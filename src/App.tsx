@@ -133,7 +133,9 @@ function DailyQuests({
         return () => {
             canceled = true;
         };
-    }, [token, onStarsChange]);
+// eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [token]);
+
 
     const handleClaim = async (questId: string) => {
         try {
@@ -562,10 +564,8 @@ function App() {
                                     </div>
 
                                     {token && (
-                                        <DailyQuests
-                                            token={token}
-                                            onStarsChange={handleStarsChange}
-                                        />
+                                        <DailyQuests token={token} onStarsChange={handleStarsChange} />
+
                                     )}
                                     {token && <Shop token={token} />}
                                 </div>
