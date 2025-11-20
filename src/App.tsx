@@ -1,11 +1,10 @@
 // src/App.tsx
-import { useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 import { Game } from './Game';
 import './App.css';
-import { InviteFriends } from './InviteFriends.tsx';
+import { InviteFriends } from './InviteFriends';
 import { HeroCard } from './HeroCard';
 import { apiFetch } from './api';
-// import HeroViewer from './HeroViewer';
 
 type Page = 'menu' | 'game' | 'leaderboard' | 'invite';
 
@@ -64,8 +63,8 @@ function Leaderboard() {
                     <div key={g.id} className="leaderboard-row">
                         <span className="leaderboard-place">#{index + 1}</span>
                         <span className="leaderboard-name">
-              {g.user?.username || g.user?.firstName || 'Игрок'}
-            </span>
+                            {g.user?.username || g.user?.firstName || 'Игрок'}
+                        </span>
                         <span className="leaderboard-score">{g.score ?? 0} pts</span>
                     </div>
                 ))}
@@ -74,7 +73,7 @@ function Leaderboard() {
     );
 }
 
-// DailyQuests
+// -------- DailyQuests --------
 
 interface Quest {
     id: string;
@@ -100,61 +99,69 @@ function DailyQuests({
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        apiFetch('/game/daily-quests', {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        })
-            .then(async (res) => {
+        let canceled = false;
+
+        setLoading(true);
+        setError('');
+
+        (async () => {
+            try {
+                const res = await apiFetch('/game/daily-quests', token);
+                const data = await res.json().catch(() => ({}));
+
                 if (!res.ok) {
-                    const data = await res.json().catch(() => ({}));
                     throw new Error(data.message || 'Не удалось загрузить квесты');
                 }
-                return res.json();
-            })
-            .then((data) => {
+
+                if (canceled) return;
+
                 setQuests(data.quests ?? []);
                 if (onStarsChange && typeof data.stars === 'number') {
                     onStarsChange(data.stars);
                 }
-            })
-            .catch((e: any) => {
+            } catch (e: any) {
+                if (canceled) return;
                 console.error(e);
                 setError(e.message || 'Ошибка загрузки квестов');
-            })
-            .finally(() => setLoading(false));
+            } finally {
+                if (!canceled) {
+                    setLoading(false);
+                }
+            }
+        })();
+
+        return () => {
+            canceled = true;
+        };
     }, [token, onStarsChange]);
 
-    const handleClaim = (questId: string) => {
-        apiFetch('/game/daily-quests/claim', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ questId }),
-        })
-            .then(async (res) => {
-                const data = await res.json().catch(() => ({}));
-                if (!res.ok) {
-                    throw new Error(data.message || 'Не удалось забрать награду');
-                }
-                return data;
-            })
-            .then((data) => {
-                setQuests((prev) =>
-                    prev.map((q) =>
-                        q.id === questId ? { ...q, claimed: true, claimable: false } : q,
-                    ),
-                );
-                if (onStarsChange && typeof data.stars === 'number') {
-                    onStarsChange(data.stars);
-                }
-            })
-            .catch((e: any) => {
-                console.error(e);
-                setError(e.message || 'Ошибка при получении награды');
+    const handleClaim = async (questId: string) => {
+        try {
+            setError('');
+
+            const res = await apiFetch('/game/daily-quests/claim', token, {
+                method: 'POST',
+                body: JSON.stringify({ questId }),
             });
+
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                throw new Error(data.message || 'Не удалось забрать награду');
+            }
+
+            setQuests((prev) =>
+                prev.map((q) =>
+                    q.id === questId ? { ...q, claimed: true, claimable: false } : q,
+                ),
+            );
+
+            if (onStarsChange && typeof data.stars === 'number') {
+                onStarsChange(data.stars);
+            }
+        } catch (e: any) {
+            console.error(e);
+            setError(e.message || 'Ошибка при получении награды');
+        }
     };
 
     if (loading) {
@@ -186,8 +193,8 @@ function DailyQuests({
                             <div className="daily-row">
                                 <span>{q.title}</span>
                                 <span className="daily-progress-text">
-                  {Math.min(q.current, q.target)} / {q.target}
-                </span>
+                                    {Math.min(q.current, q.target)} / {q.target}
+                                </span>
                             </div>
                             <div className="daily-bar">
                                 <div
@@ -208,7 +215,9 @@ function DailyQuests({
                                         Забрать
                                     </button>
                                 ) : (
-                                    <span className="daily-badge daily-badge--grey">В процессе</span>
+                                    <span className="daily-badge daily-badge--grey">
+                                        В процессе
+                                    </span>
                                 )}
                             </div>
                         </div>
@@ -218,6 +227,8 @@ function DailyQuests({
         </div>
     );
 }
+
+// -------- Shop --------
 
 interface ShopItem {
     id: 'multiplier' | 'extra_time' | 'epic_boost';
@@ -241,11 +252,9 @@ function Shop({ token }: { token: string }) {
 
     const load = () => {
         setLoading(true);
-        apiFetch('/shop/status', {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        })
+        setError('');
+
+        apiFetch('/shop/status', token)
             .then(async (res) => {
                 if (!res.ok) {
                     const data = await res.json().catch(() => ({}));
@@ -256,7 +265,6 @@ function Shop({ token }: { token: string }) {
             .then((data) => {
                 setStars(data.stars);
                 setItems(data.items ?? []);
-                setError('');
             })
             .catch((e: any) => {
                 console.error(e);
@@ -267,15 +275,12 @@ function Shop({ token }: { token: string }) {
 
     useEffect(() => {
         load();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token]);
 
     const handleBuy = (id: ShopItem['id']) => {
-        apiFetch('/shop/buy', {
+        apiFetch('/shop/buy', token, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
-            },
             body: JSON.stringify({ itemId: id }),
         })
             .then(async (res) => {
@@ -315,8 +320,8 @@ function Shop({ token }: { token: string }) {
                         <div className="shop-row">
                             <span className="shop-title">{item.title}</span>
                             <span className="shop-level">
-                Уровень: {item.level} / {item.maxLevel}
-              </span>
+                                Уровень: {item.level} / {item.maxLevel}
+                            </span>
                         </div>
                         <div className="shop-row">
                             <span className="shop-price">Цена: {item.price} ⭐</span>
@@ -357,6 +362,8 @@ function Shop({ token }: { token: string }) {
     );
 }
 
+// -------- App --------
+
 function App() {
     const [token, setToken] = useState('');
     const [me, setMe] = useState<MeResponse | null>(null);
@@ -365,17 +372,7 @@ function App() {
     const [currentPage, setCurrentPage] = useState<Page>('menu');
     const [showHero, setShowHero] = useState(false);
 
-    useEffect(() => {
-        // @ts-ignore
-        const tg = window.Telegram?.WebApp;
-        if (!tg) return;
-
-        tg.ready();
-        tg.expand();
-        tg.setBackgroundColor('#1a0b2e');
-        tg.setHeaderColor('#1a0b2e');
-    }, []);
-
+    // Настройка Telegram WebApp
     useEffect(() => {
         // @ts-ignore
         const tg = window.Telegram?.WebApp;
@@ -387,6 +384,7 @@ function App() {
         tg.setHeaderColor('#050816');
     }, []);
 
+    // Читаем token из URL
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const t = params.get('token');
@@ -409,14 +407,11 @@ function App() {
         }
     }, []);
 
+    // Загружаем профиль
     useEffect(() => {
         if (!token) return;
 
-        apiFetch('/users/me', {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        })
+        apiFetch('/users/me', token)
             .then(async (res) => {
                 if (!res.ok) {
                     const data = await res.json().catch(() => ({}));
@@ -507,7 +502,10 @@ function App() {
                         {currentPage === 'menu' && me && (
                             <div className="panel panel-menu">
                                 <HeroCard level={me.level} xp={me.xp} />
-                                <button className="menu-btn" onClick={() => setCurrentPage('game')}>
+                                <button
+                                    className="menu-btn"
+                                    onClick={() => setCurrentPage('game')}
+                                >
                                     🎮 Играть
                                 </button>
                             </div>
@@ -527,9 +525,12 @@ function App() {
                                             onClick={() => goTo('game')}
                                         >
                                             <div className="menu-icon">🎮</div>
-                                            <div className="menu-card-title">Одиночная игра</div>
+                                            <div className="menu-card-title">
+                                                Одиночная игра
+                                            </div>
                                             <div className="menu-card-text">
-                                                60 секунд, один раунд, сколько монстров успеешь поймать?
+                                                60 секунд, один раунд, сколько монстров успеешь
+                                                поймать?
                                             </div>
                                         </button>
                                         <button
@@ -543,7 +544,9 @@ function App() {
                                             onClick={() => goTo('leaderboard')}
                                         >
                                             <div className="menu-icon">🏆</div>
-                                            <div className="menu-card-title">Таблица лидеров</div>
+                                            <div className="menu-card-title">
+                                                Таблица лидеров
+                                            </div>
                                             <div className="menu-card-text">
                                                 Посмотри топ игроков и свои лучшие результаты.
                                             </div>
@@ -559,7 +562,10 @@ function App() {
                                     </div>
 
                                     {token && (
-                                        <DailyQuests token={token} onStarsChange={handleStarsChange} />
+                                        <DailyQuests
+                                            token={token}
+                                            onStarsChange={handleStarsChange}
+                                        />
                                     )}
                                     {token && <Shop token={token} />}
                                 </div>
@@ -624,8 +630,7 @@ function App() {
                                     className="hero-modal-card"
                                     onClick={(e) => e.stopPropagation()}
                                 >
-
-
+                                    {/* Тут можешь потом добавить HeroViewer или доп-инфу */}
                                     <button
                                         className="hero-modal-close"
                                         onClick={() => setShowHero(false)}
@@ -637,7 +642,6 @@ function App() {
                         )}
                     </>
                 )}
-
             </main>
         </div>
     );

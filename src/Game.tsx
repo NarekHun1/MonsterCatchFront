@@ -1,14 +1,13 @@
 // src/Game.tsx
 import { useCallback, useEffect, useRef, useState } from 'react';
 import './Game.css';
-import {apiFetch} from "./api.ts";
+import { apiFetch } from './api';
 
 interface GameProps {
     token: string;
     onBack: () => void;
-    onStarsChange?: (stars: number) => void; // <-- было
+    onStarsChange?: (stars: number) => void;
     onStatsChange?: (stats: { stars: number; level: number; xp: number }) => void;
-
 }
 
 type GameStatus = 'idle' | 'running' | 'finished';
@@ -30,10 +29,10 @@ interface HitLabel {
 }
 
 const MONSTERS: MonsterDef[] = [
-    { emoji: '👾',   rarity: 'common',    score: 1,  weight: 60 },
-    { emoji: '🧟‍♂️', rarity: 'rare',      score: 3,  weight: 25 },
-    { emoji: '🐉',   rarity: 'epic',      score: 5,  weight: 10 },
-    { emoji: '👑',   rarity: 'legendary', score: 10, weight: 5  },
+    { emoji: '👾', rarity: 'common', score: 1, weight: 60 },
+    { emoji: '🧟‍♂️', rarity: 'rare', score: 3, weight: 25 },
+    { emoji: '🐉', rarity: 'epic', score: 5, weight: 10 },
+    { emoji: '👑', rarity: 'legendary', score: 10, weight: 5 },
 ];
 
 function pickRandomMonster(): MonsterDef {
@@ -53,7 +52,7 @@ function randomPosition() {
     return { x, y };
 }
 
-export function Game({ token, onBack, onStarsChange, onStatsChange}: GameProps) {
+export function Game({ token, onBack, onStarsChange, onStatsChange }: GameProps) {
     const [phase, setPhase] = useState<GamePhase>('intro');
     const [status, setStatus] = useState<GameStatus>('idle');
     const [gameId, setGameId] = useState<number | null>(null);
@@ -61,8 +60,8 @@ export function Game({ token, onBack, onStarsChange, onStatsChange}: GameProps) 
     const [remainingMs, setRemainingMs] = useState<number>(60_000);
     const [score, setScore] = useState<number>(0);
     const [bestScore, setBestScore] = useState<number | null>(null);
-    const [clicks, setClicks] = useState<number>(0);      // 👈 все пойманные монстры
-    const [epicCount, setEpicCount] = useState<number>(0); // 👈 только эпики
+    const [clicks, setClicks] = useState<number>(0);
+    const [epicCount, setEpicCount] = useState<number>(0);
     const [error, setError] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
 
@@ -103,119 +102,118 @@ export function Game({ token, onBack, onStarsChange, onStatsChange}: GameProps) 
         }, 100);
     }, []);
 
-    const finishGame = useCallback(async () => {
-        if (!gameId || finishSentRef.current) return;
-        finishSentRef.current = true;
+    const finishGame = useCallback(
+        async () => {
+            if (!gameId || finishSentRef.current) return;
+            finishSentRef.current = true;
 
-        setLoading(true);
-
-        try {
-            const res = await apiFetch('/game/finish', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    gameId,
-                    score,
-                    clicks,
-                    epicCount
-                }),
-            });
-
-            let data: any = {};
-            try {
-                data = await res.json();
-            } catch {}
-
-            if (!res.ok) {
-                const msg = data?.message ?? data?.error ?? 'Не удалось завершить игру';
-                throw new Error(msg);
-            }
-
-            // обновление bestScore
-            setBestScore(prev => (prev === null || score > prev ? score : prev));
-
-            // обновляем звезды через onStarsChange, если есть
-            if (typeof data.totalStars === 'number') {
-                onStarsChange?.(data.totalStars);
-            }
-
-            // 🔥 НОВАЯ ЧАСТЬ — обновление уровня и XP
-            if (
-                typeof data.level === 'number' &&
-                typeof data.xp === 'number' &&
-                typeof onStatsChange === 'function'
-            ) {
-                onStatsChange({
-                    stars: data.totalStars,
-                    level: data.level,
-                    xp: data.xp,
-                });
-            }
-
-            // реферальная награда
-            if (data.referralReward > 0) {
-                alert(`🎉 +${data.referralReward} ⭐ за первую игру друга!`);
-            }
-
-            setStatus('finished');
-            return { success: true, data };
-
-        } catch (e: any) {
-            console.error(e);
-            setError(e.message ?? 'Ошибка завершения игры');
-            return { success: false, error: e };
-        } finally {
-            setLoading(false);
-        }
-    }, [gameId, score, token, onStarsChange, onStatsChange, clicks, epicCount]);
-
-    const startGame = useCallback(async () => {
-        try {
-            setError('');
             setLoading(true);
-            setScore(0);
-            setStatus('idle');
-            finishSentRef.current = false;
 
-            const res = await apiFetch('/game/start', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            try {
+                const res = await apiFetch('/game/finish', token, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        gameId,
+                        score,
+                        clicks,
+                        epicCount,
+                    }),
+                });
 
-            const data = await res.json();
-            if (!res.ok) {
-                throw new Error(data.message || 'Не удалось начать игру');
+                let data: any = {};
+                try {
+                    data = await res.json();
+                } catch {
+                    // если тело пустое — просто игнор
+                }
+
+                if (!res.ok) {
+                    const msg = data?.message ?? data?.error ?? 'Не удалось завершить игру';
+                    throw new Error(msg);
+                }
+
+                // обновление bestScore
+                setBestScore(prev => (prev === null || score > prev ? score : prev));
+
+                // обновляем звезды через onStarsChange, если есть
+                if (typeof data.totalStars === 'number') {
+                    onStarsChange?.(data.totalStars);
+                }
+
+                // обновление уровня и XP
+                if (
+                    typeof data.level === 'number' &&
+                    typeof data.xp === 'number' &&
+                    typeof onStatsChange === 'function'
+                ) {
+                    onStatsChange({
+                        stars: data.totalStars,
+                        level: data.level,
+                        xp: data.xp,
+                    });
+                }
+
+                // реферальная награда
+                if (data.referralReward > 0) {
+                    alert(`🎉 +${data.referralReward} ⭐ за первую игру друга!`);
+                }
+
+                setStatus('finished');
+                return { success: true, data };
+            } catch (e: any) {
+                console.error(e);
+                setError(e.message ?? 'Ошибка завершения игры');
+                return { success: false, error: e };
+            } finally {
+                setLoading(false);
             }
+        },
+        [gameId, score, clicks, epicCount, token, onStarsChange, onStatsChange],
+    );
 
-            const duration = data.roundDurationMs ?? 60_000;
+    const startGame = useCallback(
+        async () => {
+            try {
+                setError('');
+                setLoading(true);
+                setScore(0);
+                setStatus('idle');
+                finishSentRef.current = false;
 
-            setGameId(data.gameId);
-            setTotalMs(duration);
-            setRemainingMs(duration);
+                const res = await apiFetch('/game/start', token, {
+                    method: 'POST',
+                });
 
-            setMonster(pickRandomMonster());
-            setMonsterPos(randomPosition());
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data.message || 'Не удалось начать игру');
+                }
 
-            setScore(0);
-            setClicks(0);
-            setEpicCount(0);
+                const duration = data.roundDurationMs ?? 60_000;
 
-            setStatus('running');
-            setPhase('playing');
-            startLocalTimer(duration);
-        } catch (e: any) {
-            console.error(e);
-            setError(e.message || 'Ошибка старта игры');
-        } finally {
-            setLoading(false);
-        }
-    }, [startLocalTimer, token]);
+                setGameId(data.gameId);
+                setTotalMs(duration);
+                setRemainingMs(duration);
+
+                setMonster(pickRandomMonster());
+                setMonsterPos(randomPosition());
+
+                setScore(0);
+                setClicks(0);
+                setEpicCount(0);
+
+                setStatus('running');
+                setPhase('playing');
+                startLocalTimer(duration);
+            } catch (e: any) {
+                console.error(e);
+                setError(e.message || 'Ошибка старта игры');
+            } finally {
+                setLoading(false);
+            }
+        },
+        [startLocalTimer, token],
+    );
 
     // Когда статус finished — шлём результат один раз
     useEffect(() => {
@@ -237,20 +235,19 @@ export function Game({ token, onBack, onStarsChange, onStatsChange}: GameProps) 
 
         setIsHit(true);
         setTimeout(() => setIsHit(false), 120);
-        // +1 клик
-        setClicks((c) => c + 1);
 
-        // если монстр эпик — увеличиваем epicCount
+        setClicks(c => c + 1);
+
         if (monster.rarity === 'epic') {
-            setEpicCount((e) => e + 1);
+            setEpicCount(e => e + 1);
         }
-        setScore((s) => s + monster.score);
+        setScore(s => s + monster.score);
 
         const hitId = Date.now() + Math.random();
         const { x, y } = monsterPos;
-        setHits((prev) => [...prev, { id: hitId, x, y, amount: monster.score }]);
+        setHits(prev => [...prev, { id: hitId, x, y, amount: monster.score }]);
         setTimeout(() => {
-            setHits((prev) => prev.filter((h) => h.id !== hitId));
+            setHits(prev => prev.filter(h => h.id !== hitId));
         }, 500);
 
         setMonster(pickRandomMonster());
@@ -285,20 +282,20 @@ export function Game({ token, onBack, onStarsChange, onStatsChange}: GameProps) 
                         <div className="game-hud-item">
                             <span className="game-hud-label">Лучший</span>
                             <span className="game-hud-value">
-                                {bestScore !== null ? bestScore : '—'}
-                            </span>
+                {bestScore !== null ? bestScore : '—'}
+              </span>
                         </div>
                         <div className="game-hud-item">
                             <span className="game-hud-label">Время</span>
                             <span className="game-hud-value">
-                                    {status === 'running' ? `${secondsLeft}s` : '—'}
-                                </span>
+                {status === 'running' ? `${secondsLeft}s` : '—'}
+              </span>
                         </div>
                     </div>
                 )}
             </div>
 
-            {/* Таймер — только в игре */}
+            {/* Таймер */}
             {phase === 'playing' && (
                 <div className="game-timer-bar game-timer-bar--overlay">
                     <div
@@ -320,12 +317,10 @@ export function Game({ token, onBack, onStarsChange, onStatsChange}: GameProps) 
                     </div>
 
                     <div className="game-intro-monsters">
-                        {MONSTERS.map((m) => (
+                        {MONSTERS.map(m => (
                             <div key={m.rarity} className="game-intro-monster-card">
                                 <div className="game-intro-monster-emoji">{m.emoji}</div>
-                                <div className="game-intro-monster-score">
-                                    +{m.score} очк.
-                                </div>
+                                <div className="game-intro-monster-score">+{m.score} очк.</div>
                             </div>
                         ))}
                     </div>
@@ -340,7 +335,7 @@ export function Game({ token, onBack, onStarsChange, onStatsChange}: GameProps) 
                 </div>
             )}
 
-            {/* Полноэкранная арена */}
+            {/* Игровая арена */}
             {phase === 'playing' && (
                 <div className="game-arena game-arena--fullscreen">
                     <div
@@ -363,7 +358,7 @@ export function Game({ token, onBack, onStarsChange, onStatsChange}: GameProps) 
                         <span className="game-monster-emoji">{monster.emoji}</span>
                     </div>
 
-                    {hits.map((h) => (
+                    {hits.map(h => (
                         <div
                             key={h.id}
                             className="game-hit-label"

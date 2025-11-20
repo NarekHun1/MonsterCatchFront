@@ -1,16 +1,10 @@
+// src/InviteFriends.tsx
 import React, { useEffect, useState } from 'react';
 import { apiFetch } from './api';
 
 interface InviteFriendsProps {
     token: string;
     onBack: () => void;
-}
-
-// базовый URL твоего API — можешь вынести в env
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
-
-if (!API_BASE_URL) {
-    throw new Error('VITE_API_BASE_URL is not set');
 }
 
 export const InviteFriends: React.FC<InviteFriendsProps> = ({ token, onBack }) => {
@@ -24,14 +18,11 @@ export const InviteFriends: React.FC<InviteFriendsProps> = ({ token, onBack }) =
                 setLoading(true);
                 setError(null);
 
-                const res = await apiFetch(`${API_BASE_URL}/referral/link`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
+                // 👉 новый вызов: путь + token
+                const res = await apiFetch('/referral/link', token);
 
                 if (!res.ok) {
-                    const text = await res.text();
+                    const text = await res.text().catch(() => '');
                     console.error('Referral link error:', res.status, text);
                     setError('Не удалось получить реферальную ссылку. Попробуй позже.');
                     return;
@@ -70,7 +61,6 @@ export const InviteFriends: React.FC<InviteFriendsProps> = ({ token, onBack }) =
         if (tg?.openTelegramLink) {
             tg.openTelegramLink(shareUrl);
         } else {
-            // запасной вариант — открыть в браузере
             window.open(shareUrl, '_blank');
         }
     };

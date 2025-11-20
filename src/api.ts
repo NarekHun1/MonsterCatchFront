@@ -1,24 +1,20 @@
-// src/api.ts
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-if (!API_BASE_URL) {
-    console.warn('VITE_API_BASE_URL is not set!');
-}
 
 export async function apiFetch(
     path: string,
-    options: RequestInit = {},
     token?: string,
+    options: RequestInit = {},
 ) {
     const url = API_BASE_URL + path;
 
-    const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-        ...(options.headers || {}),
-    };
+    const headers = new Headers(options.headers || {});
 
     if (token) {
-        (headers as any).Authorization = `Bearer ${token}`;
+        headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    if (!headers.has('Content-Type')) {
+        headers.set('Content-Type', 'application/json');
     }
 
     const res = await fetch(url, {
