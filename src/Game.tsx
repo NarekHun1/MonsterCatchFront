@@ -171,49 +171,46 @@ export function Game({ token, onBack, onStarsChange, onStatsChange }: GameProps)
         [gameId, score, clicks, epicCount, token, onStarsChange, onStatsChange],
     );
 
-    const startGame = useCallback(
-        async () => {
-            try {
-                setError('');
-                setLoading(true);
-                setScore(0);
-                setStatus('idle');
-                finishSentRef.current = false;
+    const startGame = useCallback(async () => {
+        try {
+            setError('');
+            setLoading(true);
+            setScore(0);
+            setStatus('idle');
+            finishSentRef.current = false;
 
-                const res = await apiFetch('/game/start', token, {
-                    method: 'POST',
-                });
+            const res = await apiFetch('/game/start', token, {
+                method: 'POST',
+            });
 
-                const data = await res.json();
-                if (!res.ok) {
-                    throw new Error(data.message || 'Не удалось начать игру');
-                }
-
-                const duration = data.roundDurationMs ?? 60_000;
-
-                setGameId(data.gameId);
-                setTotalMs(duration);
-                setRemainingMs(duration);
-
-                setMonster(pickRandomMonster());
-                setMonsterPos(randomPosition());
-
-                setScore(0);
-                setClicks(0);
-                setEpicCount(0);
-
-                setStatus('running');
-                setPhase('playing');
-                startLocalTimer(duration);
-            } catch (e: any) {
-                console.error(e);
-                setError(e.message || 'Ошибка старта игры');
-            } finally {
-                setLoading(false);
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.message || 'Не удалось начать игру');
             }
-        },
-        [startLocalTimer, token],
-    );
+
+            const duration = data.roundDurationMs ?? 60_000;
+
+            setGameId(data.gameId);
+            setTotalMs(duration);
+            setRemainingMs(duration);
+
+            setMonster(pickRandomMonster());
+            setMonsterPos(randomPosition());
+
+            setScore(0);
+            setClicks(0);
+            setEpicCount(0);
+
+            setStatus('running');
+            setPhase('playing');
+            startLocalTimer(duration);
+        } catch (e: any) {
+            console.error(e);
+            setError(e.message || 'Ошибка старта игры');
+        } finally {
+            setLoading(false);
+        }
+    }, [startLocalTimer, token]);
 
     // Когда статус finished — шлём результат один раз
     useEffect(() => {
