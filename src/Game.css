@@ -1,0 +1,281 @@
+.game-fullscreen {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    height: calc(100vh - 120px); /* почти весь экран внутри app-shell */
+    min-height: 360px;
+}
+
+/* Верхняя панель */
+
+.game-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.game-back-btn {
+    border: none;
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    background: rgba(15, 23, 42, 0.95);
+    color: #e5e7eb;
+    border: 1px solid rgba(75, 85, 99, 0.9);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.9);
+    transition:
+            background 0.12s ease,
+            transform 0.1s ease,
+            box-shadow 0.12s ease;
+}
+
+.game-back-btn:hover:not(:disabled) {
+    background: rgba(31, 41, 55, 0.98);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.95);
+}
+
+.game-back-btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.game-hud {
+    display: flex;
+    gap: 6px;
+}
+
+.game-hud-item {
+    min-width: 70px;
+    padding: 6px 8px;
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(55, 65, 81, 0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.9);
+}
+
+.game-hud-label {
+    font-size: 9px;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.game-hud-value {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+
+/* Таймер */
+
+.game-timer-bar {
+    position: relative;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(31, 41, 55, 1);
+    overflow: hidden;
+}
+
+.game-timer-bar--overlay {
+    margin-top: 2px;
+}
+
+.game-timer-fill {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, #22c55e, #facc15, #f97316, #ef4444);
+    transform-origin: left center;
+    transform: scaleX(0);
+    transition: transform 0.1s linear;
+}
+
+/* Арена */
+
+.game-arena {
+    position: relative;
+    margin-top: 8px;
+    border-radius: 18px;
+    background: radial-gradient(circle at top, rgba(30, 64, 175, 0.55), rgba(15, 23, 42, 0.98));
+    border: 1px solid rgba(55, 65, 81, 0.9);
+    overflow: hidden;
+}
+
+.game-arena--fullscreen {
+    flex: 1;
+}
+
+/* Монстр — ТОЛЬКО emoji */
+
+.game-monster-emoji-wrapper {
+    position: absolute;
+    transform: translate(-50%, -50%) scale(1);
+    transition:
+            transform 0.1s ease-out,
+            filter 0.1s ease-out,
+            text-shadow 0.12s ease-out;
+}
+
+.game-monster-emoji-wrapper--active {
+    cursor: pointer;
+}
+
+.game-monster-emoji-wrapper--finished {
+    filter: grayscale(0.6);
+    opacity: 0.7;
+}
+
+.game-monster-emoji-wrapper--hit {
+    transform: translate(-50%, -50%) scale(1.15);
+    text-shadow:
+            0 0 18px rgba(250, 250, 250, 0.9),
+            0 0 40px rgba(251, 191, 36, 0.9);
+}
+
+.game-monster-emoji {
+    font-size: 64px;
+    line-height: 1;
+}
+
+/* Летающие +N */
+
+.game-hit-label {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    font-size: 16px;
+    font-weight: 600;
+    color: #fbbf24;
+    text-shadow:
+            0 0 10px rgba(250, 204, 21, 0.9),
+            0 0 18px rgba(0, 0, 0, 0.9);
+    animation: game-hit-pop 0.5s ease-out forwards;
+}
+
+@keyframes game-hit-pop {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -80%);
+    }
+}
+
+/* Ошибка */
+
+.game-error {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #fecaca;
+}
+.game-fullscreen {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    height: calc(100vh - 120px);
+    min-height: 360px;
+}
+
+/* Верхняя панель и HUD уже есть, оставляем те же */
+
+.game-intro {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-top: 8px;
+    padding: 10px 6px 6px;
+    border-radius: 18px;
+    background: radial-gradient(
+            circle at top,
+            rgba(30, 64, 175, 0.5),
+            rgba(15, 23, 42, 0.98)
+    );
+    border: 1px solid rgba(55, 65, 81, 0.9);
+}
+
+.game-intro-top {
+    margin-bottom: 8px;
+}
+
+.game-intro-title {
+    margin: 0 0 4px;
+    font-size: 18px;
+}
+
+.game-intro-text {
+    margin: 0;
+    font-size: 12px;
+    color: #e5e7eb;
+}
+
+/* Монстры на интро-экране */
+
+.game-intro-monsters {
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+    margin: 8px 0 12px;
+}
+
+.game-intro-monster-card {
+    flex: 1;
+    padding: 8px 4px;
+    border-radius: 14px;
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(55, 65, 81, 0.9);
+    text-align: center;
+    box-shadow: 0 6px 14px rgba(15, 23, 42, 0.9);
+}
+
+.game-intro-monster-emoji {
+    font-size: 26px;
+}
+
+.game-intro-monster-score {
+    margin-top: 4px;
+    font-size: 11px;
+    color: #a5b4fc;
+}
+
+/* Кнопка "Начать игру" */
+
+.game-start-btn {
+    width: 100%;
+    border: none;
+    border-radius: 999px;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #ecfdf5;
+    box-shadow:
+            0 10px 20px rgba(22, 163, 74, 0.5),
+            0 0 0 1px rgba(187, 247, 208, 0.3);
+    transition:
+            transform 0.12s ease,
+            box-shadow 0.12s ease,
+            opacity 0.12s ease;
+}
+
+.game-start-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow:
+            0 16px 28px rgba(22, 163, 74, 0.55),
+            0 0 0 1px rgba(190, 242, 100, 0.5);
+}
+
+.game-start-btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+/* Остальной CSS (arena, monster-emoji-wrapper, hit-label, hud, back-btn) оставь как есть */

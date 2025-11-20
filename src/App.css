@@ -1,0 +1,669 @@
+
+:root {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text',
+    sans-serif;
+    color: #f9fafb;
+    background: radial-gradient(circle at top, #1e293b, #020617);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+}
+
+
+.app-root {
+    min-height: 100vh;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    background: radial-gradient(circle at top, #0f172a, #020617);
+    color: #e5e7eb;
+}
+
+.app-bg-glow {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at 20% 0%, rgba(56, 189, 248, 0.18), transparent 55%),
+    radial-gradient(circle at 80% 100%, rgba(249, 115, 22, 0.2), transparent 55%);
+    opacity: 0.9;
+    z-index: 0;
+}
+
+.app-shell {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 520px;
+    margin: 16px;
+    padding: 16px 16px 12px;
+    border-radius: 24px;
+    background: rgba(15, 23, 42, 0.94);
+    box-shadow:
+            0 20px 40px rgba(15, 23, 42, 0.9),
+            0 0 0 1px rgba(148, 163, 184, 0.25);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Header */
+
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.app-title {
+    margin: 0;
+    font-size: 24px;
+    letter-spacing: 0.04em;
+}
+
+.app-subtitle {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+.app-userchip {
+    padding: 8px 10px;
+    border-radius: 999px;
+    background: rgba(15, 118, 110, 0.18);
+    border: 1px solid rgba(45, 212, 191, 0.5);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 120px;
+}
+
+.user-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #a5f3fc;
+}
+
+.user-id {
+    font-size: 12px;
+}
+
+/* Tabs */
+
+.menu-nav {
+    display: flex;
+    gap: 6px;
+    background: rgba(15, 23, 42, 0.9);
+    padding: 4px;
+    border-radius: 999px;
+    border: 1px solid rgba(55, 65, 81, 0.7);
+}
+
+.menu-tab {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: #9ca3af;
+    font-size: 12px;
+    padding: 6px 8px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition:
+            background 0.18s ease,
+            color 0.18s ease,
+            transform 0.12s ease;
+}
+
+.menu-tab--active {
+    background: radial-gradient(circle at top, #22c55e, #16a34a);
+    color: #e5e7eb;
+    transform: translateY(-1px);
+}
+
+/* Panels */
+
+.app-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.panel {
+    padding: 12px 12px 14px;
+    border-radius: 18px;
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(75, 85, 99, 0.8);
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.7);
+}
+
+.panel-title {
+    margin: 0 0 6px;
+    font-size: 16px;
+}
+
+.panel-muted {
+    margin: 0 0 10px;
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+.panel-error {
+    margin: 0;
+    font-size: 12px;
+    color: #fecaca;
+}
+
+.panel-error-box {
+    border-color: rgba(248, 113, 113, 0.7);
+    background: linear-gradient(135deg, rgba(127, 29, 29, 0.95), rgba(15, 23, 42, 0.96));
+}
+
+/* Menu cards */
+
+.panel-menu {
+    padding-top: 10px;
+}
+
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.menu-card {
+    position: relative;
+    border: none;
+    border-radius: 16px;
+    padding: 10px 10px 12px;
+    background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.38), rgba(15, 23, 42, 1));
+    color: #e5e7eb;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow:
+            0 10px 20px rgba(15, 23, 42, 0.85),
+            0 0 0 1px rgba(148, 163, 184, 0.35);
+    transition:
+            transform 0.14s ease,
+            box-shadow 0.14s ease,
+            background 0.18s ease,
+            translate 0.14s ease;
+}
+
+.menu-card:hover {
+    transform: translateY(-2px);
+    box-shadow:
+            0 18px 30px rgba(15, 23, 42, 0.95),
+            0 0 0 1px rgba(148, 163, 184, 0.6);
+}
+
+.menu-card--disabled {
+    cursor: default;
+    opacity: 0.6;
+    background: radial-gradient(circle at top left, rgba(148, 163, 184, 0.25), rgba(15, 23, 42, 1));
+}
+
+.menu-icon {
+    font-size: 22px;
+}
+
+.menu-card-title {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.menu-card-text {
+    font-size: 12px;
+    color: #cbd5f5;
+}
+
+.menu-badge {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: rgba(251, 191, 36, 0.9);
+    color: #111827;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+/* Leaderboard */
+
+.leaderboard-list {
+    margin-top: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.leaderboard-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 8px;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(55, 65, 81, 0.9);
+    font-size: 12px;
+}
+
+.leaderboard-place {
+    width: 30px;
+    color: #9ca3af;
+}
+
+.leaderboard-name {
+    flex: 1;
+    padding: 0 8px;
+}
+
+.leaderboard-score {
+    font-weight: 600;
+    color: #4ade80;
+}
+
+/* Footer */
+
+.app-footer {
+    margin-top: 4px;
+    padding-top: 4px;
+    border-top: 1px solid rgba(31, 41, 55, 0.9);
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: #6b7280;
+}
+
+/* Buttons inside Game component (если они обычные) */
+
+button {
+    font-family: inherit;
+}
+.daily-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.daily-item {
+    border-radius: 12px;
+    padding: 6px 8px 8px;
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(55, 65, 81, 0.9);
+}
+
+.daily-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+}
+
+.daily-progress-text {
+    color: #9ca3af;
+}
+
+.daily-bar {
+    position: relative;
+    margin-top: 4px;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(31, 41, 55, 1);
+    overflow: hidden;
+}
+
+.daily-bar-fill {
+    position: absolute;
+    inset: 0;
+    transform-origin: left center;
+    transform: scaleX(0);
+    background: linear-gradient(90deg, #22c55e, #facc15, #f97316);
+    transition: transform 0.2s ease-out;
+}
+
+.daily-footer {
+    margin-top: 4px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+}
+
+.daily-reward {
+    color: #a5b4fc;
+}
+
+.daily-badge {
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: rgba(34, 197, 94, 0.15);
+    color: #bbf7d0;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+.user-stars {
+    font-size: 12px;
+    margin-top: 2px;
+    color: #fde68a;
+}
+/* машазин */
+
+.shop-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.shop-item {
+    border-radius: 12px;
+    padding: 6px 8px;
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(55, 65, 81, 0.9);
+    font-size: 12px;
+}
+
+.shop-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2px;
+}
+
+.shop-title {
+    font-weight: 500;
+}
+
+.shop-level {
+    color: #9ca3af;
+}
+
+.shop-price {
+    color: #eab308;
+}
+
+.shop-buy-btn {
+    border: none;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #ecfdf5;
+    box-shadow: 0 4px 10px rgba(22, 163, 74, 0.5);
+    transition:
+            transform 0.1s ease,
+            box-shadow 0.1s ease,
+            opacity 0.1s ease;
+}
+
+.shop-buy-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+    box-shadow: none;
+}
+
+.shop-buy-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 16px rgba(22, 163, 74, 0.6);
+}
+
+/*time monster*/
+.reward-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 50;
+}
+
+.reward-card {
+    width: 260px;
+    border-radius: 20px;
+    padding: 16px 14px 14px;
+    background: radial-gradient(circle at top, rgba(56, 189, 248, 0.5), rgba(15, 23, 42, 0.98));
+    border: 1px solid rgba(59, 130, 246, 0.8);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.95);
+    text-align: center;
+}
+
+.reward-emoji {
+    font-size: 40px;
+}
+
+.reward-title {
+    margin-top: 6px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.reward-text {
+    margin-top: 4px;
+    font-size: 13px;
+    color: #e5e7eb;
+}
+
+.reward-level {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #bfdbfe;
+}
+
+.reward-btn {
+    margin-top: 10px;
+    border: none;
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #ecfdf5;
+    box-shadow: 0 8px 16px rgba(22, 163, 74, 0.6);
+}
+/*собрать очки*/
+.daily-claim-btn {
+    border: none;
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #ecfdf5;
+    box-shadow: 0 4px 10px rgba(22, 163, 74, 0.5);
+}
+
+.daily-badge {
+    padding: 2px 6px;
+    border-radius: 999px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: rgba(34, 197, 94, 0.15);
+    color: #bbf7d0;
+}
+
+.daily-badge--grey {
+    background: rgba(148, 163, 184, 0.15);
+    color: #e5e7eb;
+}
+
+.menu-btn {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 16px;
+    border: none;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #f9fafb;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(79, 70, 229, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: transform 0.08s ease-out, box-shadow 0.08s ease-out, opacity 0.15s;
+}
+
+.menu-btn:active {
+    transform: translateY(1px) scale(0.99);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.6);
+}
+
+.menu-btn--secondary {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.75);
+    color: #e5e7eb;
+}
+
+.menu-btn--secondary:active {
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.8);
+}
+/*hero booton */
+.hero-floating-bar {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: radial-gradient(circle at top, rgba(255, 255, 255, 0.08), rgba(5, 8, 22, 0.95));
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+
+    color: #fff;
+    cursor: pointer;
+    outline: none;
+}
+
+.hero-floating-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.12);
+    font-size: 20px;
+}
+
+.hero-floating-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.hero-floating-name {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.hero-floating-meta {
+    font-size: 11px;
+    opacity: 0.8;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.hero-floating-meta .dot {
+    opacity: 0.5;
+}
+
+.hero-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1001;
+    background: rgba(0, 0, 0, 0.6);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-modal-card {
+    background: #050816;
+    border-radius: 20px;
+    padding: 16px;
+    max-width: 360px;
+    width: calc(100% - 32px);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.7);
+}
+
+.hero-modal-close {
+    margin-top: 12px;
+    width: 100%;
+    border-radius: 999px;
+    border: none;
+    padding: 10px 0;
+    font-size: 14px;
+    font-weight: 600;
+    background: linear-gradient(90deg, #ff8a3c, #ff4b7d);
+    color: #fff;
+    cursor: pointer;
+}
+/*hero*/
+/* Оверлей — на весь экран */
+.hero-modal-overlay {
+    position: fixed;
+    inset: 0; /* top:0 right:0 bottom:0 left:0 */
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 50;
+}
+
+/* Карточка модалки — тоже на весь экран */
+.hero-modal-card {
+    background: radial-gradient(circle at top, #1b1634, #050816);
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    border-radius: 0; /* чтобы без скруглений */
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Внутри модалки — контейнер под 3D героя */
+.hero-3d-wrapper {
+    flex: 1;              /* занимает всё доступное пространство */
+    width: 100%;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+/* Кнопка закрыть — прижать вверх */
+.hero-modal-close {
+    margin-top: 12px;
+    align-self: center;
+}

@@ -1,0 +1,62 @@
+.hud {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    background: rgba(255,255,255,0.03);
+    backdrop-filter: blur(18px);
+    border-radius: 0 0 22px 22px;
+    font-family: 'Inter', sans-serif;
+    color: #fff;
+}
+
+.hud-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hud-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #2c1e3f;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.hud-tab {
+    background: #2c1e3f;
+    padding: 6px 14px;
+    border-radius: 18px;
+    font-size: 14px;
+    opacity: 0.6;
+}
+
+.hud-tab.active {
+    opacity: 1;
+    background: #3a2755;
+}
+
+.hud-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.hud-currency,
+.hud-stars {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.hud-menu {
+    font-size: 24px;
+    rotate: 90deg;
+}
