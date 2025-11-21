@@ -5,6 +5,7 @@ import './App.css';
 import { InviteFriends } from './InviteFriends';
 import { HeroCard } from './HeroCard';
 import { apiFetch } from './api';
+import HeroViewer from './HeroViewer'; // 🔥 ДЕМОН
 
 type Page = 'menu' | 'game' | 'leaderboard' | 'invite';
 
@@ -606,7 +607,7 @@ function App() {
                     <span>Powered by твоё безумие и JS ⚡️</span>
                 </footer>
 
-                {/* 🔥 ПАНЕЛЬ ГЕРОЯ СНИЗУ + МОДАЛКА */}
+                {/* 🔥 ПАНЕЛЬ ГЕРОЯ СНИЗУ + МОДАЛКА С ДЕМОНОМ */}
                 {me && (
                     <>
                         <button
@@ -614,18 +615,14 @@ function App() {
                             onClick={() => setShowHero(true)}
                         >
                             <div className="hero-floating-avatar">
-                                <span>🧙‍♂️</span>
+                                <span>😈</span>
                             </div>
                             <div className="hero-floating-info">
                                 <div className="hero-floating-name">
                                     {me.username || me.firstName || 'Герой'}
                                 </div>
                                 <div className="hero-floating-meta">
-                                    <span>Lvl {me.level}</span>
-                                    <span className="dot">•</span>
-                                    <span>{me.xp} XP</span>
-                                    <span className="dot">•</span>
-                                    <span>⭐ {me.stars}</span>
+                                    <span>Нажми, чтобы призвать демона</span>
                                 </div>
                             </div>
                         </button>
@@ -636,7 +633,7 @@ function App() {
                                 onClick={() => setShowHero(false)}
                             >
                                 <div
-                                    className="hero-modal-card"
+                                    className="hero-modal-card hero-modal-card--demon"
                                     onClick={(e) => e.stopPropagation()}
                                 >
                                     <button
@@ -646,34 +643,8 @@ function App() {
                                         ✕
                                     </button>
 
-                                    <div className="hero-modal-header">
-                                        <span className="hero-modal-emoji">😈</span>
-                                        <div>
-                                            <div className="hero-modal-name">
-                                                {me.username || me.firstName || 'Твой герой'}
-                                            </div>
-                                            <div className="hero-modal-meta">
-                                                Lvl {me.level} • {me.xp} XP • ⭐ {me.stars}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <HeroCard level={me.level} xp={me.xp} />
-
-                                    <div className="hero-modal-stats">
-                                        <div className="hero-modal-stat-row">
-                                            <span>Множитель очков</span>
-                                            <span>x{me.multiplierLevel}</span>
-                                        </div>
-                                        <div className="hero-modal-stat-row">
-                                            <span>Доп. время</span>
-                                            <span>ур. {me.extraTimeLevel}</span>
-                                        </div>
-                                        <div className="hero-modal-stat-row">
-                                            <span>Epic-boost</span>
-                                            <span>ур. {me.epicBoostLevel}</span>
-                                        </div>
-                                    </div>
+                                    {/* здесь только 3D демон */}
+                                    <HeroViewer />
                                 </div>
                             </div>
                         )}
