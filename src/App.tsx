@@ -1,11 +1,11 @@
 // src/App.tsx
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Game } from './Game';
 import './App.css';
 import { InviteFriends } from './InviteFriends';
 import { HeroCard } from './HeroCard';
 import { apiFetch } from './api';
-import HeroViewer from './HeroViewer'; // 🔥 ДЕМОН
+import HeroViewer from './HeroViewer'; // 😈 3D демон
 
 type Page = 'menu' | 'game' | 'leaderboard' | 'invite';
 
@@ -99,15 +99,8 @@ function DailyQuests({
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
 
-    // флаг, чтобы не грузить квесты дважды в StrictMode
-    const loadedRef = useRef(false);
-
     useEffect(() => {
         if (!token) return;
-
-        // защищаемся от двойного вызова эффекта в dev
-        if (loadedRef.current) return;
-        loadedRef.current = true;
 
         let canceled = false;
 
@@ -143,7 +136,8 @@ function DailyQuests({
         return () => {
             canceled = true;
         };
-    }, [token, onStarsChange]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [token]); // важно: не триггерим перезагрузку при каждом новом onStarsChange
 
     const handleClaim = async (questId: string) => {
         try {
@@ -643,7 +637,7 @@ function App() {
                                         ✕
                                     </button>
 
-                                    {/* здесь только 3D демон */}
+                                    {/* только демон */}
                                     <HeroViewer />
                                 </div>
                             </div>
