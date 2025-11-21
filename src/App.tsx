@@ -1,5 +1,5 @@
 // src/App.tsx
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Game } from './Game';
 import './App.css';
 import { InviteFriends } from './InviteFriends';
@@ -98,7 +98,16 @@ function DailyQuests({
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
 
+    // флаг, чтобы не грузить квесты дважды в StrictMode
+    const loadedRef = useRef(false);
+
     useEffect(() => {
+        if (!token) return;
+
+        // защищаемся от двойного вызова эффекта в dev
+        if (loadedRef.current) return;
+        loadedRef.current = true;
+
         let canceled = false;
 
         setLoading(true);
@@ -133,9 +142,7 @@ function DailyQuests({
         return () => {
             canceled = true;
         };
-// eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [token]);
-
+    }, [token, onStarsChange]);
 
     const handleClaim = async (questId: string) => {
         try {
@@ -564,8 +571,10 @@ function App() {
                                     </div>
 
                                     {token && (
-                                        <DailyQuests token={token} onStarsChange={handleStarsChange} />
-
+                                        <DailyQuests
+                                            token={token}
+                                            onStarsChange={handleStarsChange}
+                                        />
                                     )}
                                     {token && <Shop token={token} />}
                                 </div>
@@ -630,13 +639,41 @@ function App() {
                                     className="hero-modal-card"
                                     onClick={(e) => e.stopPropagation()}
                                 >
-                                    {/* Тут можешь потом добавить HeroViewer или доп-инфу */}
                                     <button
                                         className="hero-modal-close"
                                         onClick={() => setShowHero(false)}
                                     >
-                                        Закрыть
+                                        ✕
                                     </button>
+
+                                    <div className="hero-modal-header">
+                                        <span className="hero-modal-emoji">😈</span>
+                                        <div>
+                                            <div className="hero-modal-name">
+                                                {me.username || me.firstName || 'Твой герой'}
+                                            </div>
+                                            <div className="hero-modal-meta">
+                                                Lvl {me.level} • {me.xp} XP • ⭐ {me.stars}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <HeroCard level={me.level} xp={me.xp} />
+
+                                    <div className="hero-modal-stats">
+                                        <div className="hero-modal-stat-row">
+                                            <span>Множитель очков</span>
+                                            <span>x{me.multiplierLevel}</span>
+                                        </div>
+                                        <div className="hero-modal-stat-row">
+                                            <span>Доп. время</span>
+                                            <span>ур. {me.extraTimeLevel}</span>
+                                        </div>
+                                        <div className="hero-modal-stat-row">
+                                            <span>Epic-boost</span>
+                                            <span>ур. {me.epicBoostLevel}</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         )}
