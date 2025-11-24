@@ -7,7 +7,7 @@ import { HeroCard } from './HeroCard';
 import { apiFetch } from './api';
 import HeroViewer from './HeroViewer'; // 😈 3D демон
 
-type Page = 'menu' | 'game' | 'leaderboard' | 'invite';
+type Page = 'menu' | 'game' | 'leaderboard' | 'invite'| 'tournament';
 
 interface MeResponse {
     id: number;
@@ -70,6 +70,266 @@ function Leaderboard() {
                     </div>
                 ))}
             </div>
+        </div>
+    );
+}
+type TournamentStatus = 'PLANNED' | 'ACTIVE' | 'FINISHED';
+
+interface TournamentParticipant {
+    userId: number;
+    username?: string | null;
+    score: number;
+}
+
+interface TournamentInfo {
+    tournamentId: number;
+    startsAt: string;
+    endsAt: string;
+    joinDeadline: string;
+    prizePool: number;
+    entryFee: number;
+    status: TournamentStatus;
+    participants: TournamentParticipant[];
+}
+
+function TournamentView({ token }: { token: string }) {
+    const [info, setInfo] = useState<TournamentInfo | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [joining, setJoining] = useState(false);
+    const [joinMessage, setJoinMessage] = useState<string | null>(null);
+
+    // загрузка турнира + периодический рефреш
+    useEffect(() => {
+        let canceled = false;
+
+        const load = async () => {
+            if (canceled) return;
+            setLoading(true);
+            setError('');
+            try {
+                const res = await apiFetch('/tournament/current');
+                const data = await res.json().catch(() => ({}));
+
+                if (!res.ok) {
+                    throw new Error(data.message || 'Не удалось загрузить турнир');
+                }
+
+                if (canceled) return;
+
+                if (!data) {
+                    setInfo(null);
+                } else {
+                    setInfo(data as TournamentInfo);
+                }
+            } catch (e: any) {
+                if (canceled) return;
+                console.error(e);
+                setError(e.message || 'Ошибка загрузки турнира');
+            } finally {
+                if (!canceled) setLoading(false);
+            }
+        };
+
+        load();
+        const id = window.setInterval(load, 15000); // обновляем раз в 15 секунд
+
+        return () => {
+            canceled = true;
+            window.clearInterval(id);
+        };
+    }, []);
+
+    const handleJoin = async () => {
+        if (!token || !info) return;
+        setJoining(true);
+        setError('');
+        setJoinMessage(null);
+
+        try {
+            const res = await apiFetch('/tournament/join', token, {
+                method: 'POST',
+            });
+
+            const data = await res.json().catch(() => ({}));
+
+            if (!res.ok) {
+                throw new Error(data.message || 'Не удалось вступить в турнир');
+            }
+
+            if (data.joined === false && data.reason === 'ALREADY_JOINED') {
+                setJoinMessage('Ты уже участвуешь в этом турнире 😎');
+            } else if (data.joined) {
+                setJoinMessage('Ты успешно вступил в турнир! Удачи 🏆');
+            } else {
+                setJoinMessage('Запрос выполнен, но непонятный ответ от сервера 🤔');
+            }
+
+            // Обновим информацию о турнире
+            try {
+                const refresh = await apiFetch('/tournament/current');
+                const refreshedData = await refresh.json().catch(() => ({}));
+                if (refresh.ok) {
+                    setInfo(refreshedData as TournamentInfo);
+                }
+            } catch {
+                // игнорим, не критично
+            }
+        } catch (e: any) {
+            console.error(e);
+            setError(e.message || 'Ошибка при вступлении');
+        } finally {
+            setJoining(false);
+        }
+    };
+
+    // красивые вычисления времени
+    const now = new Date();
+    let statusLabel = '—';
+    let statusClass = 'tournament-badge';
+
+    if (info) {
+        if (info.status === 'PLANNED') {
+            statusLabel = 'Скоро начнётся';
+            statusClass += ' tournament-badge--planned';
+        } else if (info.status === 'ACTIVE') {
+            statusLabel = 'Идёт сейчас';
+            statusClass += ' tournament-badge--active';
+        } else if (info.status === 'FINISHED') {
+            statusLabel = 'Завершён';
+            statusClass += ' tournament-badge--finished';
+        }
+    }
+
+    let canJoin = false;
+    let joinHint = '';
+    if (info) {
+        const joinDeadline = new Date(info.joinDeadline);
+        const endsAt = new Date(info.endsAt);
+
+        if (info.status === 'FINISHED' || now > endsAt) {
+            canJoin = false;
+            joinHint = 'Турнир уже завершён. Жди следующего часа ⏳';
+        } else if (now > joinDeadline) {
+            canJoin = false;
+            joinHint = 'Окно входа в турнир закрыто. Загляни в следующий турнир 🕒';
+        } else {
+            canJoin = true;
+            const minutesLeft = Math.max(
+                0,
+                Math.ceil((joinDeadline.getTime() - now.getTime()) / 60000),
+            );
+            joinHint = `Ещё можно вступить! Осталось примерно ${minutesLeft} мин.`;
+        }
+    }
+
+    return (
+        <div className="panel">
+            <h2 className="panel-title">🏆 Почасовой турнир</h2>
+
+            {loading && <p className="panel-muted">Загружаем турнир...</p>}
+            {error && <p className="panel-error">Ошибка: {error}</p>}
+
+            {!loading && !error && !info && (
+                <p className="panel-muted">
+                    Сейчас активного турнира нет. Зайди в начале следующего часа 😉
+                </p>
+            )}
+
+            {info && (
+                <>
+                    <div className="tournament-header">
+                        <span className={statusClass}>{statusLabel}</span>
+                        <div className="tournament-times">
+                            <div>
+                                Старт:{' '}
+                                {new Date(info.startsAt).toLocaleTimeString([], {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                })}
+                            </div>
+                            <div>
+                                Конец:{' '}
+                                {new Date(info.endsAt).toLocaleTimeString([], {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                })}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="tournament-stats">
+                        <div className="tournament-stat">
+                            <span className="tournament-stat-label">Вход:</span>
+                            <span className="tournament-stat-value">
+                                {info.entryFee} монетка
+                            </span>
+                        </div>
+                        <div className="tournament-stat">
+                            <span className="tournament-stat-label">
+                                Призовой фонд:
+                            </span>
+                            <span className="tournament-stat-value">
+                                {info.prizePool} монет
+                            </span>
+                        </div>
+                    </div>
+
+                    <p className="panel-muted tournament-hint">
+                        Награда распределяется между топ-3 игроками в конце турнира.
+                    </p>
+
+                    <div className="tournament-join-block">
+                        <button
+                            className="menu-btn"
+                            disabled={!canJoin || joining || !token}
+                            onClick={handleJoin}
+                        >
+                            {joining
+                                ? 'Вступаем...'
+                                : canJoin
+                                    ? 'Вступить в турнир за 1 монетку'
+                                    : 'Вступление недоступно'}
+                        </button>
+                        {joinHint && (
+                            <p className="panel-muted tournament-join-hint">
+                                {joinHint}
+                            </p>
+                        )}
+                        {joinMessage && (
+                            <p className="tournament-join-message">{joinMessage}</p>
+                        )}
+                    </div>
+
+                    <div className="tournament-leaderboard">
+                        <h3 className="panel-subtitle">Текущий топ</h3>
+                        {info.participants.length === 0 ? (
+                            <p className="panel-muted">
+                                Пока ещё никто не отправил результат. Будь первым! 💥
+                            </p>
+                        ) : (
+                            <div className="leaderboard-list">
+                                {info.participants.map((p, index) => (
+                                    <div
+                                        key={p.userId}
+                                        className="leaderboard-row leaderboard-row--compact"
+                                    >
+                                        <span className="leaderboard-place">
+                                            #{index + 1}
+                                        </span>
+                                        <span className="leaderboard-name">
+                                            {p.username || 'Игрок'}
+                                        </span>
+                                        <span className="leaderboard-score">
+                                            {p.score} pts
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </>
+            )}
         </div>
     );
 }
@@ -555,14 +815,17 @@ function App() {
                                                 Посмотри топ игроков и свои лучшие результаты.
                                             </div>
                                         </button>
-                                        <button className="menu-card menu-card--disabled">
+                                        <button
+                                            className="menu-card"
+                                            onClick={() => goTo('tournament')}
+                                        >
                                             <div className="menu-icon">🎯</div>
                                             <div className="menu-card-title">Турниры</div>
                                             <div className="menu-card-text">
-                                                Скоро: платные турниры, призы и крипто-вывод.
+                                                Почасовые турниры, призовой фонд и топ-3 победителя.
                                             </div>
-                                            <span className="menu-badge">Soon</span>
                                         </button>
+
                                     </div>
 
                                     {token && (
@@ -592,6 +855,11 @@ function App() {
                             )}
 
                             {currentPage === 'leaderboard' && <Leaderboard />}
+
+                            {currentPage === 'tournament' && token && (
+                                <TournamentView token={token} />
+                            )}
+
                         </section>
                     </>
                 )}
