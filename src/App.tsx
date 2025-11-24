@@ -707,37 +707,30 @@ function App() {
 
         let cancelled = false;
 
-        const loadMe = async () => {
+        const loadProfile = async () => {
             try {
                 const res = await apiFetch('/users/me', token);
                 const data = await res.json().catch(() => ({}));
 
-                if (!res.ok) {
-                    throw new Error(data.message || 'Не удалось загрузить профиль');
-                }
+                if (!res.ok) return;
 
                 if (!cancelled) {
-                    setMe(data);
+                    setMe(data); // 🔥 тут coins всегда обновятся
                 }
             } catch (e) {
                 console.error(e);
             }
         };
 
-        // первый запрос при старте
-        loadMe();
+        loadProfile(); // первый запуск
 
-        // дальше обновляем профиль каждые 10 секунд
-        const id = window.setInterval(() => {
-            loadMe();
-        }, 10000); // 10000 мс = 10 секунд
+        const interval = setInterval(loadProfile, 5000); // обновление каждые 5 сек
 
         return () => {
             cancelled = true;
-            window.clearInterval(id);
+            clearInterval(interval);
         };
     }, [token]);
-
 
 
     const goTo = (page: Page) => setCurrentPage(page);
