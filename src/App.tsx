@@ -702,22 +702,47 @@ function App() {
     }, []);
 
     // Загружаем профиль
+    // Загружаем профиль + обновляем, когда WebApp снова становится видимым
     useEffect(() => {
         if (!token) return;
 
-        apiFetch('/users/me', token)
-            .then(async (res) => {
+        let cancelled = false;
+
+        const loadMe = async () => {
+            try {
+                const res = await apiFetch('/users/me', token);
+                const data = await res.json().catch(() => ({}));
+
                 if (!res.ok) {
-                    const data = await res.json().catch(() => ({}));
                     throw new Error(data.message || 'Не удалось загрузить профиль');
                 }
-                return res.json();
-            })
-            .then((data) => setMe(data))
-            .catch((e) => {
+
+                if (!cancelled) {
+                    setMe(data);
+                }
+            } catch (e) {
                 console.error(e);
-            });
+            }
+        };
+
+        // первый запрос при старте
+        loadMe();
+
+        // когда пользователь возвращается в приложение (после оплаты / выхода в бот и обратно)
+        const onVisible = () => {
+            if (document.visibilityState === 'visible') {
+                loadMe();
+            }
+        };
+
+        document.addEventListener('visibilitychange', onVisible);
+
+        return () => {
+            cancelled = true;
+            document.removeEventListener('visibilitychange', onVisible);
+        };
     }, [token]);
+
 
     const goTo = (page: Page) => setCurrentPage(page);
 
