@@ -8,6 +8,7 @@ interface GameProps {
     onBack: () => void;
     onStarsChange?: (stars: number) => void;
     onStatsChange?: (stats: { stars: number; level: number; xp: number }) => void;
+    tournamentId?: number;
 }
 
 type GameStatus = 'idle' | 'running' | 'finished';

@@ -92,7 +92,13 @@ interface TournamentInfo {
     participants: TournamentParticipant[];
 }
 
-function TournamentView({ token }: { token: string }) {
+function TournamentView({
+                            token,
+                            onStartGame,
+                        }: {
+    token: string;
+    onStartGame?: (tournamentId: number) => void;
+}) {
     const [info, setInfo] = useState<TournamentInfo | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -280,6 +286,20 @@ function TournamentView({ token }: { token: string }) {
                     </p>
 
                     <div className="tournament-join-block">
+                        {info && onStartGame && (
+                            <div className="tournament-play-block">
+                                <button
+                                    className="menu-btn menu-btn--secondary"
+                                    onClick={() => onStartGame(info.tournamentId)}
+                                >
+                                    🎮 Начать турнирную игру
+                                </button>
+                                <p className="panel-muted">
+                                    Результат этой игры пойдёт в таблицу турнира.
+                                </p>
+                            </div>
+                        )}
+
                         <button
                             className="menu-btn"
                             disabled={!canJoin || joining || !token}
@@ -625,6 +645,7 @@ function Shop({ token }: { token: string }) {
         </div>
     );
 }
+const [tournamentGameId, setTournamentGameId] = useState<number | null>(null);
 
 // -------- App --------
 
@@ -853,12 +874,31 @@ function App() {
                                     onBack={() => setCurrentPage('menu')}
                                 />
                             )}
+                            {currentPage === 'game' && token && (
+                                <Game
+                                    token={token}
+                                    tournamentId={tournamentGameId ?? undefined}  // 👈 ДОБАВИЛИ
+                                    onBack={() => {
+                                        setCurrentPage('menu');
+                                        setTournamentGameId(null);                  // 👈 сбрасываем
+                                    }}
+                                    onStarsChange={handleStarsChange}
+                                    onStatsChange={handleStatsChange}
+                                />
+                            )}
 
                             {currentPage === 'leaderboard' && <Leaderboard />}
 
                             {currentPage === 'tournament' && token && (
-                                <TournamentView token={token} />
+                                <TournamentView
+                                    token={token}
+                                    onStartGame={(tournamentId) => {
+                                        setTournamentGameId(tournamentId);
+                                        setCurrentPage('game');
+                                    }}
+                                />
                             )}
+
 
                         </section>
                     </>
