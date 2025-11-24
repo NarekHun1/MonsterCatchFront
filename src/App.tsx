@@ -747,19 +747,35 @@ function App() {
                         <h1 className="app-title">Monster Catch</h1>
                         <p className="app-subtitle">Telegram mini-game • турниры • призы</p>
                     </div>
-                    {userId && (
+
+                    {me && userId && (
                         <div className="app-userchip">
-                            <span className="user-label">Игрок</span>
-                            <span className="user-id">ID: {userId}</span>
-                            {me && (
-                                <>
-                                    <span className="user-stars">⭐ {me.stars}</span>
-                                    <span className="user-coins">🪙 {me.coins}</span>
-                                </>
-                            )}
+                            <div className="user-main">
+                                <div className="user-avatar">
+                                    <span>😈</span>
+                                </div>
+                                <div className="user-meta">
+                                    <div className="user-name">
+                                        {me.username || me.firstName || 'Игрок'}
+                                    </div>
+                                    <div className="user-id-small">ID: {userId}</div>
+                                </div>
+                            </div>
+
+                            <div className="user-stats-row">
+                                <div className="user-pill">
+                                    <span className="user-pill-icon">⭐</span>
+                                    <span className="user-pill-value">{me.stars}</span>
+                                </div>
+                                <div className="user-pill user-pill--coins">
+                                    <span className="user-pill-icon">🪙</span>
+                                    <span className="user-pill-value">{me.coins}</span>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </header>
+
 
                 {error && (
                     <div className="panel panel-error-box">
