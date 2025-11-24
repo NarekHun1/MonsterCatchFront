@@ -702,7 +702,6 @@ function App() {
     }, []);
 
     // Загружаем профиль
-    // Загружаем профиль + обновляем, когда WebApp снова становится видимым
     useEffect(() => {
         if (!token) return;
 
@@ -728,20 +727,17 @@ function App() {
         // первый запрос при старте
         loadMe();
 
-        // когда пользователь возвращается в приложение (после оплаты / выхода в бот и обратно)
-        const onVisible = () => {
-            if (document.visibilityState === 'visible') {
-                loadMe();
-            }
-        };
-
-        document.addEventListener('visibilitychange', onVisible);
+        // дальше обновляем профиль каждые 10 секунд
+        const id = window.setInterval(() => {
+            loadMe();
+        }, 10000); // 10000 мс = 10 секунд
 
         return () => {
             cancelled = true;
-            document.removeEventListener('visibilitychange', onVisible);
+            window.clearInterval(id);
         };
     }, [token]);
+
 
 
     const goTo = (page: Page) => setCurrentPage(page);
