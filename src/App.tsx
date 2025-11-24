@@ -14,6 +14,7 @@ interface MeResponse {
     username?: string | null;
     firstName?: string | null;
     stars: number;
+    coins: number;
     multiplierLevel: number;
     extraTimeLevel: number;
     epicBoostLevel: number;
@@ -95,9 +96,11 @@ interface TournamentInfo {
 function TournamentView({
                             token,
                             onStartGame,
+                            onCoinsChange,
                         }: {
     token: string;
     onStartGame?: (tournamentId: number) => void;
+    onCoinsChange?: (coins: number) => void;
 }) {
     const [info, setInfo] = useState<TournamentInfo | null>(null);
     const [loading, setLoading] = useState(true);
@@ -169,6 +172,10 @@ function TournamentView({
                 setJoinMessage('Ты успешно вступил в турнир! Удачи 🏆');
             } else {
                 setJoinMessage('Запрос выполнен, но непонятный ответ от сервера 🤔');
+            }
+            // 👇 ОБНОВЛЯЕМ МОНЕТЫ В APP, ЕСЛИ СЕРВЕР ИХ ВЕРНУЛ
+            if (typeof data.coins === 'number' && onCoinsChange) {
+                onCoinsChange(data.coins);
             }
 
             // Обновим информацию о турнире
@@ -744,7 +751,12 @@ function App() {
                         <div className="app-userchip">
                             <span className="user-label">Игрок</span>
                             <span className="user-id">ID: {userId}</span>
-                            {me && <span className="user-stars">⭐ {me.stars}</span>}
+                            {me && (
+                                <>
+                                    <span className="user-stars">⭐ {me.stars}</span>
+                                    <span className="user-coins">🪙 {me.coins}</span>
+                                </>
+                            )}
                         </div>
                     )}
                 </header>
@@ -891,8 +903,12 @@ function App() {
                                         setTournamentGameId(tournamentId);
                                         setCurrentPage('game');
                                     }}
+                                    onCoinsChange={(coins) => {
+                                        setMe((prev) => (prev ? { ...prev, coins } : prev));
+                                    }}
                                 />
                             )}
+
 
 
 
