@@ -646,7 +646,6 @@ function Shop({ token }: { token: string }) {
         </div>
     );
 }
-const [tournamentGameId, setTournamentGameId] = useState<number | null>(null);
 
 // -------- App --------
 
@@ -657,6 +656,8 @@ function App() {
     const [error, setError] = useState('');
     const [currentPage, setCurrentPage] = useState<Page>('menu');
     const [showHero, setShowHero] = useState(false);
+    const [tournamentGameId, setTournamentGameId] = useState<number | null>(null);
+
 
     // Настройка Telegram WebApp
     useEffect(() => {
@@ -863,7 +864,11 @@ function App() {
                             {currentPage === 'game' && token && (
                                 <Game
                                     token={token}
-                                    onBack={() => setCurrentPage('menu')}
+                                    tournamentId={tournamentGameId ?? undefined}
+                                    onBack={() => {
+                                        setCurrentPage('menu');
+                                        setTournamentGameId(null);
+                                    }}
                                     onStarsChange={handleStarsChange}
                                     onStatsChange={handleStatsChange}
                                 />
@@ -875,18 +880,7 @@ function App() {
                                     onBack={() => setCurrentPage('menu')}
                                 />
                             )}
-                            {currentPage === 'game' && token && (
-                                <Game
-                                    token={token}
-                                    tournamentId={tournamentGameId ?? undefined}  // 👈 ДОБАВИЛИ
-                                    onBack={() => {
-                                        setCurrentPage('menu');
-                                        setTournamentGameId(null);                  // 👈 сбрасываем
-                                    }}
-                                    onStarsChange={handleStarsChange}
-                                    onStatsChange={handleStatsChange}
-                                />
-                            )}
+
 
                             {currentPage === 'leaderboard' && <Leaderboard />}
 
