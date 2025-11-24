@@ -300,6 +300,7 @@ function TournamentView({
                             </div>
                         )}
 
+
                         <button
                             className="menu-btn"
                             disabled={!canJoin || joining || !token}
@@ -898,6 +899,7 @@ function App() {
                                     }}
                                 />
                             )}
+
 
 
                         </section>

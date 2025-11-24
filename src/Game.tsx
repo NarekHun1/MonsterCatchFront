@@ -53,7 +53,7 @@ function randomPosition() {
     return { x, y };
 }
 
-export function Game({ token, onBack, onStarsChange, onStatsChange }: GameProps) {
+export function Game({ token, onBack, onStarsChange, onStatsChange, tournamentId}: GameProps) {
     const [phase, setPhase] = useState<GamePhase>('intro');
     const [status, setStatus] = useState<GameStatus>('idle');
     const [gameId, setGameId] = useState<number | null>(null);
@@ -159,6 +159,31 @@ export function Game({ token, onBack, onStarsChange, onStatsChange }: GameProps)
             if (data.referralReward > 0) {
                 alert(`🎉 +${data.referralReward} ⭐ за первую игру друга!`);
             }
+            // 2) если игра была турнирной — отправляем счёт в турнир
+            if (tournamentId != null) {
+                try {
+                    const tRes = await apiFetch('/tournament/submit-score', token, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            tournamentId,
+                            score,
+                        }),
+                    });
+
+                    const tData = await tRes.json().catch(() => ({}));
+                    if (!tRes.ok) {
+                        console.error(
+                            'submit-score error:',
+                            tRes.status,
+                            tData?.message || tData,
+                        );
+                    } else {
+                        console.log('Tournament score submitted:', tData);
+                    }
+                } catch (e) {
+                    console.error('Ошибка отправки результата в турнир', e);
+                }
+            }
 
             setStatus('finished');
             return { success: true, data };
@@ -169,7 +194,8 @@ export function Game({ token, onBack, onStarsChange, onStatsChange }: GameProps)
         } finally {
             setLoading(false);
         }
-    }, [gameId, score, token, onStarsChange, onStatsChange, clicks, epicCount]);
+
+    }, [gameId, score, token, onStarsChange, onStatsChange, clicks, epicCount,tournamentId]);
 
     // ✅ ПРАВИЛЬНЫЙ /game/start
     const startGame = useCallback(async () => {
