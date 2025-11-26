@@ -31,7 +31,7 @@ body {
     display: flex;
     justify-content: center;    /* по центру по горизонтали */
     align-items: flex-start;    /* ⬅️ прижали к верху, не центр */
-    padding-top: 56px;          /* ⬅️ отступ вниз от шапки Telegram */
+    padding-top: 60px;          /* ⬅️ отступ вниз от шапки Telegram */
 }
 
 
