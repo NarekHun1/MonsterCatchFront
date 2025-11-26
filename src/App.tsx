@@ -6,6 +6,8 @@ import { InviteFriends } from './InviteFriends';
 import { HeroCard } from './HeroCard';
 import { apiFetch } from './api';
 import HeroViewer from './HeroViewer'; // 😈 3D демон
+import { initAuth } from './auth/initAuth'; // ← ДОБАВЬ ЭТО
+
 
 type Page = 'menu' | 'game' | 'leaderboard' | 'invite'| 'tournament';
 
@@ -657,7 +659,7 @@ function Shop({ token }: { token: string }) {
 // -------- App --------
 
 function App() {
-    const [token, setToken] = useState('');
+    const [token, setToken] = useState<string | null>(null);
     const [me, setMe] = useState<MeResponse | null>(null);
     const [userId, setUserId] = useState<number | null>(null);
     const [error, setError] = useState('');
@@ -679,27 +681,37 @@ function App() {
     }, []);
 
     // Читаем token из URL
+    // Авторизация: URL ?token=... ИЛИ Telegram WebApp initData
     useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const t = params.get('token');
+        (async () => {
+            const t = await initAuth();
 
-        if (!t) {
-            setError('Не найден token в URL (запусти через кнопку в Telegram)');
-            return;
-        }
-
-        setToken(t);
-
-        try {
-            const payload = JSON.parse(atob(t.split('.')[1]));
-            if (payload.userId) {
-                setUserId(payload.userId);
+            if (!t) {
+                // сюда попадём только если:
+                // - нет ?token в URL
+                // - нет Telegram.WebApp.initData
+                // т.е. игра запущена просто в браузере
+                setError(
+                    'Запусти игру через Telegram (кнопка «Играть» в боте или через раздел Игр).',
+                );
+                return;
             }
-        } catch (e) {
-            console.error(e);
-            setError('Не получилось прочитать JWT payload');
-        }
+
+            setToken(t);
+
+            // как и раньше — вытаскиваем userId из JWT
+            try {
+                const payload = JSON.parse(atob(t.split('.')[1]));
+                if (payload.userId) {
+                    setUserId(payload.userId);
+                }
+            } catch (e) {
+                console.error(e);
+                setError('Не получилось прочитать JWT payload');
+            }
+        })();
     }, []);
+
 
     // Загружаем профиль
     useEffect(() => {

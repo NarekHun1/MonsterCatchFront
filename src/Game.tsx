@@ -103,7 +103,7 @@ export function Game({ token, onBack, onStarsChange, onStatsChange, tournamentId
         }, 100);
     }, []);
 
-    // ✅ ПРАВИЛЬНЫЙ /game/finish
+    // ✅/game/finish
     const finishGame = useCallback(async () => {
         if (!gameId || finishSentRef.current) return;
         finishSentRef.current = true;
