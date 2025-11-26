@@ -80,7 +80,7 @@ body {
 
 .app-header {
     position: fixed;
-    top: 74px;              /* 👈 просто опускаем ниже */
+    top: 78px; /* или твоё число */
     left: 50%;
     transform: translateX(-50%);
     width: calc(100% - 32px);
@@ -88,11 +88,20 @@ body {
 
     z-index: 1000;
 
+    /* 👇 Добавляем фон */
+    background: rgba(15, 23, 42, 0.95); /* как .app-shell */
+    border: 1px solid rgba(75, 85, 99, 0.8);
+    border-radius: 16px;
+
+    /* Чтобы текст не прилипал */
+    padding: 12px;
+
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 12px;
 }
+
 
 
 
