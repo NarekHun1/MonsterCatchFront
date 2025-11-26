@@ -78,11 +78,22 @@ body {
 /* Header */
 
 .app-header {
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 12px);
+    left: 50%;
+    transform: translateX(-50%);
+
+    width: calc(100% - 32px); /* отступы как в .app-shell */
+    max-width: 520px;
+
+    z-index: 1000; /* поверх игры */
+
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 12px;
 }
+
 
 .app-title {
     margin: 0;
