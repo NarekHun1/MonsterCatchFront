@@ -80,20 +80,20 @@ body {
 
 .app-header {
     position: fixed;
-    top: calc(env(safe-area-inset-top, 0px) + 12px);
+    top: 56px;              /* 👈 просто опускаем ниже */
     left: 50%;
     transform: translateX(-50%);
-
-    width: calc(100% - 32px); /* отступы как в .app-shell */
+    width: calc(100% - 32px);
     max-width: 520px;
 
-    z-index: 1000; /* поверх игры */
+    z-index: 1000;
 
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 12px;
 }
+
 
 
 .app-title {
