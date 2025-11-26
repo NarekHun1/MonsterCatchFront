@@ -24,12 +24,16 @@ a:hover {
 }
 
 body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+
+    display: flex;
+    justify-content: center;    /* по центру по горизонтали */
+    align-items: flex-start;    /* ⬅️ прижали к верху, не центр */
+    padding-top: 56px;          /* ⬅️ отступ вниз от шапки Telegram */
 }
+
 
 h1 {
   font-size: 3.2em;
