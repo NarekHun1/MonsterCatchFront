@@ -5,10 +5,7 @@
     max-width: 520px;
 
     /* Отступ зависит от безопасной зоны + fallback */
-    margin-top: calc(env(safe-area-inset-top, 0px) + 32px);
-    margin-left: 16px;
-    margin-right: 16px;
-    margin-bottom: 16px;
+    margin-top: calc(env(safe-area-inset-top, 0px) + 24px);
 
     padding: 16px 16px 12px;
 
