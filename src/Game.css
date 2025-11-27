@@ -5,11 +5,15 @@
     flex-direction: column;
     gap: 10px;
 
-    /* Игра занимает ВСЮ высоту телефона */
-    height: calc(100vh - 80px); /* 80px = место под header */
+    /* игра занимает почти весь экран, но не перекрывает HUD */
+    height: calc(100vh - 145px);
+
+    width: 100vw;        /* НА ВЕСЬ ЭКРАН!!! */
+    margin-left: -16px;  /* убираем отступы внутри app-shell */
+    margin-right: -16px;
 
     padding: 0;
-    border-radius: 18px;
+    border-radius: 20px;
     overflow: hidden;
 }
 
@@ -240,16 +244,15 @@
 }
 
 .game-arena--fullscreen {
-    flex: 1; /* растягивает арену на всю оставшуюся высоту */
+    flex: 1;
     width: 100%;
-
     background: radial-gradient(circle at top, #1e293b, #020617);
-    border: 1px solid rgba(55, 65, 81, 0.6);
-    border-radius: 18px;
-    margin-top: 6px;
-    position: relative;
+    border: 1px solid rgba(55, 65, 81, 0.5);
+    border-radius: 0 0 20px 20px;
     overflow: hidden;
+    position: relative;
 }
+
 
 
 
