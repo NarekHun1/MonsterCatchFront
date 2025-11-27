@@ -3,23 +3,19 @@
     z-index: 1;
     width: 100%;
     max-width: 520px;
+    margin: 80px 16px 16px; /* ← 80px от хедера вниз */
 
-    padding-top: 120px; /* ⬅ ВАЖНО: место под фиксированный хедер */
-    padding-left: 16px;
-    padding-right: 16px;
-    padding-bottom: 12px;
-
+    padding: 16px 16px 12px;
     border-radius: 24px;
     background: rgba(15, 23, 42, 0.94);
-
     box-shadow:
             0 20px 40px rgba(15, 23, 42, 0.9),
             0 0 0 1px rgba(148, 163, 184, 0.25);
-
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
+
 
 
 :root {
@@ -80,21 +76,17 @@ body {
 
 .app-header {
     position: fixed;
-    top: 78px; /* или твоё число */
-    left: 50%;
-    transform: translateX(-50%);
-    width: calc(100% - 32px);
-    max-width: 520px;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    width: 100%;
+    padding: 12px 16px;
+
+    background: rgba(15, 23, 42, 0.98);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
 
     z-index: 1000;
-
-    /* 👇 Добавляем фон */
-    background: rgba(15, 23, 42, 0.95); /* как .app-shell */
-    border: 1px solid rgba(75, 85, 99, 0.8);
-    border-radius: 16px;
-
-    /* Чтобы текст не прилипал */
-    padding: 12px;
 
     display: flex;
     justify-content: space-between;

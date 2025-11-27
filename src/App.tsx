@@ -6,10 +6,9 @@ import { InviteFriends } from './InviteFriends';
 import { HeroCard } from './HeroCard';
 import { apiFetch } from './api';
 import HeroViewer from './HeroViewer'; // 😈 3D демон
-import { initAuth } from './auth/initAuth'; // ← ДОБАВЬ ЭТО
+import { initAuth } from './auth/initAuth';
 
-
-type Page = 'menu' | 'game' | 'leaderboard' | 'invite'| 'tournament';
+type Page = 'menu' | 'game' | 'leaderboard' | 'invite' | 'tournament';
 
 interface MeResponse {
     id: number;
@@ -67,8 +66,8 @@ function Leaderboard() {
                     <div key={g.id} className="leaderboard-row">
                         <span className="leaderboard-place">#{index + 1}</span>
                         <span className="leaderboard-name">
-                            {g.user?.username || g.user?.firstName || 'Игрок'}
-                        </span>
+              {g.user?.username || g.user?.firstName || 'Игрок'}
+            </span>
                         <span className="leaderboard-score">{g.score ?? 0} pts</span>
                     </div>
                 ))}
@@ -76,6 +75,7 @@ function Leaderboard() {
         </div>
     );
 }
+
 type TournamentStatus = 'PLANNED' | 'ACTIVE' | 'FINISHED';
 
 interface TournamentParticipant {
@@ -110,7 +110,6 @@ function TournamentView({
     const [joining, setJoining] = useState(false);
     const [joinMessage, setJoinMessage] = useState<string | null>(null);
 
-    // загрузка турнира + периодический рефреш
     useEffect(() => {
         let canceled = false;
 
@@ -143,7 +142,7 @@ function TournamentView({
         };
 
         load();
-        const id = window.setInterval(load, 15000); // обновляем раз в 15 секунд
+        const id = window.setInterval(load, 15000);
 
         return () => {
             canceled = true;
@@ -175,12 +174,11 @@ function TournamentView({
             } else {
                 setJoinMessage('Запрос выполнен, но непонятный ответ от сервера 🤔');
             }
-            // 👇 ОБНОВЛЯЕМ МОНЕТЫ В APP, ЕСЛИ СЕРВЕР ИХ ВЕРНУЛ
+
             if (typeof data.coins === 'number' && onCoinsChange) {
                 onCoinsChange(data.coins);
             }
 
-            // Обновим информацию о турнире
             try {
                 const refresh = await apiFetch('/tournament/current');
                 const refreshedData = await refresh.json().catch(() => ({}));
@@ -188,7 +186,7 @@ function TournamentView({
                     setInfo(refreshedData as TournamentInfo);
                 }
             } catch {
-                // игнорим, не критично
+                // ignore
             }
         } catch (e: any) {
             console.error(e);
@@ -198,7 +196,6 @@ function TournamentView({
         }
     };
 
-    // красивые вычисления времени
     const now = new Date();
     let statusLabel = '—';
     let statusClass = 'tournament-badge';
@@ -276,17 +273,11 @@ function TournamentView({
                     <div className="tournament-stats">
                         <div className="tournament-stat">
                             <span className="tournament-stat-label">Вход:</span>
-                            <span className="tournament-stat-value">
-                                {info.entryFee} монетка
-                            </span>
+                            <span className="tournament-stat-value">{info.entryFee} монетка</span>
                         </div>
                         <div className="tournament-stat">
-                            <span className="tournament-stat-label">
-                                Призовой фонд:
-                            </span>
-                            <span className="tournament-stat-value">
-                                {info.prizePool} монет
-                            </span>
+                            <span className="tournament-stat-label">Призовой фонд:</span>
+                            <span className="tournament-stat-value">{info.prizePool} монет</span>
                         </div>
                     </div>
 
@@ -309,7 +300,6 @@ function TournamentView({
                             </div>
                         )}
 
-
                         <button
                             className="menu-btn"
                             disabled={!canJoin || joining || !token}
@@ -322,9 +312,7 @@ function TournamentView({
                                     : 'Вступление недоступно'}
                         </button>
                         {joinHint && (
-                            <p className="panel-muted tournament-join-hint">
-                                {joinHint}
-                            </p>
+                            <p className="panel-muted tournament-join-hint">{joinHint}</p>
                         )}
                         {joinMessage && (
                             <p className="tournament-join-message">{joinMessage}</p>
@@ -344,15 +332,11 @@ function TournamentView({
                                         key={p.userId}
                                         className="leaderboard-row leaderboard-row--compact"
                                     >
-                                        <span className="leaderboard-place">
-                                            #{index + 1}
-                                        </span>
+                                        <span className="leaderboard-place">#{index + 1}</span>
                                         <span className="leaderboard-name">
-                                            {p.username || 'Игрок'}
-                                        </span>
-                                        <span className="leaderboard-score">
-                                            {p.score} pts
-                                        </span>
+                      {p.username || 'Игрок'}
+                    </span>
+                                        <span className="leaderboard-score">{p.score} pts</span>
                                     </div>
                                 ))}
                             </div>
@@ -363,8 +347,6 @@ function TournamentView({
         </div>
     );
 }
-
-// -------- DailyQuests --------
 
 interface Quest {
     id: string;
@@ -426,8 +408,7 @@ function DailyQuests({
         return () => {
             canceled = true;
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [token]); // важно: не триггерим перезагрузку при каждом новом onStarsChange
+    }, [token]);
 
     const handleClaim = async (questId: string) => {
         try {
@@ -487,8 +468,8 @@ function DailyQuests({
                             <div className="daily-row">
                                 <span>{q.title}</span>
                                 <span className="daily-progress-text">
-                                    {Math.min(q.current, q.target)} / {q.target}
-                                </span>
+                  {Math.min(q.current, q.target)} / {q.target}
+                </span>
                             </div>
                             <div className="daily-bar">
                                 <div
@@ -510,8 +491,8 @@ function DailyQuests({
                                     </button>
                                 ) : (
                                     <span className="daily-badge daily-badge--grey">
-                                        В процессе
-                                    </span>
+                    В процессе
+                  </span>
                                 )}
                             </div>
                         </div>
@@ -521,8 +502,6 @@ function DailyQuests({
         </div>
     );
 }
-
-// -------- Shop --------
 
 interface ShopItem {
     id: 'multiplier' | 'extra_time' | 'epic_boost';
@@ -569,7 +548,6 @@ function Shop({ token }: { token: string }) {
 
     useEffect(() => {
         load();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token]);
 
     const handleBuy = (id: ShopItem['id']) => {
@@ -614,8 +592,8 @@ function Shop({ token }: { token: string }) {
                         <div className="shop-row">
                             <span className="shop-title">{item.title}</span>
                             <span className="shop-level">
-                                Уровень: {item.level} / {item.maxLevel}
-                            </span>
+                Уровень: {item.level} / {item.maxLevel}
+              </span>
                         </div>
                         <div className="shop-row">
                             <span className="shop-price">Цена: {item.price} ⭐</span>
@@ -656,8 +634,6 @@ function Shop({ token }: { token: string }) {
     );
 }
 
-// -------- App --------
-
 function App() {
     const [token, setToken] = useState<string | null>(null);
     const [me, setMe] = useState<MeResponse | null>(null);
@@ -667,8 +643,6 @@ function App() {
     const [showHero, setShowHero] = useState(false);
     const [tournamentGameId, setTournamentGameId] = useState<number | null>(null);
 
-
-    // Настройка Telegram WebApp
     useEffect(() => {
         // @ts-ignore
         const tg = window.Telegram?.WebApp;
@@ -680,17 +654,11 @@ function App() {
         tg.setHeaderColor('#050816');
     }, []);
 
-    // Читаем token из URL
-    // Авторизация: URL ?token=... ИЛИ Telegram WebApp initData
     useEffect(() => {
         (async () => {
             const t = await initAuth();
 
             if (!t) {
-                // сюда попадём только если:
-                // - нет ?token в URL
-                // - нет Telegram.WebApp.initData
-                // т.е. игра запущена просто в браузере
                 setError(
                     'Запусти игру через Telegram (кнопка «Играть» в боте или через раздел Игр).',
                 );
@@ -699,7 +667,6 @@ function App() {
 
             setToken(t);
 
-            // как и раньше — вытаскиваем userId из JWT
             try {
                 const payload = JSON.parse(atob(t.split('.')[1]));
                 if (payload.userId) {
@@ -712,8 +679,6 @@ function App() {
         })();
     }, []);
 
-
-    // Загружаем профиль
     useEffect(() => {
         if (!token) return;
 
@@ -727,16 +692,16 @@ function App() {
                 if (!res.ok) return;
 
                 if (!cancelled) {
-                    setMe(data); // 🔥 тут coins всегда обновятся
+                    setMe(data);
                 }
             } catch (e) {
                 console.error(e);
             }
         };
 
-        loadProfile(); // первый запуск
+        loadProfile();
 
-        const interval = setInterval(loadProfile, 5000); // обновление каждые 5 сек
+        const interval = setInterval(loadProfile, 5000);
 
         return () => {
             cancelled = true;
@@ -744,14 +709,17 @@ function App() {
         };
     }, [token]);
 
-
     const goTo = (page: Page) => setCurrentPage(page);
 
     const handleStarsChange = (stars: number) => {
         setMe((prev) => (prev ? { ...prev, stars } : prev));
     };
 
-    const handleStatsChange = (stats: { stars: number; level: number; xp: number }) => {
+    const handleStatsChange = (stats: {
+        stars: number;
+        level: number;
+        xp: number;
+    }) => {
         setMe((prev) =>
             prev
                 ? {
@@ -767,42 +735,44 @@ function App() {
     return (
         <div className="app-root">
             <div className="app-bg-glow" />
-            <main className="app-shell">
-                <header className="app-header">
-                    <div>
-                        <h1 className="app-title">Monster Catch</h1>
-                        <p className="app-subtitle">Telegram mini-game • турниры • призы</p>
-                    </div>
 
-                    {me && userId && (
-                        <div className="app-userchip">
-                            <div className="user-main">
-                                <div className="user-avatar">
-                                    <span>😈</span>
-                                </div>
-                                <div className="user-meta">
-                                    <div className="user-name">
-                                        {me.username || me.firstName || 'Игрок'}
-                                    </div>
-                                    <div className="user-id-small">ID: {userId}</div>
-                                </div>
+            {/* ХЕДЕР НА ВЕСЬ ЭКРАН */}
+            <header className="app-header">
+                <div>
+                    <h1 className="app-title">Monster Catch</h1>
+                    <p className="app-subtitle">Telegram mini-game • турниры • призы</p>
+                </div>
+
+                {me && userId && (
+                    <div className="app-userchip">
+                        <div className="user-main">
+                            <div className="user-avatar">
+                                <span>😈</span>
                             </div>
-
-                            <div className="user-stats-row">
-                                <div className="user-pill">
-                                    <span className="user-pill-icon">⭐</span>
-                                    <span className="user-pill-value">{me.stars}</span>
+                            <div className="user-meta">
+                                <div className="user-name">
+                                    {me.username || me.firstName || 'Игрок'}
                                 </div>
-                                <div className="user-pill user-pill--coins">
-                                    <span className="user-pill-icon">🪙</span>
-                                    <span className="user-pill-value">{me.coins}</span>
-                                </div>
+                                <div className="user-id-small">ID: {userId}</div>
                             </div>
                         </div>
-                    )}
-                </header>
 
+                        <div className="user-stats-row">
+                            <div className="user-pill">
+                                <span className="user-pill-icon">⭐</span>
+                                <span className="user-pill-value">{me.stars}</span>
+                            </div>
+                            <div className="user-pill user-pill--coins">
+                                <span className="user-pill-icon">🪙</span>
+                                <span className="user-pill-value">{me.coins}</span>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </header>
 
+            {/* ВСЯ ОСТАЛЬНАЯ ИГРА — ВНУТРИ КАРТОЧКИ */}
+            <main className="app-shell">
                 {error && (
                     <div className="panel panel-error-box">
                         <h3 className="panel-title">Ошибка</h3>
@@ -812,7 +782,6 @@ function App() {
 
                 {!error && (
                     <>
-                        {/* Навигация */}
                         <nav className="menu-nav">
                             <button
                                 className={`menu-tab ${
@@ -852,7 +821,6 @@ function App() {
                             </div>
                         )}
 
-                        {/* Контент */}
                         <section className="app-content">
                             {currentPage === 'menu' && (
                                 <div className="panel panel-menu">
@@ -866,12 +834,9 @@ function App() {
                                             onClick={() => goTo('game')}
                                         >
                                             <div className="menu-icon">🎮</div>
-                                            <div className="menu-card-title">
-                                                Одиночная игра
-                                            </div>
+                                            <div className="menu-card-title">Одиночная игра</div>
                                             <div className="menu-card-text">
-                                                60 секунд, один раунд, сколько монстров успеешь
-                                                поймать?
+                                                60 секунд, один раунд, сколько монстров успеешь поймать?
                                             </div>
                                         </button>
                                         <button
@@ -885,9 +850,7 @@ function App() {
                                             onClick={() => goTo('leaderboard')}
                                         >
                                             <div className="menu-icon">🏆</div>
-                                            <div className="menu-card-title">
-                                                Таблица лидеров
-                                            </div>
+                                            <div className="menu-card-title">Таблица лидеров</div>
                                             <div className="menu-card-text">
                                                 Посмотри топ игроков и свои лучшие результаты.
                                             </div>
@@ -902,7 +865,6 @@ function App() {
                                                 Почасовые турниры, призовой фонд и топ-3 победителя.
                                             </div>
                                         </button>
-
                                     </div>
 
                                     {token && (
@@ -935,7 +897,6 @@ function App() {
                                 />
                             )}
 
-
                             {currentPage === 'leaderboard' && <Leaderboard />}
 
                             {currentPage === 'tournament' && token && (
@@ -950,10 +911,6 @@ function App() {
                                     }}
                                 />
                             )}
-
-
-
-
                         </section>
                     </>
                 )}
@@ -963,7 +920,6 @@ function App() {
                     <span>Powered by твоё безумие и JS ⚡️</span>
                 </footer>
 
-                {/* 🔥 ПАНЕЛЬ ГЕРОЯ СНИЗУ + МОДАЛКА С ДЕМОНОМ */}
                 {me && (
                     <>
                         <button
@@ -999,7 +955,6 @@ function App() {
                                         ✕
                                     </button>
 
-                                    {/* только демон */}
                                     <HeroViewer />
                                 </div>
                             </div>
