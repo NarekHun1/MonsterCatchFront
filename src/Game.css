@@ -1,13 +1,46 @@
+/* === ОБЩАЯ ОБЁРТКА ИГРЫ === */
+
 .game-fullscreen {
     position: relative;
     display: flex;
     flex-direction: column;
     gap: 8px;
-    height: calc(100vh - 120px); /* почти весь экран внутри app-shell */
-    min-height: 360px;
+
+    /* почти весь экран внутри app-shell */
+    height: calc(100vh - 140px);
+    min-height: 380px;
+
+    padding: 10px 10px 14px;
+    border-radius: 20px;
+
+    background: radial-gradient(circle at top, #020617, #020617);
+    border: 1px solid rgba(148, 163, 184, 0.45);
+    box-shadow:
+            0 18px 40px rgba(15, 23, 42, 0.95),
+            0 0 0 1px rgba(15, 23, 42, 0.9);
+
+    overflow: hidden;
+    color: #e5e7eb;
 }
 
-/* Верхняя панель */
+/* лёгкое свечение фона */
+.game-fullscreen::before {
+    content: '';
+    position: absolute;
+    inset: -30%;
+    background:
+            radial-gradient(circle at 15% 0%, rgba(56, 189, 248, 0.18), transparent 55%),
+            radial-gradient(circle at 80% 100%, rgba(248, 113, 113, 0.22), transparent 60%);
+    opacity: 0.8;
+    pointer-events: none;
+}
+
+.game-fullscreen > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* === ВЕРХНЯЯ ПАНЕЛЬ + HUD === */
 
 .game-topbar {
     display: flex;
@@ -18,13 +51,13 @@
 .game-back-btn {
     border: none;
     border-radius: 999px;
-    padding: 6px 10px;
+    padding: 6px 12px;
     font-size: 12px;
     cursor: pointer;
-    background: rgba(15, 23, 42, 0.95);
+    background: radial-gradient(circle at top left, #0f172a, #020617);
     color: #e5e7eb;
     border: 1px solid rgba(75, 85, 99, 0.9);
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.9);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.95);
     transition:
             background 0.12s ease,
             transform 0.1s ease,
@@ -32,9 +65,9 @@
 }
 
 .game-back-btn:hover:not(:disabled) {
-    background: rgba(31, 41, 55, 0.98);
+    background: radial-gradient(circle at top left, #1f2937, #020617);
     transform: translateY(-1px);
-    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.95);
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 1);
 }
 
 .game-back-btn:disabled {
@@ -48,15 +81,15 @@
 }
 
 .game-hud-item {
-    min-width: 70px;
+    min-width: 72px;
     padding: 6px 8px;
-    border-radius: 12px;
+    border-radius: 14px;
     background: rgba(15, 23, 42, 0.95);
     border: 1px solid rgba(55, 65, 81, 0.9);
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.9);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.9);
 }
 
 .game-hud-label {
@@ -71,19 +104,23 @@
     font-weight: 600;
 }
 
+/* подчёркиваем счёт */
+.game-hud-item:first-child .game-hud-value {
+    color: #22c55e;
+}
 
-/* Таймер */
+/* === ТАЙМЕР === */
 
 .game-timer-bar {
     position: relative;
-    height: 4px;
+    height: 5px;
     border-radius: 999px;
     background: rgba(31, 41, 55, 1);
     overflow: hidden;
 }
 
 .game-timer-bar--overlay {
-    margin-top: 2px;
+    margin-top: 4px;
 }
 
 .game-timer-fill {
@@ -95,110 +132,25 @@
     transition: transform 0.1s linear;
 }
 
-/* Арена */
-
-.game-arena {
-    position: relative;
-    margin-top: 8px;
-    border-radius: 18px;
-    background: radial-gradient(circle at top, rgba(30, 64, 175, 0.55), rgba(15, 23, 42, 0.98));
-    border: 1px solid rgba(55, 65, 81, 0.9);
-    overflow: hidden;
-}
-
-.game-arena--fullscreen {
-    flex: 1;
-}
-
-/* Монстр — ТОЛЬКО emoji */
-
-.game-monster-emoji-wrapper {
-    position: absolute;
-    transform: translate(-50%, -50%) scale(1);
-    transition:
-            transform 0.1s ease-out,
-            filter 0.1s ease-out,
-            text-shadow 0.12s ease-out;
-}
-
-.game-monster-emoji-wrapper--active {
-    cursor: pointer;
-}
-
-.game-monster-emoji-wrapper--finished {
-    filter: grayscale(0.6);
-    opacity: 0.7;
-}
-
-.game-monster-emoji-wrapper--hit {
-    transform: translate(-50%, -50%) scale(1.15);
-    text-shadow:
-            0 0 18px rgba(250, 250, 250, 0.9),
-            0 0 40px rgba(251, 191, 36, 0.9);
-}
-
-.game-monster-emoji {
-    font-size: 64px;
-    line-height: 1;
-}
-
-/* Летающие +N */
-
-.game-hit-label {
-    position: absolute;
-    transform: translate(-50%, -50%);
-    font-size: 16px;
-    font-weight: 600;
-    color: #fbbf24;
-    text-shadow:
-            0 0 10px rgba(250, 204, 21, 0.9),
-            0 0 18px rgba(0, 0, 0, 0.9);
-    animation: game-hit-pop 0.5s ease-out forwards;
-}
-
-@keyframes game-hit-pop {
-    0% {
-        opacity: 1;
-        transform: translate(-50%, -50%);
-    }
-    100% {
-        opacity: 0;
-        transform: translate(-50%, -80%);
-    }
-}
-
-/* Ошибка */
-
-.game-error {
-    margin-top: 4px;
-    font-size: 12px;
-    color: #fecaca;
-}
-.game-fullscreen {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    height: calc(100vh - 120px);
-    min-height: 360px;
-}
-
-/* Верхняя панель и HUD уже есть, оставляем те же */
+/* === ИНТРО-ЭКРАН === */
 
 .game-intro {
     flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+
     margin-top: 8px;
-    padding: 10px 6px 6px;
+    padding: 10px 8px 8px;
     border-radius: 18px;
+
     background: radial-gradient(
             circle at top,
             rgba(30, 64, 175, 0.5),
             rgba(15, 23, 42, 0.98)
     );
     border: 1px solid rgba(55, 65, 81, 0.9);
+    box-shadow: 0 12px 26px rgba(15, 23, 42, 0.95);
 }
 
 .game-intro-top {
@@ -229,10 +181,10 @@
     flex: 1;
     padding: 8px 4px;
     border-radius: 14px;
-    background: rgba(15, 23, 42, 0.95);
+    background: rgba(15, 23, 42, 0.96);
     border: 1px solid rgba(55, 65, 81, 0.9);
     text-align: center;
-    box-shadow: 0 6px 14px rgba(15, 23, 42, 0.9);
+    box-shadow: 0 6px 14px rgba(15, 23, 42, 0.95);
 }
 
 .game-intro-monster-emoji {
@@ -278,4 +230,102 @@
     cursor: default;
 }
 
-/* Остальной CSS (arena, monster-emoji-wrapper, hit-label, hud, back-btn) оставь как есть */
+/* === АРЕНА === */
+
+.game-arena {
+    position: relative;
+    margin-top: 8px;
+    border-radius: 18px;
+    background: radial-gradient(
+            circle at top,
+            rgba(30, 64, 175, 0.55),
+            rgba(15, 23, 42, 0.98)
+    );
+    border: 1px solid rgba(55, 65, 81, 0.95);
+    overflow: hidden;
+    box-shadow:
+            0 16px 34px rgba(15, 23, 42, 0.95),
+            inset 0 0 40px rgba(15, 23, 42, 0.9);
+}
+
+.game-arena--fullscreen {
+    flex: 1;
+}
+
+/* подсветка в углах арены */
+.game-arena::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+            radial-gradient(circle at 10% 0%, rgba(56, 189, 248, 0.18), transparent 55%),
+            radial-gradient(circle at 90% 100%, rgba(248, 113, 113, 0.2), transparent 60%);
+    opacity: 0.9;
+    pointer-events: none;
+}
+
+/* === МОНСТР === */
+
+.game-monster-emoji-wrapper {
+    position: absolute;
+    transform: translate(-50%, -50%) scale(1);
+    transition:
+            transform 0.1s ease-out,
+            filter 0.1s ease-out,
+            text-shadow 0.12s ease-out;
+}
+
+.game-monster-emoji-wrapper--active {
+    cursor: pointer;
+}
+
+.game-monster-emoji-wrapper--finished {
+    filter: grayscale(0.6);
+    opacity: 0.7;
+}
+
+.game-monster-emoji-wrapper--hit {
+    transform: translate(-50%, -50%) scale(1.15);
+    text-shadow:
+            0 0 18px rgba(250, 250, 250, 0.9),
+            0 0 40px rgba(251, 191, 36, 0.9);
+}
+
+.game-monster-emoji {
+    font-size: 64px;
+    line-height: 1;
+}
+
+/* === ЛЕТАЮЩИЕ +N === */
+
+.game-hit-label {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    font-size: 16px;
+    font-weight: 600;
+    color: #fbbf24;
+    text-shadow:
+            0 0 10px rgba(250, 204, 21, 0.9),
+            0 0 18px rgba(0, 0, 0, 0.9);
+    animation: game-hit-pop 0.5s ease-out forwards;
+}
+
+@keyframes game-hit-pop {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -80%);
+    }
+}
+
+/* === ОШИБКА === */
+
+.game-error {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #fecaca;
+    text-align: center;
+}
