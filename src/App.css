@@ -81,7 +81,7 @@ body {
 
 .app-header {
     position: fixed;
-    top: 75px;
+    top: 0;
     left: 0;
     right: 0;
 
@@ -99,7 +99,7 @@ body {
     justify-content: space-between;
     align-items: center;
     gap: 12px;
-    height: 150px;
+    height: 200px;
 
 }
 
