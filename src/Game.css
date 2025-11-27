@@ -6,7 +6,7 @@
     gap: 10px;
 
     /* игра занимает почти весь экран, но не перекрывает HUD */
-    height: calc(100vh - 165px);
+    height: calc(100vh - 185px);
     width: 100vw;        /* НА ВЕСЬ ЭКРАН!!! */
     margin-left: -16px;  /* убираем отступы внутри app-shell */
     margin-right: -16px;
