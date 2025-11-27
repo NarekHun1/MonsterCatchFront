@@ -47,34 +47,37 @@ function Leaderboard() {
             })
             .then((data) => setItems(data))
             .catch((e: any) => {
-                console.error(e);
                 setError(e.message || 'Ошибка загрузки лидеров');
             });
     }, []);
 
     return (
-        <div className="panel">
-            <h2 className="panel-title">📊 Таблица лидеров</h2>
-            {error && <p className="panel-error">Ошибка: {error}</p>}
+        <div className="leaderboard-container">
+            <h2 className="leaderboard-title">🏆 Таблица лидеров</h2>
 
-            {items.length === 0 && !error && (
-                <p className="panel-muted">Пока ещё никто не сыграл. Будь первым!</p>
-            )}
+            {error && <p className="panel-error">{error}</p>}
 
-            <div className="leaderboard-list">
-                {items.map((g, index) => (
-                    <div key={g.id} className="leaderboard-row">
-                        <span className="leaderboard-place">#{index + 1}</span>
-                        <span className="leaderboard-name">
-              {g.user?.username || g.user?.firstName || 'Игрок'}
-            </span>
-                        <span className="leaderboard-score">{g.score ?? 0} pts</span>
+            <div className="leaderboard-big-list">
+                {items.map((entry, index) => (
+                    <div key={entry.id} className="leaderboard-card">
+                        <div className={`lb-place lb-place-${index + 1}`}>
+                            {index + 1 <= 3 ? ['🥇', '🥈', '🥉'][index] : index + 1}
+                        </div>
+
+                        <div className="lb-avatar">😈</div>
+
+                        <div className="lb-name">
+                            {entry.user?.username || entry.user?.firstName || 'Игрок'}
+                        </div>
+
+                        <div className="lb-score">{entry.score} pts</div>
                     </div>
                 ))}
             </div>
         </div>
     );
 }
+
 
 type TournamentStatus = 'PLANNED' | 'ACTIVE' | 'FINISHED';
 
