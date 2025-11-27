@@ -1,26 +1,16 @@
 /* === ОБЩАЯ ОБЁРТКА ИГРЫ === */
-
 .game-fullscreen {
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 
-    /* БОЛЬШЕ НЕТ 100vh — высота под контент */
-    height: auto;
-    min-height: 320px;
+    /* Игра занимает ВСЮ высоту телефона */
+    height: calc(100vh - 80px); /* 80px = место под header */
 
-    padding: 10px 10px 14px;
-    border-radius: 20px;
-
-    background: radial-gradient(circle at top, #020617, #020617);
-    border: 1px solid rgba(148, 163, 184, 0.45);
-    box-shadow:
-            0 18px 40px rgba(15, 23, 42, 0.95),
-            0 0 0 1px rgba(15, 23, 42, 0.9);
-
+    padding: 0;
+    border-radius: 18px;
     overflow: hidden;
-    color: #e5e7eb;
 }
 
 
@@ -250,10 +240,17 @@
 }
 
 .game-arena--fullscreen {
-    /* больше не тянем на всё свободное место */
-    flex: 0 0 auto;
-    height: 220px; /* можешь играть: 200 / 220 / 240 */
+    flex: 1; /* растягивает арену на всю оставшуюся высоту */
+    width: 100%;
+
+    background: radial-gradient(circle at top, #1e293b, #020617);
+    border: 1px solid rgba(55, 65, 81, 0.6);
+    border-radius: 18px;
+    margin-top: 6px;
+    position: relative;
+    overflow: hidden;
 }
+
 
 
 /* подсветка в углах арены */
