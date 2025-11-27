@@ -778,8 +778,8 @@ function App() {
 
 
             {/* ВСЯ ОСТАЛЬНАЯ ИГРА — ВНУТРИ КАРТОЧКИ */}
-            <main className="app-shell">
-                {error && (
+            <main className={`app-shell ${currentPage === 'game' ? 'game-active' : ''}`}>
+            {error && (
                     <div className="panel panel-error-box">
                         <h3 className="panel-title">Ошибка</h3>
                         <p>{error}</p>
