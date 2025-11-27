@@ -81,7 +81,7 @@ body {
 
 .app-header {
     position: fixed;
-    top: 0;
+    top: 75px;
     left: 0;
     right: 0;
 
