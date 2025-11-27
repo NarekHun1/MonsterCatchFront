@@ -6,9 +6,9 @@
     flex-direction: column;
     gap: 8px;
 
-    /* почти весь экран внутри app-shell */
-    height: calc(100vh - 140px);
-    min-height: 380px;
+    /* БОЛЬШЕ НЕТ 100vh — высота под контент */
+    height: auto;
+    min-height: 320px;
 
     padding: 10px 10px 14px;
     border-radius: 20px;
@@ -22,6 +22,7 @@
     overflow: hidden;
     color: #e5e7eb;
 }
+
 
 /* лёгкое свечение фона */
 .game-fullscreen::before {
@@ -249,8 +250,11 @@
 }
 
 .game-arena--fullscreen {
-    flex: 1;
+    /* больше не тянем на всё свободное место */
+    flex: 0 0 auto;
+    height: 220px; /* можешь играть: 200 / 220 / 240 */
 }
+
 
 /* подсветка в углах арены */
 .game-arena::before {
