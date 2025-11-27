@@ -740,39 +740,42 @@ function App() {
             <div className="app-bg-glow" />
 
             {/* ХЕДЕР НА ВЕСЬ ЭКРАН */}
-            <header className="app-header">
-                <div>
-                    <h1 className="app-title">Monster Catch</h1>
-                    <p className="app-subtitle">Telegram mini-game • турниры • призы</p>
-                </div>
-
-                {me && userId && (
-                    <div className="app-userchip">
-                        <div className="user-main">
-                            <div className="user-avatar">
-                                <span>😈</span>
-                            </div>
-                            <div className="user-meta">
-                                <div className="user-name">
-                                    {me.username || me.firstName || 'Игрок'}
-                                </div>
-                                <div className="user-id-small">ID: {userId}</div>
-                            </div>
-                        </div>
-
-                        <div className="user-stats-row">
-                            <div className="user-pill">
-                                <span className="user-pill-icon">⭐</span>
-                                <span className="user-pill-value">{me.stars}</span>
-                            </div>
-                            <div className="user-pill user-pill--coins">
-                                <span className="user-pill-icon">🪙</span>
-                                <span className="user-pill-value">{me.coins}</span>
-                            </div>
-                        </div>
+            {currentPage !== 'game' && (
+                <header className="app-header">
+                    <div>
+                        <h1 className="app-title">Monster Catch</h1>
+                        <p className="app-subtitle">Telegram mini-game • турниры • призы</p>
                     </div>
-                )}
-            </header>
+
+                    {me && userId && (
+                        <div className="app-userchip">
+                            <div className="user-main">
+                                <div className="user-avatar">
+                                    <span>😈</span>
+                                </div>
+                                <div className="user-meta">
+                                    <div className="user-name">
+                                        {me.username || me.firstName || 'Игрок'}
+                                    </div>
+                                    <div className="user-id-small">ID: {userId}</div>
+                                </div>
+                            </div>
+
+                            <div className="user-stats-row">
+                                <div className="user-pill">
+                                    <span className="user-pill-icon">⭐</span>
+                                    <span className="user-pill-value">{me.stars}</span>
+                                </div>
+                                <div className="user-pill user-pill--coins">
+                                    <span className="user-pill-icon">🪙</span>
+                                    <span className="user-pill-value">{me.coins}</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </header>
+            )}
+
 
             {/* ВСЯ ОСТАЛЬНАЯ ИГРА — ВНУТРИ КАРТОЧКИ */}
             <main className="app-shell">
