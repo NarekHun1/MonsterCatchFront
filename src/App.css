@@ -26,7 +26,7 @@
 /* Когда игра активна — поднимаем контейнер вверх */
 .app-shell.game-active {
     margin-top: 0 !important;
-    padding-top: 10px
+    padding-top: 15px
 }
 :root {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text',
