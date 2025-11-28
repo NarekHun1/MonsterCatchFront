@@ -78,7 +78,6 @@ function Leaderboard() {
     );
 }
 
-
 type TournamentStatus = 'PLANNED' | 'ACTIVE' | 'FINISHED';
 
 interface TournamentParticipant {
@@ -337,8 +336,8 @@ function TournamentView({
                                     >
                                         <span className="leaderboard-place">#{index + 1}</span>
                                         <span className="leaderboard-name">
-                      {p.username || 'Игрок'}
-                    </span>
+                                            {p.username || 'Игрок'}
+                                        </span>
                                         <span className="leaderboard-score">{p.score} pts</span>
                                     </div>
                                 ))}
@@ -471,8 +470,8 @@ function DailyQuests({
                             <div className="daily-row">
                                 <span>{q.title}</span>
                                 <span className="daily-progress-text">
-                  {Math.min(q.current, q.target)} / {q.target}
-                </span>
+                                    {Math.min(q.current, q.target)} / {q.target}
+                                </span>
                             </div>
                             <div className="daily-bar">
                                 <div
@@ -494,8 +493,8 @@ function DailyQuests({
                                     </button>
                                 ) : (
                                     <span className="daily-badge daily-badge--grey">
-                    В процессе
-                  </span>
+                                        В процессе
+                                    </span>
                                 )}
                             </div>
                         </div>
@@ -595,8 +594,8 @@ function Shop({ token }: { token: string }) {
                         <div className="shop-row">
                             <span className="shop-title">{item.title}</span>
                             <span className="shop-level">
-                Уровень: {item.level} / {item.maxLevel}
-              </span>
+                                Уровень: {item.level} / {item.maxLevel}
+                            </span>
                         </div>
                         <div className="shop-row">
                             <span className="shop-price">Цена: {item.price} ⭐</span>
@@ -645,6 +644,29 @@ function App() {
     const [currentPage, setCurrentPage] = useState<Page>('menu');
     const [showHero, setShowHero] = useState(false);
     const [tournamentGameId, setTournamentGameId] = useState<number | null>(null);
+
+    // 👇 состояние для магазина монет
+    const [showCoinShop, setShowCoinShop] = useState(false);
+
+    // кнопка "Купить монеты" в меню
+    const buyCoinsMenu = () => {
+        setShowCoinShop(true);
+    };
+
+    // отправка команды боту на покупку определённого пакета
+    const buyCoinsPack = (packId: string) => {
+        const tg = (window as any).Telegram?.WebApp;
+        if (!tg) return;
+
+        tg.sendData(
+            JSON.stringify({
+                action: 'buy_coins',
+                packId,
+            }),
+        );
+
+        setShowCoinShop(false);
+    };
 
     useEffect(() => {
         // @ts-ignore
@@ -712,6 +734,44 @@ function App() {
         };
     }, [token]);
 
+    // 🔁 обновляем профиль после закрытия invoice (после оплаты Stars)
+    useEffect(() => {
+        const tg = (window as any).Telegram?.WebApp;
+        if (!tg) return;
+
+        const handler = () => {
+            if (!token) return;
+
+            apiFetch('/users/me', token)
+                .then((res) => res.json().catch(() => ({})))
+                .then((data) => {
+                    if (!data) return;
+                    setMe((prev) =>
+                        prev
+                            ? {
+                                ...prev,
+                                coins:
+                                    typeof data.coins === 'number'
+                                        ? data.coins
+                                        : prev.coins,
+                                stars:
+                                    typeof data.stars === 'number'
+                                        ? data.stars
+                                        : prev.stars,
+                            }
+                            : data,
+                    );
+                })
+                .catch((e) => console.error(e));
+        };
+
+        tg.onEvent('invoiceClosed', handler);
+
+        return () => {
+            tg.offEvent('invoiceClosed', handler);
+        };
+    }, [token]);
+
     const goTo = (page: Page) => setCurrentPage(page);
 
     const handleStarsChange = (stars: number) => {
@@ -776,10 +836,9 @@ function App() {
                 </header>
             )}
 
-
             {/* ВСЯ ОСТАЛЬНАЯ ИГРА — ВНУТРИ КАРТОЧКИ */}
             <main className={`app-shell ${currentPage === 'game' ? 'game-active' : ''}`}>
-            {error && (
+                {error && (
                     <div className="panel panel-error-box">
                         <h3 className="panel-title">Ошибка</h3>
                         <p>{error}</p>
@@ -818,6 +877,16 @@ function App() {
                         {currentPage === 'menu' && me && (
                             <div className="panel panel-menu">
                                 <HeroCard level={me.level} xp={me.xp} />
+
+                                {/* КУПИТЬ МОНЕТЫ */}
+                                <div className="menu-card" onClick={buyCoinsMenu}>
+                                    <div className="menu-icon">🪙</div>
+                                    <div className="menu-card-title">Купить монеты</div>
+                                    <div className="menu-card-text">
+                                        Пополнить баланс монет через Stars
+                                    </div>
+                                </div>
+
                                 <button
                                     className="menu-btn"
                                     onClick={() => setCurrentPage('game')}
@@ -840,9 +909,12 @@ function App() {
                                             onClick={() => goTo('game')}
                                         >
                                             <div className="menu-icon">🎮</div>
-                                            <div className="menu-card-title">Одиночная игра</div>
+                                            <div className="menu-card-title">
+                                                Одиночная игра
+                                            </div>
                                             <div className="menu-card-text">
-                                                60 секунд, один раунд, сколько монстров успеешь поймать?
+                                                60 секунд, один раунд, сколько монстров успеешь
+                                                поймать?
                                             </div>
                                         </button>
                                         <button
@@ -913,12 +985,57 @@ function App() {
                                         setCurrentPage('game');
                                     }}
                                     onCoinsChange={(coins) => {
-                                        setMe((prev) => (prev ? { ...prev, coins } : prev));
+                                        setMe((prev) =>
+                                            prev ? { ...prev, coins } : prev,
+                                        );
                                     }}
                                 />
                             )}
                         </section>
                     </>
+                )}
+
+                {/* POPUP магазина монет */}
+                {showCoinShop && (
+                    <div
+                        className="shop-overlay"
+                        onClick={() => setShowCoinShop(false)}
+                    >
+                        <div
+                            className="shop-popup"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <h3 className="panel-title">🪙 Покупка монет</h3>
+
+                            <button
+                                className="menu-btn"
+                                onClick={() => buyCoinsPack('coins_500')}
+                            >
+                                500 монет — 100 Stars
+                            </button>
+
+                            <button
+                                className="menu-btn"
+                                onClick={() => buyCoinsPack('coins_1000')}
+                            >
+                                1000 монет — 180 Stars
+                            </button>
+
+                            <button
+                                className="menu-btn"
+                                onClick={() => buyCoinsPack('coins_2500')}
+                            >
+                                2500 монет — 400 Stars
+                            </button>
+
+                            <button
+                                className="menu-btn menu-btn--secondary"
+                                onClick={() => setShowCoinShop(false)}
+                            >
+                                Закрыть
+                            </button>
+                        </div>
+                    </div>
                 )}
 
                 <footer className="app-footer">

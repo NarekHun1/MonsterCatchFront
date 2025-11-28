@@ -809,3 +809,22 @@ button {
     margin-top: 12px;
     align-self: center;
 }
+
+.shop-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999;
+}
+
+.shop-popup {
+    background: #111;
+    padding: 22px;
+    width: 80%;
+    max-width: 360px;
+    border-radius: 14px;
+    text-align: center;
+}
