@@ -675,34 +675,29 @@ function App() {
 
 
     useEffect(() => {
-       // @ts-ignore
-        const tg = (window as any).Telegram?.WebApp;
+        // @ts-ignore
+        const tg = window.Telegram?.WebApp;
         if (!tg) return;
 
         const handler = (event: any) => {
             try {
-                if (!event?.data) return;
                 const data = JSON.parse(event.data);
-                console.log("📩 WebApp получил от бота:", data);
+                console.log("📩 Получено из WebAppQuery:", data);
 
                 if (data.type === "invoice") {
-                    console.log("🧾 Открываю invoice:", data.link);
                     tg.openInvoice(data.link, (status: string) => {
                         console.log("Invoice status:", status);
                     });
                 }
-
             } catch (e) {
-                console.error("❌ Ошибка парсинга:", e);
+                console.error("Ошибка парсинга:", e);
             }
         };
 
         tg.onEvent('messageReceived', handler);
-
-        return () => {
-            tg.offEvent('messageReceived', handler);
-        };
+        return () => tg.offEvent('messageReceived', handler);
     }, []);
+
 
 
     useEffect(() => {
