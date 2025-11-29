@@ -669,19 +669,41 @@ function App() {
                 packId,
             })
         );
+
+        // popup закрывать НЕ нужно
     };
 
 
     useEffect(() => {
-        // @ts-ignore
-        const tg = window.Telegram?.WebApp;
+       // @ts-ignore
+        const tg = (window as any).Telegram?.WebApp;
         if (!tg) return;
 
-        tg.ready();
-        tg.expand();
-        tg.setBackgroundColor('#050816');
-        tg.setHeaderColor('#050816');
+        const handler = (event: any) => {
+            try {
+                if (!event?.data) return;
+                const data = JSON.parse(event.data);
+                console.log("📩 WebApp получил от бота:", data);
+
+                if (data.type === "invoice") {
+                    console.log("🧾 Открываю invoice:", data.link);
+                    tg.openInvoice(data.link, (status: string) => {
+                        console.log("Invoice status:", status);
+                    });
+                }
+
+            } catch (e) {
+                console.error("❌ Ошибка парсинга:", e);
+            }
+        };
+
+        tg.onEvent('messageReceived', handler);
+
+        return () => {
+            tg.offEvent('messageReceived', handler);
+        };
     }, []);
+
 
     useEffect(() => {
         (async () => {
@@ -1011,24 +1033,15 @@ function App() {
                         >
                             <h3 className="panel-title">🪙 Покупка монет</h3>
 
-                            <button
-                                className="menu-btn"
-                                onClick={() => buyCoinsPack('coins_500')}
-                            >
+                            <button className="menu-btn" onClick={() => buyCoinsPack('coins_500')}>
                                 500 монет — 100 Stars
                             </button>
 
-                            <button
-                                className="menu-btn"
-                                onClick={() => buyCoinsPack('coins_1000')}
-                            >
+                            <button className="menu-btn" onClick={() => buyCoinsPack('coins_1000')}>
                                 1000 монет — 180 Stars
                             </button>
 
-                            <button
-                                className="menu-btn"
-                                onClick={() => buyCoinsPack('coins_2500')}
-                            >
+                            <button className="menu-btn" onClick={() => buyCoinsPack('coins_2500')}>
                                 2500 монет — 400 Stars
                             </button>
 
