@@ -672,16 +672,16 @@ function App() {
     };
 
 
-
     useEffect(() => {
-        // @ts-ignore
-        const tg = window.Telegram?.WebApp;
+        const tg = (window as any).Telegram?.WebApp;
         if (!tg) return;
 
-        const handler = (event: any) => {
+        const handler = (event: MessageEvent) => {
+            if (!event.data) return;
+
             try {
                 const data = JSON.parse(event.data);
-                console.log("📩 Получено из WebAppQuery:", data);
+                console.log("📩 Ответ от бэкенда:", data);
 
                 if (data.type === "invoice") {
                     tg.openInvoice(data.link, (status: string) => {
@@ -689,12 +689,12 @@ function App() {
                     });
                 }
             } catch (e) {
-                console.error("Ошибка парсинга:", e);
+                // игнорируем обычные системные сообщения
             }
         };
 
-        tg.onEvent('messageReceived', handler);
-        return () => tg.offEvent('messageReceived', handler);
+        window.addEventListener("message", handler);
+        return () => window.removeEventListener("message", handler);
     }, []);
 
 
