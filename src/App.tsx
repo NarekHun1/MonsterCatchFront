@@ -656,17 +656,21 @@ function App() {
     // отправка команды боту на покупку определённого пакета
     const buyCoinsPack = (packId: string) => {
         const tg = (window as any).Telegram?.WebApp;
-        if (!tg) return;
+        if (!tg) {
+            console.log('❌ Telegram WebApp не найден');
+            return;
+        }
+
+        console.log('➡️ Отправка sendData:', packId);
 
         tg.sendData(
             JSON.stringify({
                 action: 'buy_coins',
                 packId,
-            }),
+            })
         );
-
-        setShowCoinShop(false);
     };
+
 
     useEffect(() => {
         // @ts-ignore
