@@ -654,24 +654,22 @@ function App() {
     };
 
     // отправка команды боту на покупку определённого пакета
-    const buyCoinsPack = (packId: string) => {
-        const tg = (window as any).Telegram?.WebApp;
-        if (!tg) {
-            console.log('❌ Telegram WebApp не найден');
-            return;
-        }
+    const buyCoinsPack = async (packId: string) => {
+        const tg = window.Telegram?.WebApp;
+        if (!tg) return;
 
-        console.log('➡️ Отправка sendData:', packId);
+        tg.showPopup({
+            title: "Покупка монет",
+            message: "Ждём ответ от сервера...",
+            buttons: [{ id: "ok", type: "close", text: "Ок" }]
+        });
 
-        tg.sendData(
-            JSON.stringify({
-                action: 'buy_coins',
-                packId,
-            })
-        );
-
-        // popup закрывать НЕ нужно
+        tg.sendData(JSON.stringify({
+            action: "buy_coins",
+            packId
+        }));
     };
+
 
 
     useEffect(() => {
