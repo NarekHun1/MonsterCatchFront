@@ -655,6 +655,7 @@ function App() {
 
     // отправка команды боту на покупку определённого пакета
     const buyCoinsPack = async (packId: string) => {
+        // @ts-ignore
         const tg = window.Telegram?.WebApp;
         if (!tg) return;
 
