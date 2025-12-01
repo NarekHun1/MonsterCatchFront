@@ -659,11 +659,11 @@ function App() {
         const tg = window.Telegram?.WebApp;
         if (!tg) return;
 
-        tg.showPopup({
-            title: "Покупка монет",
-            message: "Ждём ответ от сервера...",
-            buttons: [{ id: "ok", type: "close", text: "Ок" }]
-        });
+        // tg.showPopup({
+        //     title: "Покупка монет",
+        //     message: "Ждём ответ от сервера...",
+        //     buttons: [{ id: "ok", type: "close", text: "Ок" }]
+        // });
 
         tg.sendData(JSON.stringify({
             action: "buy_coins",
