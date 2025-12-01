@@ -663,7 +663,7 @@ function App() {
                 'https://monstercatch-production.up.railway.app';
 
             // ❗ вызываем свой backend, а НЕ бота через sendData
-            const res = await fetch(`${backendUrl}/payments/create-stars-invoice`, {
+            const res = await fetch(`${backendUrl}/payment/create-stars-invoice`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
