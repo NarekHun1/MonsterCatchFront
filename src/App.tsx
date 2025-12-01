@@ -659,11 +659,11 @@ function App() {
         const tg = window.Telegram?.WebApp;
         if (!tg) return;
 
-        // tg.showPopup({
-        //     title: "Покупка монет",
-        //     message: "Ждём ответ от сервера...",
-        //     buttons: [{ id: "ok", type: "close", text: "Ок" }]
-        // });
+        tg.showPopup({
+            title: "Покупка монет",
+            message: "Ждём ответ от сервера...",
+            buttons: [{ id: "ok", type: "close", text: "Ок" }]
+        });
 
         tg.sendData(JSON.stringify({
             action: "buy_coins",
@@ -672,23 +672,25 @@ function App() {
     };
 
     useEffect(() => {
-        const tg = (window as any).Telegram?.WebApp;
+        // @ts-ignore
+        const tg = window.Telegram.WebApp;
         if (!tg) return;
 
-        const handler = (data: any) => {
-            console.log("invoiceClosed:", data);
-            if (data?.status === "paid") {
-                // обновляем профиль
-                apiFetch('/users/me', token || undefined)
-                    .then(res => res.json())
-                    .then(u => setMe(u));
-            }
+        const handler = (event: MessageEvent) => {
+            try {
+                const data = JSON.parse(event.data);
+                if (data.type === "invoice") {
+                    tg.openInvoice(data.link, (status) => {
+                        console.log("Invoice status:", status);
+                    });
+                }
+            } catch { /* empty */ }
         };
 
-        tg.onEvent('invoiceClosed', handler);
+        window.addEventListener("message", handler);
+        return () => window.removeEventListener("message", handler);
+    }, []);
 
-        return () => tg.offEvent('invoiceClosed', handler);
-    }, [token]);
 
 
 
