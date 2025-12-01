@@ -653,47 +653,40 @@ function App() {
         setShowCoinShop(true);
     };
 
-    // отправка команды боту на покупку определённого пакета
     const buyCoinsPack = async (packId: string) => {
-        // @ts-ignore
-        const tg = window.Telegram?.WebApp;
-        if (!tg) return;
+        const tg = (window as any).Telegram?.WebApp;
+        if (!tg || !token) return;
 
-        tg.showPopup({
-            title: "Покупка монет",
-            message: "Ждём ответ от сервера...",
-            buttons: [{ id: "ok", type: "close", text: "Ок" }]
-        });
+        try {
+            const backendUrl =
+                import.meta.env.VITE_API_BASE_URL ||
+                'https://monstercatch-production.up.railway.app';
 
-        tg.sendData(JSON.stringify({
-            action: "buy_coins",
-            packId
-        }));
+            // ❗ вызываем свой backend, а НЕ бота через sendData
+            const res = await fetch(`${backendUrl}/payments/create-stars-invoice`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ packId }),
+            });
+
+            const data = await res.json().catch(() => ({}));
+
+            if (!res.ok || !data.invoiceLink) {
+                throw new Error(data.message || 'Не удалось создать оплату');
+            }
+
+            // 🔥 открываем Stars-оплату ПРЯМО в игре
+            tg.openInvoice(data.invoiceLink, (status: string) => {
+                console.log('Invoice status:', status);
+            });
+        } catch (e: any) {
+            console.error(e);
+            tg.showAlert?.(e.message || 'Ошибка создания платежа');
+        }
     };
-
-    useEffect(() => {
-        // @ts-ignore
-        const tg = window.Telegram?.WebApp;
-        if (!tg) return;
-
-        // Ловим ответ от бота
-        const handler = (data: any) => {
-            try {
-                const parsed = JSON.parse(data);
-
-                if (parsed.type === "invoice") {
-                    // Открываем окно оплаты Stars
-                    tg.openInvoice(parsed.link, (status) => {
-                        console.log("Invoice status:", status);
-                    });
-                }
-            } catch (e) {}
-        };
-
-        tg.onEvent("web_app_data", handler);
-
-        return () => tg.offEvent("web_app_data", handler);
-    }, []);
 
 
     useEffect(() => {
