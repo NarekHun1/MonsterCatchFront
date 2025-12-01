@@ -672,26 +672,27 @@ function App() {
     };
 
     useEffect(() => {
-        // @ts-ignore
-        const tg = window.Telegram.WebApp;
+        const tg = window.Telegram?.WebApp;
         if (!tg) return;
 
-        const handler = (event: MessageEvent) => {
+        // Ловим ответ от бота
+        const handler = (data: any) => {
             try {
-                const data = JSON.parse(event.data);
-                if (data.type === "invoice") {
-                    tg.openInvoice(data.link, (status) => {
+                const parsed = JSON.parse(data);
+
+                if (parsed.type === "invoice") {
+                    // Открываем окно оплаты Stars
+                    tg.openInvoice(parsed.link, (status) => {
                         console.log("Invoice status:", status);
                     });
                 }
-            } catch { /* empty */ }
+            } catch (e) {}
         };
 
-        window.addEventListener("message", handler);
-        return () => window.removeEventListener("message", handler);
+        tg.onEvent("web_app_data", handler);
+
+        return () => tg.offEvent("web_app_data", handler);
     }, []);
-
-
 
 
     useEffect(() => {
