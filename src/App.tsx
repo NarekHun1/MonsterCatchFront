@@ -671,31 +671,24 @@ function App() {
         }));
     };
 
-
     useEffect(() => {
         const tg = (window as any).Telegram?.WebApp;
         if (!tg) return;
 
-        const handler = (event: MessageEvent) => {
-            if (!event.data) return;
-
-            try {
-                const data = JSON.parse(event.data);
-                console.log("📩 Ответ от бэкенда:", data);
-
-                if (data.type === "invoice") {
-                    tg.openInvoice(data.link, (status: string) => {
-                        console.log("Invoice status:", status);
-                    });
-                }
-            } catch (e) {
-                // игнорируем обычные системные сообщения
+        const handler = (data: any) => {
+            console.log("invoiceClosed:", data);
+            if (data?.status === "paid") {
+                // обновляем профиль
+                apiFetch('/users/me', token || undefined)
+                    .then(res => res.json())
+                    .then(u => setMe(u));
             }
         };
 
-        window.addEventListener("message", handler);
-        return () => window.removeEventListener("message", handler);
-    }, []);
+        tg.onEvent('invoiceClosed', handler);
+
+        return () => tg.offEvent('invoiceClosed', handler);
+    }, [token]);
 
 
 
