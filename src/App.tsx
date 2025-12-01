@@ -672,6 +672,7 @@ function App() {
     };
 
     useEffect(() => {
+        // @ts-ignore
         const tg = window.Telegram?.WebApp;
         if (!tg) return;
 
