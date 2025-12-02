@@ -1018,15 +1018,15 @@ function App() {
                             <h3 className="panel-title">🪙 Покупка монет</h3>
 
                             <button className="menu-btn" onClick={() => buyCoinsPack('coins_500')}>
-                                500 монет — 100 Stars
+                                100 монет — 100 Stars
                             </button>
 
                             <button className="menu-btn" onClick={() => buyCoinsPack('coins_1000')}>
-                                1000 монет — 180 Stars
+                                150 монет — 150 Stars
                             </button>
 
                             <button className="menu-btn" onClick={() => buyCoinsPack('coins_2500')}>
-                                2500 монет — 400 Stars
+                                300 монет — 250 Stars
                             </button>
 
                             <button
