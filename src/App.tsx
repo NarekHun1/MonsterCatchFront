@@ -740,7 +740,7 @@ function App() {
                 setError(
                     'Запусти игру через Telegram (кнопка «Играть» в боте или через раздел Игр).',
                 );
-                setIsBooting(false);
+                // setIsBooting(false);
                 return;
             }
 
