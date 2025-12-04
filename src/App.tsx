@@ -644,10 +644,29 @@ function App() {
     const [currentPage, setCurrentPage] = useState<Page>('menu');
     const [showHero, setShowHero] = useState(false);
     const [tournamentGameId, setTournamentGameId] = useState<number | null>(null);
+    const [isBooting, setIsBooting] = useState(true);
 
     // 👇 состояние для магазина монет
     const [showCoinShop, setShowCoinShop] = useState(false);
 
+    if (isBooting && !error) {
+        return (
+            <div className="splash-root">
+                <div className="splash-inner">
+                    <div className="splash-logo-circle">
+                        <img src="/monster.jpeg" alt="Monster" className="splash-logo-img" />
+                    </div>
+
+                    <h1 className="splash-title">Monster Catch</h1>
+                    <p className="splash-subtitle">Загружаем монстров...</p>
+
+                    <div className="splash-bar">
+                        <div className="splash-bar-fill" />
+                    </div>
+                </div>
+            </div>
+        );
+    }
     // кнопка "Купить монеты" в меню
     const buyCoinsMenu = () => {
         setShowCoinShop(true);
@@ -713,6 +732,7 @@ function App() {
                 setError(
                     'Запусти игру через Telegram (кнопка «Играть» в боте или через раздел Игр).',
                 );
+                setIsBooting(false);
                 return;
             }
 
@@ -744,6 +764,7 @@ function App() {
 
                 if (!cancelled) {
                     setMe(data);
+                    setIsBooting(false);
                 }
             } catch (e) {
                 console.error(e);

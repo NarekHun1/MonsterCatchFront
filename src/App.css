@@ -828,3 +828,99 @@ button {
     border-radius: 14px;
     text-align: center;
 }
+
+/* loading Page */
+
+.splash-root {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at top, #2b1338 0, #050510 55%, #000 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+.splash-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    max-width: 320px;
+    width: 100%;
+    text-align: center;
+    color: #fff;
+}
+
+.splash-logo-circle {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 10%, #ffdd66, #ff7a3c 45%, #7b1fa2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+            0 0 30px rgba(255, 122, 60, 0.8),
+            0 0 80px rgba(123, 31, 162, 0.6);
+}
+
+.splash-logo-img {
+    width: 90%;
+    height: 90%;
+    object-fit: contain;
+}
+
+.splash-title {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.splash-subtitle {
+    font-size: 14px;
+    opacity: 0.8;
+    margin: 0 0 8px;
+}
+
+.splash-bar {
+    width: 100%;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+    position: relative;
+}
+
+.splash-bar-fill {
+    position: absolute;
+    inset: 0;
+    transform-origin: left center;
+    animation: splash-loading 1.4s infinite ease-in-out;
+}
+
+.splash-bar-fill::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, #ffeb3b, #ff9800, #ff5722);
+}
+
+@keyframes splash-loading {
+    0% {
+        transform: scaleX(0.1);
+    }
+    40% {
+        transform: scaleX(0.7);
+    }
+    80% {
+        transform: scaleX(1);
+    }
+    100% {
+        transform: scaleX(1);
+    }
+}
+
