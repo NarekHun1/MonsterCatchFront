@@ -857,6 +857,7 @@ button {
     width: 140px;
     height: 140px;
     border-radius: 50%;
+    overflow: hidden;
     background: radial-gradient(circle at 30% 10%, #ffdd66, #ff7a3c 45%, #7b1fa2 100%);
     display: flex;
     align-items: center;
@@ -867,10 +868,12 @@ button {
 }
 
 .splash-logo-img {
-    width: 90%;
-    height: 90%;
-    object-fit: contain;
+    width: 120px;       /* или другое значение */
+    height: 120px;
+    border-radius: 50%; /* превращает квадрат в круг */
+    object-fit: cover;  /* чтобы картинка не растягивалась */
 }
+
 
 .splash-title {
     font-size: 26px;
