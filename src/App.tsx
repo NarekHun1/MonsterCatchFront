@@ -688,6 +688,16 @@ function App() {
         }
     };
 
+    useEffect(() => {
+        const tg = (window as any).Telegram?.WebApp;
+        if (!tg) return;
+
+        // просим Telegram развернуть WebApp
+        tg.expand();
+
+        // можно ещё включить “привычный” цвет
+        tg.setBackgroundColor?.('#000000'); // или твой цвет
+    }, []);
 
     useEffect(() => {
         (async () => {
