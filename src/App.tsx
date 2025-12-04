@@ -667,6 +667,14 @@ function App() {
             </div>
         );
     }
+
+    useEffect(() => {
+        // если есть токен или есть ошибка — прячем экран загрузки
+        if (token || error) {
+            setIsBooting(false);
+        }
+    }, [token, error]);
+
     // кнопка "Купить монеты" в меню
     const buyCoinsMenu = () => {
         setShowCoinShop(true);
@@ -764,7 +772,7 @@ function App() {
 
                 if (!cancelled) {
                     setMe(data);
-                    setIsBooting(false);
+                    // setIsBooting(false);
                 }
             } catch (e) {
                 console.error(e);
