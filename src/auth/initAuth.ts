@@ -5,7 +5,22 @@ export async function initAuth(): Promise<string | null> {
         // 0. Пробуем взять токен из localStorage
         const saved = localStorage.getItem('authToken');
         if (saved) {
-            return saved;
+            try {
+                const [, payloadB64] = saved.split('.');
+                const payloadJson = atob(payloadB64);
+                const payload = JSON.parse(payloadJson) as { exp?: number };
+
+                if (payload.exp && payload.exp * 1000 > Date.now()) {
+                    // токен ещё живой → можно использовать
+                    return saved;
+                } else {
+                    console.warn('⚠️ Saved token expired, clearing localStorage');
+                    localStorage.removeItem('authToken');
+                }
+            } catch (e) {
+                console.warn('⚠️ Failed to parse saved token, clearing', e);
+                localStorage.removeItem('authToken');
+            }
         }
 
         // 1. Берём initData из Telegram WebApp
