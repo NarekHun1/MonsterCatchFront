@@ -692,12 +692,18 @@ function App() {
         const tg = (window as any).Telegram?.WebApp;
         if (!tg) return;
 
-        // просим Telegram развернуть WebApp
-        tg.expand();
+        // говорим, что всё загрузили
+        tg.ready?.();
 
-        // можно ещё включить “привычный” цвет
-        tg.setBackgroundColor?.('#000000'); // или твой цвет
+        // просим максимум доступной высоты
+        tg.expand?.();
+
+        // опционально — отключить свайпы, чтобы не сворачивался
+        tg.disableVerticalSwipes?.();
+
+        tg.setBackgroundColor?.('#000000');
     }, []);
+
 
     useEffect(() => {
         (async () => {
