@@ -645,16 +645,30 @@ function App() {
     const [showHero, setShowHero] = useState(false);
     const [tournamentGameId, setTournamentGameId] = useState<number | null>(null);
     const [isBooting, setIsBooting] = useState(true);
+    const [minDelayPassed, setMinDelayPassed] = useState(false);
+
 
     // 👇 состояние для магазина монет
     const [showCoinShop, setShowCoinShop] = useState(false);
 
+    // минимальная длительность сплэша — 1500 мс
     useEffect(() => {
-        // если есть токен или есть ошибка — прячем экран загрузки
-        if (token || error) {
+        const timer = setTimeout(() => {
+            setMinDelayPassed(true);
+        }, 2000); // можешь поставить 2000, если хочешь ещё дольше
+
+        return () => clearTimeout(timer);
+    }, []);
+
+
+    useEffect(() => {
+        // прятать сплэш только когда:
+        // 1) либо авторизовались (есть token) либо ошибка (error)
+        // 2) и прошла минимальная задержка
+        if ((token || error) && minDelayPassed) {
             setIsBooting(false);
         }
-    }, [token, error]);
+    }, [token, error, minDelayPassed]);
 
     useEffect(() => {
         const tg = (window as any).Telegram?.WebApp;
