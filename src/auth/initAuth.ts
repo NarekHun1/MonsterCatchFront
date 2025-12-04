@@ -43,14 +43,15 @@ export async function initAuth(): Promise<string | null> {
             'https://monstercatch-production.up.railway.app';
 
         // 2. Отправляем initData на backend
-        const res = await fetch(`${backendUrl}/telegram/webapp-auth`, {
+        const res = await fetch(`${backendUrl}/auth/telegram`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                initData: tg.initData,              // главное поле
-                initDataUnsafe: tg.initDataUnsafe,  // для дебага (backend игнорирует)
+                initData: tg.initData,
+                initDataUnsafe: tg.initDataUnsafe,
             }),
         });
+
 
         if (!res.ok) {
             const errText = await res.text();
