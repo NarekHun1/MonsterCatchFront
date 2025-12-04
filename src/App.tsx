@@ -649,31 +649,59 @@ function App() {
     // 👇 состояние для магазина монет
     const [showCoinShop, setShowCoinShop] = useState(false);
 
-    if (isBooting && !error) {
-        return (
-            <div className="splash-root">
-                <div className="splash-inner">
-                    <div className="splash-logo-circle">
-                        <img src="/monster.jpeg" alt="Monster" className="splash-logo-img" />
-                    </div>
-
-                    <h1 className="splash-title">Monster Catch</h1>
-                    <p className="splash-subtitle">Загружаем монстров...</p>
-
-                    <div className="splash-bar">
-                        <div className="splash-bar-fill" />
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
     useEffect(() => {
         // если есть токен или есть ошибка — прячем экран загрузки
         if (token || error) {
             setIsBooting(false);
         }
     }, [token, error]);
+
+    useEffect(() => {
+        const tg = (window as any).Telegram?.WebApp;
+        if (!tg) return;
+
+        // говорим, что всё загрузили
+        tg.ready?.();
+
+        // просим максимум доступной высоты
+        tg.expand?.();
+
+        // опционально — отключить свайпы, чтобы не сворачивался
+        tg.disableVerticalSwipes?.();
+
+        tg.setBackgroundColor?.('#000000');
+    }, []);
+
+    useEffect(() => {
+        if (!token) return;
+
+        let cancelled = false;
+
+        const loadProfile = async () => {
+            try {
+                const res = await apiFetch('/users/me', token);
+                const data = await res.json().catch(() => ({}));
+
+                if (!res.ok) return;
+
+                if (!cancelled) {
+                    setMe(data);
+                    // setIsBooting(false);
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        };
+
+        loadProfile();
+
+        const interval = setInterval(loadProfile, 5000);
+
+        return () => {
+            cancelled = true;
+            clearInterval(interval);
+        };
+    }, [token]);
 
     // кнопка "Купить монеты" в меню
     const buyCoinsMenu = () => {
@@ -715,21 +743,6 @@ function App() {
         }
     };
 
-    useEffect(() => {
-        const tg = (window as any).Telegram?.WebApp;
-        if (!tg) return;
-
-        // говорим, что всё загрузили
-        tg.ready?.();
-
-        // просим максимум доступной высоты
-        tg.expand?.();
-
-        // опционально — отключить свайпы, чтобы не сворачивался
-        tg.disableVerticalSwipes?.();
-
-        tg.setBackgroundColor?.('#000000');
-    }, []);
 
 
     useEffect(() => {
@@ -758,36 +771,7 @@ function App() {
         })();
     }, []);
 
-    useEffect(() => {
-        if (!token) return;
 
-        let cancelled = false;
-
-        const loadProfile = async () => {
-            try {
-                const res = await apiFetch('/users/me', token);
-                const data = await res.json().catch(() => ({}));
-
-                if (!res.ok) return;
-
-                if (!cancelled) {
-                    setMe(data);
-                    // setIsBooting(false);
-                }
-            } catch (e) {
-                console.error(e);
-            }
-        };
-
-        loadProfile();
-
-        const interval = setInterval(loadProfile, 5000);
-
-        return () => {
-            cancelled = true;
-            clearInterval(interval);
-        };
-    }, [token]);
 
     // 🔁 обновляем профиль после закрытия invoice (после оплаты Stars)
     useEffect(() => {
@@ -849,6 +833,26 @@ function App() {
                 : prev,
         );
     };
+
+    if (isBooting && !error) {
+        return (
+            <div className="splash-root">
+                <div className="splash-inner">
+                    <div className="splash-logo-circle">
+                        <img src="/monster.jpeg" alt="Monster" className="splash-logo-img" />
+                    </div>
+
+                    <h1 className="splash-title">Monster Catch</h1>
+                    <p className="splash-subtitle">Загружаем монстров...</p>
+
+                    <div className="splash-bar">
+                        <div className="splash-bar-fill" />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
 
     return (
         <div className="app-root">
