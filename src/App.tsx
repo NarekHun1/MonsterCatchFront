@@ -7,6 +7,9 @@ import { HeroCard } from './HeroCard';
 import { apiFetch } from './api';
 import HeroViewer from './HeroViewer'; // 😈 3D демон
 import { initAuth } from './auth/initAuth';
+import { Wallet } from './Wallet';
+
+
 
 type Page = 'menu' | 'game' | 'leaderboard' | 'invite' | 'tournament' | 'wallet';
 
