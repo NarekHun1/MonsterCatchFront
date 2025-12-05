@@ -980,6 +980,15 @@ function App() {
                                         Лови монстров, набирай очки и поднимайся в таблице лидеров.
                                     </p>
                                     <div className="menu-grid">
+
+
+                                        {currentPage === 'wallet' && token && (
+                                            <Wallet
+                                                token={token}
+                                                onBack={() => setCurrentPage('menu')}
+                                            />
+                                        )}
+
                                         <button
                                             className="menu-card"
                                             onClick={() => setCurrentPage('wallet')}
@@ -990,6 +999,7 @@ function App() {
                                                 Выводи награды в USDT или TON.
                                             </div>
                                         </button>
+
 
                                         <button
                                             className="menu-card"
