@@ -927,3 +927,117 @@ button {
     }
 }
 
+/*walet*/
+.wallet-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.wallet-back-btn {
+    background: transparent;
+    border: none;
+    color: #aaa;
+    font-size: 14px;
+    padding: 4px 0;
+}
+
+.wallet-balance {
+    background: radial-gradient(circle at top, #333 0, #111 60%);
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+}
+
+.wallet-balance-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+
+.wallet-balance-main {
+    font-weight: 700;
+}
+
+.wallet-balance-sub {
+    font-size: 12px;
+    color: #aaa;
+}
+
+.wallet-section {
+    margin-bottom: 22px;
+}
+
+.wallet-section-title {
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.wallet-label {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+.wallet-input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid #444;
+    background: #151515;
+    color: #fff;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.wallet-small-btn {
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid #444;
+    background: #222;
+    color: #ddd;
+    margin-bottom: 12px;
+}
+
+.wallet-withdraw-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.wallet-radio-group {
+    display: flex;
+    gap: 6px;
+}
+
+.wallet-radio {
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid #444;
+    background: #181818;
+    font-size: 12px;
+}
+
+.wallet-radio--active {
+    border-color: #ffb347;
+    background: #302010;
+}
+
+.wallet-withdraw-hint {
+    font-size: 12px;
+    color: #ccc;
+}
+
+.wallet-message {
+    margin-top: 8px;
+    padding: 8px 10px;
+    font-size: 13px;
+    text-align: center;
+    background: #182618;
+    border-radius: 10px;
+}

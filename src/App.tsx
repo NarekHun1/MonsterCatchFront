@@ -8,7 +8,7 @@ import { apiFetch } from './api';
 import HeroViewer from './HeroViewer'; // 😈 3D демон
 import { initAuth } from './auth/initAuth';
 
-type Page = 'menu' | 'game' | 'leaderboard' | 'invite' | 'tournament';
+type Page = 'menu' | 'game' | 'leaderboard' | 'invite' | 'tournament' | 'wallet';
 
 interface MeResponse {
     id: number;
@@ -977,6 +977,17 @@ function App() {
                                         Лови монстров, набирай очки и поднимайся в таблице лидеров.
                                     </p>
                                     <div className="menu-grid">
+                                        <button
+                                            className="menu-card"
+                                            onClick={() => setCurrentPage('wallet')}
+                                        >
+                                            <div className="menu-icon">👛</div>
+                                            <div className="menu-card-title">Кошелёк</div>
+                                            <div className="menu-card-text">
+                                                Выводи награды в USDT или TON.
+                                            </div>
+                                        </button>
+
                                         <button
                                             className="menu-card"
                                             onClick={() => goTo('game')}
