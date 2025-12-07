@@ -1,5 +1,6 @@
 // src/Wallet.tsx
 import { useEffect, useState } from 'react';
+import { TonConnectButton, useTonWallet } from '@tonconnect/ui-react';
 import { apiFetch } from './api';
 
 type WithdrawalStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'PAID';
@@ -49,6 +50,9 @@ export function Wallet({ token, onBack }: WalletProps) {
     const [withdrawLoading, setWithdrawLoading] = useState(false);
     const [withdrawMessage, setWithdrawMessage] = useState<string | null>(null);
 
+    // TON Connect
+    const wallet = useTonWallet();
+
     const loadInfo = () => {
         setLoading(true);
         setError('');
@@ -77,7 +81,7 @@ export function Wallet({ token, onBack }: WalletProps) {
         loadInfo();
     }, [token]);
 
-    // 🔗 Сохранение адресов
+    // 🔗 Сохранение адресов вручную (USDT / TON)
     const handleLink = async (type: 'USDT' | 'TON') => {
         setLinkMessage(null);
         setError('');
@@ -127,6 +131,35 @@ export function Wallet({ token, onBack }: WalletProps) {
             setLinkLoading(false);
         }
     };
+
+    // 🚀 Автосохранение TON-адреса через TON Connect
+    useEffect(() => {
+        if (!wallet || !token) return;
+
+        const addr = wallet.account.address; // адрес из TON Connect
+        setTonAddress(addr); // показываем его в инпуте
+
+        (async () => {
+            try {
+                const res = await apiFetch('/wallet/addresses', token, {
+                    method: 'POST',
+                    body: JSON.stringify({ tonAddress: addr }),
+                });
+
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    throw new Error(data.message || 'Не удалось сохранить TON-адрес');
+                }
+
+                setLinkMessage('TON-кошелёк подключён через TON Connect ✅');
+                // обновим инфу о кошельке
+                loadInfo();
+            } catch (e: any) {
+                console.error(e);
+                setError(e.message || 'Ошибка при сохранении TON-адреса');
+            }
+        })();
+    }, [wallet, token]);
 
     // 💸 Создание заявки на вывод
     const handleWithdraw = async () => {
@@ -212,8 +245,8 @@ export function Wallet({ token, onBack }: WalletProps) {
                             <div className="wallet-balance-coins">
                                 <span className="wallet-balance-label">Твой баланс</span>
                                 <span className="wallet-balance-value">
-                  {currentCoins} 🪙
-                </span>
+                                    {currentCoins} 🪙
+                                </span>
                             </div>
                             <div className="wallet-balance-usd">
                                 ~ {approxUsd.toFixed(2)} $ при курсе{' '}
@@ -221,12 +254,35 @@ export function Wallet({ token, onBack }: WalletProps) {
                             </div>
                         </div>
                         <p className="panel-muted wallet-balance-note">
-                            Монеты ты зарабатываешь в турнирах и покупаешь через Telegram Stars.
-                            Здесь ты можешь запросить вывод в крипту.
+                            Монеты ты зарабатываешь в турнирах и покупаешь через Telegram
+                            Stars. Здесь ты можешь запросить вывод в крипту.
                         </p>
                     </div>
 
-                    {/* ПРИВЯЗКА КОШЕЛЬКОВ */}
+                    {/* TON CONNECT */}
+                    <div className="wallet-section">
+                        <h3 className="panel-subtitle">🔗 TON Connect</h3>
+                        <p className="panel-muted">
+                            Подключи TON-кошелёк (Telegram Wallet, Tonkeeper, Tonhub и др.).
+                        </p>
+
+                        <div
+                            className="wallet-tonconnect-box"
+                            style={{ marginBottom: '16px' }}
+                        >
+                            <TonConnectButton />
+
+                            {wallet && (
+                                <p className="wallet-hint" style={{ marginTop: '8px' }}>
+                                    Подключён кошелёк:{' '}
+                                    {wallet.account.address.slice(0, 6)}...
+                                    {wallet.account.address.slice(-4)}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* ПРИВЯЗКА КОШЕЛЬКОВ ВРУЧНУЮ */}
                     <div className="wallet-section">
                         <h3 className="panel-subtitle">🔗 Привязка кошельков</h3>
 
@@ -279,7 +335,9 @@ export function Wallet({ token, onBack }: WalletProps) {
 
                         <div className="wallet-withdraw-grid">
                             <div className="wallet-field">
-                                <label className="wallet-label">Сколько монет вывести</label>
+                                <label className="wallet-label">
+                                    Сколько монет вывести
+                                </label>
                                 <input
                                     className="wallet-input"
                                     type="number"
@@ -332,7 +390,7 @@ export function Wallet({ token, onBack }: WalletProps) {
                                             : 'Сначала привяжи USDT-адрес выше.'
                                         : info.tonAddress
                                             ? `Будем отправлять на: ${info.tonAddress}`
-                                            : 'Сначала привяжи TON-кошелёк выше.'}
+                                            : 'Сначала привяжи TON-кошелёк выше (через TON Connect или вручную).'}
                                 </div>
                             </div>
                         </div>
@@ -360,24 +418,25 @@ export function Wallet({ token, onBack }: WalletProps) {
                                 {info.withdrawals.map((w) => (
                                     <div key={w.id} className="wallet-history-item">
                                         <div className="wallet-history-main">
-                      <span>
-                        {w.coins} 🪙 → {w.amountUsd.toFixed(2)} $ {w.currency}
-                      </span>
+                                            <span>
+                                                {w.coins} 🪙 → {w.amountUsd.toFixed(2)} ${' '}
+                                                {w.currency}
+                                            </span>
                                             <span
                                                 className={`wallet-status wallet-status--${w.status.toLowerCase()}`}
                                             >
-                        {w.status === 'PENDING' && 'В ожидании'}
+                                                {w.status === 'PENDING' && 'В ожидании'}
                                                 {w.status === 'APPROVED' && 'Одобрено'}
                                                 {w.status === 'PAID' && 'Выплачено'}
                                                 {w.status === 'REJECTED' && 'Отклонено'}
-                      </span>
+                                            </span>
                                         </div>
                                         <div className="wallet-history-sub">
                                             {new Date(w.createdAt).toLocaleString()}
                                             {w.txHash && (
                                                 <span className="wallet-txhash">
-                          · tx: {w.txHash.slice(0, 8)}...
-                        </span>
+                                                    · tx: {w.txHash.slice(0, 8)}...
+                                                </span>
                                             )}
                                         </div>
                                     </div>
