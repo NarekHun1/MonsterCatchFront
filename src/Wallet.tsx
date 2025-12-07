@@ -94,7 +94,7 @@ export function Wallet({ token, onBack }: WalletProps) {
                     ? { usdtAddress: address.trim() }
                     : { tonAddress: address.trim() };
 
-            const res = await apiFetch('/wallet/set-address', token, {
+            const res = await apiFetch('/wallet/addresses', token, {
                 method: 'POST',
                 body: JSON.stringify(body),
             });
