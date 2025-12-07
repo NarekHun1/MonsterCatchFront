@@ -39,7 +39,6 @@ export function Wallet({ token, onBack }: WalletProps) {
     const [error, setError] = useState('');
 
     const [usdtAddress, setUsdtAddress] = useState('');
-    const [tonAddress, setTonAddress] = useState('');
 
     const [linkLoading, setLinkLoading] = useState(false);
     const [linkMessage, setLinkMessage] = useState<string | null>(null);
@@ -50,8 +49,7 @@ export function Wallet({ token, onBack }: WalletProps) {
     const [withdrawLoading, setWithdrawLoading] = useState(false);
     const [withdrawMessage, setWithdrawMessage] = useState<string | null>(null);
 
-    // TON Connect
-    const wallet = useTonWallet();
+    const wallet = useTonWallet(); // TON Connect
 
     const loadInfo = () => {
         setLoading(true);
@@ -67,7 +65,6 @@ export function Wallet({ token, onBack }: WalletProps) {
             .then((data) => {
                 setInfo(data);
                 setUsdtAddress(data.usdtAddress ?? '');
-                setTonAddress(data.tonAddress ?? '');
             })
             .catch((e: any) => {
                 console.error(e);
@@ -81,34 +78,29 @@ export function Wallet({ token, onBack }: WalletProps) {
         loadInfo();
     }, [token]);
 
-    // 🔗 Сохранение адресов вручную (USDT / TON)
-    const handleLink = async (type: 'USDT' | 'TON') => {
+    // 🔗 сохранение USDT-адреса вручную
+    const handleLinkUsdt = async () => {
         setLinkMessage(null);
         setError('');
         setLinkLoading(true);
         try {
-            const address = type === 'USDT' ? usdtAddress : tonAddress;
+            const address = usdtAddress.trim();
 
-            if (!address.trim()) {
-                throw new Error('Введи адрес кошелька');
+            if (!address) {
+                throw new Error('Введи адрес USDT-кошелька');
             }
-
-            const body =
-                type === 'USDT'
-                    ? { usdtAddress: address.trim() }
-                    : { tonAddress: address.trim() };
 
             const res = await apiFetch('/wallet/addresses', token, {
                 method: 'POST',
-                body: JSON.stringify(body),
+                body: JSON.stringify({ usdtAddress: address }),
             });
 
             const data = await res.json().catch(() => ({}));
             if (!res.ok) {
-                throw new Error(data.message || 'Не удалось сохранить адрес');
+                throw new Error(data.message || 'Не удалось сохранить USDT-адрес');
             }
 
-            setLinkMessage('Адрес успешно сохранён ✅');
+            setLinkMessage('USDT-адрес успешно сохранён ✅');
             setInfo((prev) =>
                 prev
                     ? {
@@ -117,10 +109,6 @@ export function Wallet({ token, onBack }: WalletProps) {
                             typeof data.usdtAddress !== 'undefined'
                                 ? data.usdtAddress
                                 : prev.usdtAddress,
-                        tonAddress:
-                            typeof data.tonAddress !== 'undefined'
-                                ? data.tonAddress
-                                : prev.tonAddress,
                     }
                     : prev,
             );
@@ -132,12 +120,14 @@ export function Wallet({ token, onBack }: WalletProps) {
         }
     };
 
-    // 🚀 Автосохранение TON-адреса через TON Connect
+    // 🔗 автоматическое сохранение TON-адреса при подключении кошелька
     useEffect(() => {
         if (!wallet || !token) return;
 
-        const addr = wallet.account.address; // адрес из TON Connect
-        setTonAddress(addr); // показываем его в инпуте
+        const addr = wallet.account.address; // raw-адрес
+
+        // если уже такой же адрес сохранён — ничего не делаем
+        if (info?.tonAddress === addr) return;
 
         (async () => {
             try {
@@ -145,21 +135,21 @@ export function Wallet({ token, onBack }: WalletProps) {
                     method: 'POST',
                     body: JSON.stringify({ tonAddress: addr }),
                 });
-
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok) {
-                    throw new Error(data.message || 'Не удалось сохранить TON-адрес');
+                    console.error('Не удалось сохранить TON-адрес', data);
+                    return;
                 }
 
+                setInfo((prev) =>
+                    prev ? { ...prev, tonAddress: addr } : prev,
+                );
                 setLinkMessage('TON-кошелёк подключён через TON Connect ✅');
-                // обновим инфу о кошельке
-                loadInfo();
-            } catch (e: any) {
+            } catch (e) {
                 console.error(e);
-                setError(e.message || 'Ошибка при сохранении TON-адреса');
             }
         })();
-    }, [wallet, token]);
+    }, [wallet, token, info?.tonAddress]);
 
     // 💸 Создание заявки на вывод
     const handleWithdraw = async () => {
@@ -191,8 +181,8 @@ export function Wallet({ token, onBack }: WalletProps) {
                 body: JSON.stringify({
                     coins: amountCoins,
                     currency: withdrawCurrency,
-                    network: withdrawCurrency === 'USDT' ? 'TRC20' : 'TON', // пока жёстко
-                    addressType: 'SAVED', // берём сохранённый адрес
+                    network: withdrawCurrency === 'USDT' ? 'TRC20' : 'TON',
+                    addressType: 'SAVED',
                 }),
             });
 
@@ -245,8 +235,8 @@ export function Wallet({ token, onBack }: WalletProps) {
                             <div className="wallet-balance-coins">
                                 <span className="wallet-balance-label">Твой баланс</span>
                                 <span className="wallet-balance-value">
-                                    {currentCoins} 🪙
-                                </span>
+                  {currentCoins} 🪙
+                </span>
                             </div>
                             <div className="wallet-balance-usd">
                                 ~ {approxUsd.toFixed(2)} $ при курсе{' '}
@@ -264,17 +254,15 @@ export function Wallet({ token, onBack }: WalletProps) {
                         <h3 className="panel-subtitle">🔗 TON Connect</h3>
                         <p className="panel-muted">
                             Подключи TON-кошелёк (Telegram Wallet, Tonkeeper, Tonhub и др.).
+                            Мы автоматически используем этот адрес для вывода TON.
                         </p>
 
-                        <div
-                            className="wallet-tonconnect-box"
-                            style={{ marginBottom: '16px' }}
-                        >
+                        <div className="wallet-tonconnect-box" style={{ marginBottom: '16px' }}>
                             <TonConnectButton />
 
                             {wallet && (
                                 <p className="wallet-hint" style={{ marginTop: '8px' }}>
-                                    Подключён кошелёк:{' '}
+                                    Подключен кошелёк:{' '}
                                     {wallet.account.address.slice(0, 6)}...
                                     {wallet.account.address.slice(-4)}
                                 </p>
@@ -282,9 +270,9 @@ export function Wallet({ token, onBack }: WalletProps) {
                         </div>
                     </div>
 
-                    {/* ПРИВЯЗКА КОШЕЛЬКОВ ВРУЧНУЮ */}
+                    {/* ПРИВЯЗКА USDT-КОШЕЛЬКА */}
                     <div className="wallet-section">
-                        <h3 className="panel-subtitle">🔗 Привязка кошельков</h3>
+                        <h3 className="panel-subtitle">💳 USDT-кошелёк</h3>
 
                         <div className="wallet-field">
                             <label className="wallet-label">
@@ -294,33 +282,14 @@ export function Wallet({ token, onBack }: WalletProps) {
                                 className="wallet-input"
                                 value={usdtAddress}
                                 onChange={(e) => setUsdtAddress(e.target.value)}
-                                placeholder="Адрес кошелька USDT"
+                                placeholder="Адрес USDT-кошелька"
                             />
                             <button
                                 className="menu-btn menu-btn--secondary"
                                 disabled={linkLoading}
-                                onClick={() => handleLink('USDT')}
+                                onClick={handleLinkUsdt}
                             >
                                 Сохранить USDT-адрес
-                            </button>
-                        </div>
-
-                        <div className="wallet-field">
-                            <label className="wallet-label">
-                                TON-кошелёк (Tonkeeper / Telegram Wallet и т.п.)
-                            </label>
-                            <input
-                                className="wallet-input"
-                                value={tonAddress}
-                                onChange={(e) => setTonAddress(e.target.value)}
-                                placeholder="Адрес TON-кошелька"
-                            />
-                            <button
-                                className="menu-btn menu-btn--secondary"
-                                disabled={linkLoading}
-                                onClick={() => handleLink('TON')}
-                            >
-                                Сохранить TON-адрес
                             </button>
                         </div>
                     </div>
@@ -335,9 +304,7 @@ export function Wallet({ token, onBack }: WalletProps) {
 
                         <div className="wallet-withdraw-grid">
                             <div className="wallet-field">
-                                <label className="wallet-label">
-                                    Сколько монет вывести
-                                </label>
+                                <label className="wallet-label">Сколько монет вывести</label>
                                 <input
                                     className="wallet-input"
                                     type="number"
@@ -348,11 +315,7 @@ export function Wallet({ token, onBack }: WalletProps) {
                                 />
                                 {withdrawCoins && (
                                     <div className="wallet-hint">
-                                        ≈{' '}
-                                        {(
-                                            Number(withdrawCoins || 0) * (price || 0)
-                                        ).toFixed(2)}{' '}
-                                        $
+                                        ≈ {(Number(withdrawCoins || 0) * (price || 0)).toFixed(2)} $
                                     </div>
                                 )}
                             </div>
@@ -363,9 +326,7 @@ export function Wallet({ token, onBack }: WalletProps) {
                                     <button
                                         className={
                                             'wallet-tab' +
-                                            (withdrawCurrency === 'USDT'
-                                                ? ' wallet-tab--active'
-                                                : '')
+                                            (withdrawCurrency === 'USDT' ? ' wallet-tab--active' : '')
                                         }
                                         onClick={() => setWithdrawCurrency('USDT')}
                                     >
@@ -374,9 +335,7 @@ export function Wallet({ token, onBack }: WalletProps) {
                                     <button
                                         className={
                                             'wallet-tab' +
-                                            (withdrawCurrency === 'TON'
-                                                ? ' wallet-tab--active'
-                                                : '')
+                                            (withdrawCurrency === 'TON' ? ' wallet-tab--active' : '')
                                         }
                                         onClick={() => setWithdrawCurrency('TON')}
                                     >
@@ -390,7 +349,7 @@ export function Wallet({ token, onBack }: WalletProps) {
                                             : 'Сначала привяжи USDT-адрес выше.'
                                         : info.tonAddress
                                             ? `Будем отправлять на: ${info.tonAddress}`
-                                            : 'Сначала привяжи TON-кошелёк выше (через TON Connect или вручную).'}
+                                            : 'Сначала подключи TON-кошелёк через TON Connect выше.'}
                                 </div>
                             </div>
                         </div>
@@ -418,25 +377,24 @@ export function Wallet({ token, onBack }: WalletProps) {
                                 {info.withdrawals.map((w) => (
                                     <div key={w.id} className="wallet-history-item">
                                         <div className="wallet-history-main">
-                                            <span>
-                                                {w.coins} 🪙 → {w.amountUsd.toFixed(2)} ${' '}
-                                                {w.currency}
-                                            </span>
+                      <span>
+                        {w.coins} 🪙 → {w.amountUsd.toFixed(2)} $ {w.currency}
+                      </span>
                                             <span
                                                 className={`wallet-status wallet-status--${w.status.toLowerCase()}`}
                                             >
-                                                {w.status === 'PENDING' && 'В ожидании'}
+                        {w.status === 'PENDING' && 'В ожидании'}
                                                 {w.status === 'APPROVED' && 'Одобрено'}
                                                 {w.status === 'PAID' && 'Выплачено'}
                                                 {w.status === 'REJECTED' && 'Отклонено'}
-                                            </span>
+                      </span>
                                         </div>
                                         <div className="wallet-history-sub">
                                             {new Date(w.createdAt).toLocaleString()}
                                             {w.txHash && (
                                                 <span className="wallet-txhash">
-                                                    · tx: {w.txHash.slice(0, 8)}...
-                                                </span>
+                          · tx: {w.txHash.slice(0, 8)}...
+                        </span>
                                             )}
                                         </div>
                                     </div>
