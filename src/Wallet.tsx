@@ -5,23 +5,26 @@ import { apiFetch } from './api';
 type WithdrawalStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'PAID';
 type WithdrawalCurrency = 'USDT' | 'TON';
 
+interface WithdrawalItem {
+    id: number;
+    createdAt: string;
+    coins: number;
+    amountUsd: number;
+    amountTon: number | null;
+    currency: WithdrawalCurrency | string;
+    network: string;
+    address: string;
+    status: WithdrawalStatus;
+    txHash: string | null;
+}
+
 interface WalletInfo {
     coins: number;
-    approxUsd: number;
+    usdBalance: number;
     coinPriceUsd: number;
-    minWithdrawUsd: number;
-    minWithdrawCoins: number;
     usdtAddress?: string | null;
     tonAddress?: string | null;
-    recentWithdrawals: {
-        id: number;
-        createdAt: string;
-        coinsAmount: number;
-        usdAmount: number;
-        currency: WithdrawalCurrency;
-        status: WithdrawalStatus;
-        txHash?: string | null;
-    }[];
+    withdrawals: WithdrawalItem[];
 }
 
 interface WalletProps {
@@ -74,6 +77,7 @@ export function Wallet({ token, onBack }: WalletProps) {
         loadInfo();
     }, [token]);
 
+    // 🔗 Сохранение адресов
     const handleLink = async (type: 'USDT' | 'TON') => {
         setLinkMessage(null);
         setError('');
@@ -81,21 +85,38 @@ export function Wallet({ token, onBack }: WalletProps) {
         try {
             const address = type === 'USDT' ? usdtAddress : tonAddress;
 
-            const res = await apiFetch('/wallet/link-address', token, {
+            if (!address.trim()) {
+                throw new Error('Введи адрес кошелька');
+            }
+
+            const body =
+                type === 'USDT'
+                    ? { usdtAddress: address.trim() }
+                    : { tonAddress: address.trim() };
+
+            const res = await apiFetch('/wallet/set-address', token, {
                 method: 'POST',
-                body: JSON.stringify({ type, address }),
+                body: JSON.stringify(body),
             });
+
             const data = await res.json().catch(() => ({}));
             if (!res.ok) {
                 throw new Error(data.message || 'Не удалось сохранить адрес');
             }
+
             setLinkMessage('Адрес успешно сохранён ✅');
             setInfo((prev) =>
                 prev
                     ? {
                         ...prev,
-                        usdtAddress: data.usdtAddress ?? prev.usdtAddress,
-                        tonAddress: data.tonAddress ?? prev.tonAddress,
+                        usdtAddress:
+                            typeof data.usdtAddress !== 'undefined'
+                                ? data.usdtAddress
+                                : prev.usdtAddress,
+                        tonAddress:
+                            typeof data.tonAddress !== 'undefined'
+                                ? data.tonAddress
+                                : prev.tonAddress,
                     }
                     : prev,
             );
@@ -107,6 +128,7 @@ export function Wallet({ token, onBack }: WalletProps) {
         }
     };
 
+    // 💸 Создание заявки на вывод
     const handleWithdraw = async () => {
         if (!info) return;
 
@@ -120,11 +142,24 @@ export function Wallet({ token, onBack }: WalletProps) {
                 throw new Error('Укажи корректное количество монет');
             }
 
+            // минималка: 1$
+            const minUsd = 1;
+            const price = info.coinPriceUsd || 0.000001;
+            const minCoins = Math.ceil(minUsd / price);
+
+            if (amountCoins < minCoins) {
+                throw new Error(
+                    `Минимум к выводу: ${minCoins} монет (~${minUsd.toFixed(2)} $)`,
+                );
+            }
+
             const res = await apiFetch('/wallet/withdraw', token, {
                 method: 'POST',
                 body: JSON.stringify({
+                    coins: amountCoins,
                     currency: withdrawCurrency,
-                    coinsAmount: amountCoins,
+                    network: withdrawCurrency === 'USDT' ? 'TRC20' : 'TON', // пока жёстко
+                    addressType: 'SAVED', // берём сохранённый адрес
                 }),
             });
 
@@ -137,11 +172,9 @@ export function Wallet({ token, onBack }: WalletProps) {
             }
 
             setWithdrawMessage(
-                `Заявка на вывод создана! Мы обработаем её вручную. ID #${data.withdrawalId}`,
+                `Заявка на вывод создана! ID #${data.id || data.withdrawalId}`,
             );
             setWithdrawCoins('');
-
-            // обновляем баланс и историю
             loadInfo();
         } catch (e: any) {
             console.error(e);
@@ -152,10 +185,11 @@ export function Wallet({ token, onBack }: WalletProps) {
     };
 
     const currentCoins = info?.coins ?? 0;
-    const approxUsd = info?.approxUsd ?? 0;
+    const approxUsd = info?.usdBalance ?? 0;
     const price = info?.coinPriceUsd ?? 0;
-    const minCoins = info?.minWithdrawCoins ?? 0;
-    const minUsd = info?.minWithdrawUsd ?? 0;
+
+    const minUsd = 1;
+    const minCoins = price > 0 ? Math.ceil(minUsd / price) : 0;
 
     return (
         <div className="panel">
@@ -168,9 +202,7 @@ export function Wallet({ token, onBack }: WalletProps) {
             {loading && <p className="panel-muted">Загружаем кошелёк...</p>}
             {error && <p className="panel-error">Ошибка: {error}</p>}
             {linkMessage && <p className="panel-success">{linkMessage}</p>}
-            {withdrawMessage && (
-                <p className="panel-success">{withdrawMessage}</p>
-            )}
+            {withdrawMessage && <p className="panel-success">{withdrawMessage}</p>}
 
             {info && (
                 <>
@@ -189,8 +221,8 @@ export function Wallet({ token, onBack }: WalletProps) {
                             </div>
                         </div>
                         <p className="panel-muted wallet-balance-note">
-                            Монеты ты зарабатываешь в турнирах и покупаешь через Telegram
-                            Stars. Здесь ты можешь вывести их в крипту.
+                            Монеты ты зарабатываешь в турнирах и покупаешь через Telegram Stars.
+                            Здесь ты можешь запросить вывод в крипту.
                         </p>
                     </div>
 
@@ -200,7 +232,7 @@ export function Wallet({ token, onBack }: WalletProps) {
 
                         <div className="wallet-field">
                             <label className="wallet-label">
-                                USDT-адрес (например, TRC20 / ERC20)
+                                USDT-адрес (например, TRC20 / ERC20 / BEP20)
                             </label>
                             <input
                                 className="wallet-input"
@@ -219,7 +251,7 @@ export function Wallet({ token, onBack }: WalletProps) {
 
                         <div className="wallet-field">
                             <label className="wallet-label">
-                                TON-кошелёк (например, Tonkeeper / Telegram Wallet)
+                                TON-кошелёк (Tonkeeper / Telegram Wallet и т.п.)
                             </label>
                             <input
                                 className="wallet-input"
@@ -319,24 +351,20 @@ export function Wallet({ token, onBack }: WalletProps) {
                     {/* ИСТОРИЯ ВЫВОДОВ */}
                     <div className="wallet-section">
                         <h3 className="panel-subtitle">📜 Последние выводы</h3>
-                        {info.recentWithdrawals.length === 0 ? (
+                        {info.withdrawals.length === 0 ? (
                             <p className="panel-muted">
                                 Ты ещё ни разу не запрашивал вывод. Всё впереди 😉
                             </p>
                         ) : (
                             <div className="wallet-history-list">
-                                {info.recentWithdrawals.map((w) => (
+                                {info.withdrawals.map((w) => (
                                     <div key={w.id} className="wallet-history-item">
                                         <div className="wallet-history-main">
                       <span>
-                        {w.coinsAmount} 🪙 → {w.usdAmount.toFixed(2)} ${' '}
-                          {w.currency}
+                        {w.coins} 🪙 → {w.amountUsd.toFixed(2)} $ {w.currency}
                       </span>
                                             <span
-                                                className={
-                                                    'wallet-status wallet-status--' +
-                                                    w.status.toLowerCase()
-                                                }
+                                                className={`wallet-status wallet-status--${w.status.toLowerCase()}`}
                                             >
                         {w.status === 'PENDING' && 'В ожидании'}
                                                 {w.status === 'APPROVED' && 'Одобрено'}
