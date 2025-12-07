@@ -310,7 +310,9 @@ export function Wallet({ token, onBack }: WalletProps) {
                             disabled={withdrawLoading}
                             onClick={handleWithdraw}
                         >
-                            {withdrawLoading ? 'Отправляем заявку...' : 'Создать заявку на вывод'}
+                            {withdrawLoading
+                                ? 'Отправляем заявку...'
+                                : 'Создать заявку на вывод'}
                         </button>
                     </div>
 
@@ -327,9 +329,15 @@ export function Wallet({ token, onBack }: WalletProps) {
                                     <div key={w.id} className="wallet-history-item">
                                         <div className="wallet-history-main">
                       <span>
-                        {w.coinsAmount} 🪙 → {w.usdAmount.toFixed(2)} $ {w.currency}
+                        {w.coinsAmount} 🪙 → {w.usdAmount.toFixed(2)} ${' '}
+                          {w.currency}
                       </span>
-                                            <span className={`wallet-status wallet-status--${w.status.toLowerCase()}`}>
+                                            <span
+                                                className={
+                                                    'wallet-status wallet-status--' +
+                                                    w.status.toLowerCase()
+                                                }
+                                            >
                         {w.status === 'PENDING' && 'В ожидании'}
                                                 {w.status === 'APPROVED' && 'Одобрено'}
                                                 {w.status === 'PAID' && 'Выплачено'}
