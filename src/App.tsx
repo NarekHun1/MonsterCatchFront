@@ -982,7 +982,7 @@ function App() {
                                     <div className="menu-grid">
 
 
-                                        {currentPage === 'wallet' && token && (
+                                        {currentPage === ('wallet' as Page) && token && (
                                             <Wallet
                                                 token={token}
                                                 onBack={() => setCurrentPage('menu')}
