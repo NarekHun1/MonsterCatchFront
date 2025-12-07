@@ -981,14 +981,6 @@ function App() {
                                     </p>
                                     <div className="menu-grid">
 
-
-                                        {currentPage === ('wallet' as Page) && token && (
-                                            <Wallet
-                                                token={token}
-                                                onBack={() => setCurrentPage('menu')}
-                                            />
-                                        )}
-
                                         <button
                                             className="menu-card"
                                             onClick={() => setCurrentPage('wallet')}
@@ -1062,6 +1054,13 @@ function App() {
                                     }}
                                     onStarsChange={handleStarsChange}
                                     onStatsChange={handleStatsChange}
+                                />
+                            )}
+
+                            {currentPage === 'wallet' && token && (
+                                <Wallet
+                                    token={token}
+                                    onBack={() => setCurrentPage('menu')}
                                 />
                             )}
 
