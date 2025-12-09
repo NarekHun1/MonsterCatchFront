@@ -39,7 +39,6 @@ export function Wallet({ token, onBack }: WalletProps) {
     const [error, setError] = useState('');
 
     const [usdtAddress, setUsdtAddress] = useState('');
-
     const [linkLoading, setLinkLoading] = useState(false);
     const [linkMessage, setLinkMessage] = useState<string | null>(null);
 
@@ -76,6 +75,7 @@ export function Wallet({ token, onBack }: WalletProps) {
     useEffect(() => {
         if (!token) return;
         loadInfo();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token]);
 
     // 🔗 сохранение USDT-адреса вручную
@@ -135,15 +135,15 @@ export function Wallet({ token, onBack }: WalletProps) {
                     method: 'POST',
                     body: JSON.stringify({ tonAddress: addr }),
                 });
-                const data = await res.json().catch(() => ({}));
+
+                // просто проверяем статус, тело нам не нужно → без лишней переменной
+                await res.json().catch(() => ({}));
                 if (!res.ok) {
-                    console.error('Не удалось сохранить TON-адрес', data);
+                    console.error('Не удалось сохранить TON-адрес');
                     return;
                 }
 
-                setInfo((prev) =>
-                    prev ? { ...prev, tonAddress: addr } : prev,
-                );
+                setInfo((prev) => (prev ? { ...prev, tonAddress: addr } : prev));
                 setLinkMessage('TON-кошелёк подключён через TON Connect ✅');
             } catch (e) {
                 console.error(e);
@@ -257,7 +257,10 @@ export function Wallet({ token, onBack }: WalletProps) {
                             Мы автоматически используем этот адрес для вывода TON.
                         </p>
 
-                        <div className="wallet-tonconnect-box" style={{ marginBottom: '16px' }}>
+                        <div
+                            className="wallet-tonconnect-box"
+                            style={{ marginBottom: '16px' }}
+                        >
                             <TonConnectButton />
 
                             {wallet && (
@@ -289,7 +292,7 @@ export function Wallet({ token, onBack }: WalletProps) {
                                 disabled={linkLoading}
                                 onClick={handleLinkUsdt}
                             >
-                                Сохранить USDT-адрес
+                                {linkLoading ? 'Сохраняем...' : 'Сохранить USDT-адрес'}
                             </button>
                         </div>
                     </div>
@@ -315,7 +318,11 @@ export function Wallet({ token, onBack }: WalletProps) {
                                 />
                                 {withdrawCoins && (
                                     <div className="wallet-hint">
-                                        ≈ {(Number(withdrawCoins || 0) * (price || 0)).toFixed(2)} $
+                                        ≈{' '}
+                                        {(
+                                            Number(withdrawCoins || 0) * (price || 0)
+                                        ).toFixed(2)}{' '}
+                                        $
                                     </div>
                                 )}
                             </div>
@@ -326,7 +333,9 @@ export function Wallet({ token, onBack }: WalletProps) {
                                     <button
                                         className={
                                             'wallet-tab' +
-                                            (withdrawCurrency === 'USDT' ? ' wallet-tab--active' : '')
+                                            (withdrawCurrency === 'USDT'
+                                                ? ' wallet-tab--active'
+                                                : '')
                                         }
                                         onClick={() => setWithdrawCurrency('USDT')}
                                     >
@@ -335,7 +344,9 @@ export function Wallet({ token, onBack }: WalletProps) {
                                     <button
                                         className={
                                             'wallet-tab' +
-                                            (withdrawCurrency === 'TON' ? ' wallet-tab--active' : '')
+                                            (withdrawCurrency === 'TON'
+                                                ? ' wallet-tab--active'
+                                                : '')
                                         }
                                         onClick={() => setWithdrawCurrency('TON')}
                                     >
