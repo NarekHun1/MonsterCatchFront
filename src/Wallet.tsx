@@ -1,11 +1,11 @@
 // src/Wallet.tsx
-import { useEffect, useState } from 'react';
-import { TonConnectButton, useTonWallet } from '@tonconnect/ui-react';
-import { apiFetch } from './api';
-import { Address } from '@ton/core';
+import { useEffect, useState } from "react";
+import { TonConnectButton, useTonWallet } from "@tonconnect/ui-react";
+import { Address } from "@ton/core";
+import { apiFetch } from "./api";
 
-type WithdrawalStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'PAID';
-type WithdrawalCurrency = 'USDT' | 'TON';
+type WithdrawalStatus = "PENDING" | "APPROVED" | "REJECTED" | "PAID";
+type WithdrawalCurrency = "USDT" | "TON";
 
 interface WithdrawalItem {
     id: number;
@@ -35,214 +35,180 @@ interface WalletProps {
 }
 
 export function Wallet({ token, onBack }: WalletProps) {
+    const wallet = useTonWallet();
+
     const [info, setInfo] = useState<WalletInfo | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    const [error, setError] = useState("");
 
-    const [usdtAddress, setUsdtAddress] = useState('');
+    const [usdtAddress, setUsdtAddress] = useState("");
     const [linkLoading, setLinkLoading] = useState(false);
     const [linkMessage, setLinkMessage] = useState<string | null>(null);
 
     const [withdrawCurrency, setWithdrawCurrency] =
-        useState<WithdrawalCurrency>('USDT');
-    const [withdrawCoins, setWithdrawCoins] = useState('');
+        useState<WithdrawalCurrency>("USDT");
+    const [withdrawCoins, setWithdrawCoins] = useState("");
     const [withdrawLoading, setWithdrawLoading] = useState(false);
     const [withdrawMessage, setWithdrawMessage] = useState<string | null>(null);
 
-    const wallet = useTonWallet(); // TON Connect
-
+    // ------------------ LOAD INFO ------------------
     const loadInfo = () => {
         setLoading(true);
-        setError('');
-        apiFetch('/wallet/info', token)
+        setError("");
+
+        apiFetch("/wallet/info", token)
             .then(async (res) => {
                 const data = await res.json().catch(() => ({}));
-                if (!res.ok) throw new Error(data.message || 'Не удалось загрузить кошелёк');
+                if (!res.ok) throw new Error(data.message || "Ошибка загрузки кошелька");
                 return data as WalletInfo;
             })
             .then((data) => {
                 setInfo(data);
-                setUsdtAddress(data.usdtAddress ?? '');
+                setUsdtAddress(data.usdtAddress ?? "");
             })
-            .catch((e: any) => {
+            .catch((e) => {
                 console.error(e);
-                setError(e.message || 'Ошибка кошелька');
+                setError(e.message || "Ошибка");
             })
             .finally(() => setLoading(false));
     };
 
     useEffect(() => {
-        if (!token) return;
-        loadInfo();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        if (token) loadInfo();
     }, [token]);
 
-    // 🔗 сохранить USDT-адрес
+    // ------------------ SAVE USDT ADDRESS ------------------
     const handleLinkUsdt = async () => {
-        setLinkMessage(null);
-        setError('');
         setLinkLoading(true);
-
+        setError("");
         try {
-            const address = usdtAddress.trim();
-            if (!address) throw new Error('Введи адрес USDT-кошелька');
+            const adr = usdtAddress.trim();
+            if (!adr) throw new Error("Введи адрес USDT");
 
-            const res = await apiFetch('/wallet/addresses', token, {
-                method: 'POST',
-                body: JSON.stringify({ usdtAddress: address }),
+            const res = await apiFetch("/wallet/addresses", token, {
+                method: "POST",
+                body: JSON.stringify({ usdtAddress: adr }),
             });
 
             const data = await res.json().catch(() => ({}));
-            if (!res.ok) throw new Error(data.message || 'Не удалось сохранить USDT-адрес');
+            if (!res.ok) throw new Error(data.message || "Не удалось сохранить");
 
-            setLinkMessage('USDT-адрес успешно сохранён ✅');
-
-            setInfo((prev) =>
-                prev
-                    ? { ...prev, usdtAddress: data.usdtAddress ?? prev.usdtAddress }
-                    : prev,
-            );
+            setLinkMessage("USDT-адрес успешно сохранён!");
+            if (info) setInfo({ ...info, usdtAddress: adr });
         } catch (e: any) {
-            console.error(e);
-            setError(e.message || 'Ошибка при сохранении адреса');
+            setError(e.message);
         } finally {
             setLinkLoading(false);
         }
     };
 
-    // 🔗 автоматическое сохранение TON-адреса через TonConnect
+    // ------------------ AUTO-SAVE TON ADDRESS ------------------
     useEffect(() => {
-        if (!wallet || !token) return;
+        if (!wallet || !wallet.account || !wallet.account.address) return;
 
-        const raw = wallet.account.address; // 0:....
-        let friendly = '';
-
+        let friendly = "";
         try {
-            friendly = Address.parse(raw).toString({
+            friendly = Address.parse(wallet.account.address).toString({
                 bounceable: false,
                 urlSafe: true,
             });
-        } catch {
-            console.error('Ошибка преобразования TON адреса');
+        } catch (e) {
+            console.error("Address parse error:", e);
             return;
         }
 
-        if (info?.tonAddress === friendly) return;
+        if (info?.tonAddress === friendly) return; // already saved
 
         (async () => {
             try {
-                const res = await apiFetch('/wallet/addresses', token, {
-                    method: 'POST',
+                const res = await apiFetch("/wallet/addresses", token, {
+                    method: "POST",
                     body: JSON.stringify({ tonAddress: friendly }),
                 });
 
                 await res.json().catch(() => ({}));
-
-                if (!res.ok) {
-                    console.error('Не удалось сохранить TON-адрес');
-                    return;
-                }
+                if (!res.ok) return;
 
                 setInfo((prev) => (prev ? { ...prev, tonAddress: friendly } : prev));
-                setLinkMessage('TON-кошелёк подключён через TON Connect ✅');
+                setLinkMessage("TON-кошелёк подключён!");
             } catch (e) {
                 console.error(e);
             }
         })();
     }, [wallet, token, info?.tonAddress]);
 
-    // 💸 Создать заявку на вывод
+    // ------------------ WITHDRAW ------------------
     const handleWithdraw = async () => {
         if (!info) return;
 
-        setWithdrawMessage(null);
-        setError('');
         setWithdrawLoading(true);
+        setError("");
+        setWithdrawMessage(null);
 
         try {
-            const amountCoins = Number(withdrawCoins);
-            if (!amountCoins || amountCoins <= 0) {
-                throw new Error('Укажи корректное количество монет');
-            }
+            const coins = Number(withdrawCoins);
+            if (!coins || coins <= 0) throw new Error("Некорректное число монет");
 
             const minUsd = 1;
-            const price = info.coinPriceUsd || 0.000001;
+            const price = info.coinPriceUsd || 0.0001;
             const minCoins = Math.ceil(minUsd / price);
 
-            if (amountCoins < minCoins) {
-                throw new Error(`Минимум к выводу: ${minCoins} монет (~${minUsd.toFixed(2)} $)`);
-            }
+            if (coins < minCoins)
+                throw new Error(`Минимум к выводу: ${minCoins} монет`);
 
-            const res = await apiFetch('/wallet/withdraw', token, {
-                method: 'POST',
+            const res = await apiFetch("/wallet/withdraw", token, {
+                method: "POST",
                 body: JSON.stringify({
-                    coins: amountCoins,
+                    coins,
                     currency: withdrawCurrency,
-                    network: withdrawCurrency === 'USDT' ? 'TRC20' : 'TON',
-                    addressType: 'SAVED',
+                    network: withdrawCurrency === "USDT" ? "TRC20" : "TON",
+                    addressType: "SAVED",
                 }),
             });
 
             const data = await res.json().catch(() => ({}));
-            if (!res.ok) {
-                throw new Error(
-                    data.message || 'Не удалось создать заявку на вывод (проверь сумму).'
-                );
-            }
+            if (!res.ok) throw new Error(data.message || "Ошибка вывода");
 
-            setWithdrawMessage(`Заявка создана! ID #${data.id || data.withdrawalId}`);
-            setWithdrawCoins('');
+            setWithdrawMessage(`Заявка создана! ID: ${data.id}`);
+            setWithdrawCoins("");
             loadInfo();
         } catch (e: any) {
-            console.error(e);
-            setError(e.message || 'Ошибка при создании заявки');
+            setError(e.message);
         } finally {
             setWithdrawLoading(false);
         }
     };
 
-    const currentCoins = info?.coins ?? 0;
-    const approxUsd = info?.usdBalance ?? 0;
-    const price = info?.coinPriceUsd ?? 0;
-
-    const minUsd = 1;
-    const minCoins = price > 0 ? Math.ceil(minUsd / price) : 0;
-
+    // ------------------ RENDER ------------------
     return (
         <div className="panel">
-            <button className="back-btn" onClick={onBack}>
-                ⬅ Назад
-            </button>
+            <button className="back-btn" onClick={onBack}>⬅ Назад</button>
 
-            <h2 className="panel-title">👛 Кошелёк</h2>
+            <h2>👛 Кошелёк</h2>
 
-            {loading && <p className="panel-muted">Загружаем кошелёк...</p>}
-            {error && <p className="panel-error">Ошибка: {error}</p>}
+            {loading && <p>Загрузка...</p>}
+            {error && <p className="panel-error">{error}</p>}
             {linkMessage && <p className="panel-success">{linkMessage}</p>}
             {withdrawMessage && <p className="panel-success">{withdrawMessage}</p>}
 
-            {info && (
+            {!info ? null : (
                 <>
+                    {/* BALANCE */}
                     <div className="wallet-balance-box">
                         <div className="wallet-balance-main">
-                            <div className="wallet-balance-coins">
-                                <span className="wallet-balance-label">Твой баланс</span>
-                                <span className="wallet-balance-value">{currentCoins} 🪙</span>
-                            </div>
-                            <div className="wallet-balance-usd">
-                                ~ {approxUsd.toFixed(2)} $ при курсе {price.toFixed(2)} $
-                            </div>
+                            <span>Баланс: {info.coins} 🪙</span>
+                            <div>~ {info.usdBalance.toFixed(2)} $</div>
                         </div>
                     </div>
 
                     {/* TON CONNECT */}
                     <div className="wallet-section">
-                        <h3 className="panel-subtitle">🔗 TON Connect</h3>
+                        <h3>🔗 TON Connect</h3>
                         <TonConnectButton />
+
                         {wallet && (
-                            <p className="wallet-hint">
-                                Подключен:{' '}
-                                {wallet.account.address.slice(0, 6)}...
+                            <p>
+                                Подключен: {wallet.account.address.slice(0, 6)}...
                                 {wallet.account.address.slice(-4)}
                             </p>
                         )}
@@ -250,89 +216,47 @@ export function Wallet({ token, onBack }: WalletProps) {
 
                     {/* USDT */}
                     <div className="wallet-section">
-                        <h3 className="panel-subtitle">💳 USDT-кошелёк</h3>
-
+                        <h3>💳 USDT-кошелёк</h3>
                         <input
                             className="wallet-input"
                             value={usdtAddress}
                             onChange={(e) => setUsdtAddress(e.target.value)}
-                            placeholder="Адрес USDT"
                         />
-
-                        <button
-                            className="menu-btn menu-btn--secondary"
-                            onClick={handleLinkUsdt}
-                            disabled={linkLoading}
-                        >
-                            {linkLoading ? 'Сохраняем...' : 'Сохранить'}
+                        <button onClick={handleLinkUsdt} disabled={linkLoading}>
+                            {linkLoading ? "Сохранение..." : "Сохранить"}
                         </button>
                     </div>
 
                     {/* WITHDRAW */}
                     <div className="wallet-section">
-                        <h3 className="panel-subtitle">💸 Запросить вывод</h3>
+                        <h3>💸 Вывод</h3>
 
                         <input
-                            className="wallet-input"
                             type="number"
-                            min={0}
+                            className="wallet-input"
                             value={withdrawCoins}
                             onChange={(e) => setWithdrawCoins(e.target.value)}
-                            placeholder={`${minCoins} и больше`}
                         />
 
                         <div className="wallet-tabs">
                             <button
-                                className={
-                                    'wallet-tab' + (withdrawCurrency === 'USDT' ? ' wallet-tab--active' : '')
-                                }
-                                onClick={() => setWithdrawCurrency('USDT')}
+                                className={withdrawCurrency === "USDT" ? "active" : ""}
+                                onClick={() => setWithdrawCurrency("USDT")}
                             >
                                 USDT
                             </button>
 
                             <button
-                                className={
-                                    'wallet-tab' + (withdrawCurrency === 'TON' ? ' wallet-tab--active' : '')
-                                }
-                                onClick={() => setWithdrawCurrency('TON')}
+                                className={withdrawCurrency === "TON" ? "active" : ""}
+                                onClick={() => setWithdrawCurrency("TON")}
                             >
                                 TON
                             </button>
                         </div>
 
-                        <button
-                            className="menu-btn"
-                            disabled={withdrawLoading}
-                            onClick={handleWithdraw}
-                        >
-                            {withdrawLoading ? 'Отправляем...' : 'Создать заявку'}
+                        <button onClick={handleWithdraw} disabled={withdrawLoading}>
+                            {withdrawLoading ? "Отправляем..." : "Создать заявку"}
                         </button>
-                    </div>
-
-                    {/* HISTORY */}
-                    <div className="wallet-section">
-                        <h3 className="panel-subtitle">📜 Последние выводы</h3>
-
-                        {info.withdrawals.length === 0 ? (
-                            <p className="panel-muted">Выводов пока нет</p>
-                        ) : (
-                            info.withdrawals.map((w) => (
-                                <div key={w.id} className="wallet-history-item">
-                                    <div className="wallet-history-main">
-                                        <span>
-                                            {w.coins} 🪙 → {w.amountUsd.toFixed(2)} $ {w.currency}
-                                        </span>
-                                        <span className={`wallet-status wallet-status--${w.status.toLowerCase()}`}>
-                                            {w.status === 'PENDING' && 'В ожидании'}
-                                            {w.status === 'APPROVED' && 'Одобрено'}
-                                            {w.status === 'PAID' && 'Выплачено'}
-                                            {w.status === 'REJECTED' && 'Отклонено'}
-                                        </span>
-                                    </div>
-                                </div>
-                            ))
-                        )}
                     </div>
                 </>
             )}
