@@ -101,7 +101,7 @@ export function Wallet({ token, onBack }: WalletProps) {
     useEffect(() => {
         if (!wallet || !token) return;
 
-        const raw = wallet.account.address;
+        let raw = wallet.account.address;
 
         // нормализация RAW → user-friendly bounceable
         let friendly = '';
