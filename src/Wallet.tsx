@@ -1,5 +1,5 @@
 // src/Wallet.tsx
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { TonConnectButton, useTonWallet } from '@tonconnect/ui-react';
 import { apiFetch } from './api';
 import { Address } from '@ton/core';
@@ -26,7 +26,7 @@ interface WalletInfo {
     coinPriceUsd: number;
     usdtAddress?: string | null;
     tonAddress?: string | null;
-    withdrawals: WithdrawalItem[];
+    withdrawals: WithdrawalItem[] | null;
 }
 
 interface WalletProps {
@@ -49,20 +49,34 @@ export function Wallet({ token, onBack }: WalletProps) {
     const [withdrawMessage, setWithdrawMessage] = useState<string | null>(null);
 
     const wallet = useTonWallet();
+    const tonSent = useRef(false);
 
+    // -------------------------------------
+    // LOAD INFO
+    // -------------------------------------
     const loadInfo = () => {
         setLoading(true);
         apiFetch('/wallet/info', token)
             .then(async (res) => {
-                const json = await res.json().catch(() => ({}));
-                if (!res.ok) throw new Error(json.message || 'Ошибка загрузки');
-                return json as WalletInfo;
+                const raw = await res.text();
+
+                try {
+                    const json = JSON.parse(raw);
+                    if (!res.ok) throw new Error(json.message || 'Ошибка загрузки');
+                    return json as WalletInfo;
+                } catch (e) {
+                    console.error("Invalid JSON from /wallet/info:", raw);
+                    throw new Error("Ошибка ответа сервера");
+                }
             })
             .then((data) => {
                 setInfo(data);
                 setUsdtAddress(data.usdtAddress ?? '');
             })
-            .catch((e: any) => setError(e.message))
+            .catch((e: any) => {
+                console.error("LOAD INFO ERROR:", e);
+                setError(e.message);
+            })
             .finally(() => setLoading(false));
     };
 
@@ -70,7 +84,9 @@ export function Wallet({ token, onBack }: WalletProps) {
         if (token) loadInfo();
     }, [token]);
 
-    // 🔗 Сохранение USDT адреса
+    // -------------------------------------
+    // SAVE USDT ADDRESS
+    // -------------------------------------
     const handleLinkUsdt = async () => {
         setError('');
         setLinkMessage(null);
@@ -79,6 +95,9 @@ export function Wallet({ token, onBack }: WalletProps) {
         try {
             const addr = usdtAddress.trim();
             if (!addr) throw new Error('Введите адрес USDT');
+
+            if (!addr.startsWith("T"))
+                throw new Error("TRC20 адрес должен начинаться с T");
 
             const res = await apiFetch('/wallet/addresses', token, {
                 method: 'POST',
@@ -90,6 +109,7 @@ export function Wallet({ token, onBack }: WalletProps) {
 
             setLinkMessage('USDT кошелёк сохранён!');
             setInfo((prev) => prev ? { ...prev, usdtAddress: addr } : prev);
+
         } catch (e: any) {
             setError(e.message);
         } finally {
@@ -97,22 +117,31 @@ export function Wallet({ token, onBack }: WalletProps) {
         }
     };
 
-    // 🔗 Автосохранение TON адреса
+    // -------------------------------------
+    // AUTO-SAVE TON ADDRESS FROM TONCONNECT
+    // -------------------------------------
     useEffect(() => {
-        if (!wallet || !token) return;
+        if (!wallet || !token || tonSent.current) return;
 
-        let raw = wallet.account.address;
+        const raw = wallet?.account?.address;
+        if (!raw) return;
 
-        // нормализация RAW → user-friendly bounceable
         let friendly = '';
+
         try {
             friendly = Address.parse(raw).toString({ bounceable: true });
         } catch {
-            console.error('Ошибка парсинга TON адреса');
-            return;
+            try {
+                friendly = Address.parseRaw(raw).toString({ bounceable: true });
+            } catch {
+                console.error("TON address parsing failed");
+                return;
+            }
         }
 
         if (info?.tonAddress === friendly) return;
+
+        tonSent.current = true;
 
         (async () => {
             try {
@@ -125,12 +154,17 @@ export function Wallet({ token, onBack }: WalletProps) {
                 if (!res.ok) return;
 
                 setInfo((prev) => prev ? { ...prev, tonAddress: friendly } : prev);
-                setLinkMessage('TON кошелёк подключён через TonConnect!');
-            } catch {}
+                setLinkMessage('TON кошелёк подключён!');
+            } catch (e) {
+                console.error("TON SAVE ERROR:", e);
+            }
         })();
+
     }, [wallet, token, info?.tonAddress]);
 
-    // 💸 Создать заявку на вывод
+    // -------------------------------------
+    // CREATE WITHDRAW REQUEST
+    // -------------------------------------
     const handleWithdraw = async () => {
         if (!info) return;
 
@@ -142,7 +176,11 @@ export function Wallet({ token, onBack }: WalletProps) {
             const coins = Number(withdrawCoins);
             if (!coins || coins <= 0) throw new Error('Некорректное число монет');
 
-            const minCoins = Math.ceil(1 / (info.coinPriceUsd || 0.00001));
+            if (coins > info.coins) throw new Error('Недостаточно монет');
+
+            const coinPrice = info.coinPriceUsd || 0;
+            const minCoins = coinPrice > 0 ? Math.ceil(1 / coinPrice) : 0;
+
             if (coins < minCoins) throw new Error(`Минимум: ${minCoins} монет`);
 
             const res = await apiFetch('/wallet/withdraw', token, {
@@ -161,6 +199,7 @@ export function Wallet({ token, onBack }: WalletProps) {
             setWithdrawMessage(`Заявка создана! ID #${json.id}`);
             setWithdrawCoins('');
             loadInfo();
+
         } catch (e: any) {
             setError(e.message);
         } finally {
@@ -168,8 +207,13 @@ export function Wallet({ token, onBack }: WalletProps) {
         }
     };
 
-    const minCoins = info ? Math.ceil(1 / info.coinPriceUsd) : 0;
+    const minCoins = info && info.coinPriceUsd > 0
+        ? Math.ceil(1 / info.coinPriceUsd)
+        : 0;
 
+    // -------------------------------------
+    // RENDER
+    // -------------------------------------
     return (
         <div className="panel">
             <button className="back-btn" onClick={onBack}>⬅ Назад</button>
@@ -183,15 +227,13 @@ export function Wallet({ token, onBack }: WalletProps) {
 
             {info && (
                 <>
-                    {/* BALANCE */}
                     <div className="wallet-balance-box">
                         <div className="wallet-balance-main">
                             <span className="wallet-balance-value">{info.coins} 🪙</span>
-                            <div>~ {info.usdBalance.toFixed(2)} $</div>
+                            <div>~ {(info.usdBalance ?? 0).toFixed(2)} $</div>
                         </div>
                     </div>
 
-                    {/* TON CONNECT */}
                     <div className="wallet-section">
                         <h3>🔗 TON Connect</h3>
                         <TonConnectButton />
@@ -203,21 +245,19 @@ export function Wallet({ token, onBack }: WalletProps) {
                         )}
                     </div>
 
-                    {/* USDT WALLET */}
                     <div className="wallet-section">
                         <h3>💳 USDT кошелёк</h3>
                         <input
                             className="wallet-input"
                             value={usdtAddress}
                             onChange={(e) => setUsdtAddress(e.target.value)}
-                            placeholder="TRC20 / ERC20 / BEP20 адрес"
+                            placeholder="TRC20 адрес"
                         />
                         <button className="menu-btn" onClick={handleLinkUsdt}>
                             {linkLoading ? 'Сохраняем...' : 'Сохранить адрес'}
                         </button>
                     </div>
 
-                    {/* WITHDRAW */}
                     <div className="wallet-section">
                         <h3>💸 Вывод</h3>
 
@@ -250,13 +290,17 @@ export function Wallet({ token, onBack }: WalletProps) {
                         </button>
                     </div>
 
-                    {/* HISTORY */}
                     <div className="wallet-section">
                         <h3>📜 История выводов</h3>
-                        {info.withdrawals.length === 0 && <p>Пусто</p>}
-                        {info.withdrawals.map((w) => (
+
+                        {!info.withdrawals || info.withdrawals.length === 0 && <p>Пусто</p>}
+
+                        {info.withdrawals && info.withdrawals.map((w) => (
                             <div key={w.id} className="wallet-history-item">
-                                <span>{w.coins} → {w.amountUsd.toFixed(2)}$</span>
+                                <div>{w.coins} → {w.amountUsd.toFixed(2)} USD ({w.currency})</div>
+                                <div>Сеть: {w.network}</div>
+                                <div>Адрес: {w.address.slice(0, 6)}...{w.address.slice(-4)}</div>
+
                                 <span className={`wallet-status wallet-status--${w.status.toLowerCase()}`}>
                                     {w.status}
                                 </span>
