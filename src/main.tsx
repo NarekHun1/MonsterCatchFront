@@ -9,18 +9,19 @@ import App from './App';
 if (typeof window !== "undefined") {
     window.addEventListener("error", (event) => {
         document.body.innerHTML =
-            "<pre style='color:red; font-size:20px; padding:20px; white-space:pre-wrap'>" +
+            "<pre style='color:red; font-size:22px; padding:20px; white-space:pre-wrap'>" +
             (event.error?.stack || event.message) +
             "</pre>";
     });
 
     window.addEventListener("unhandledrejection", (event) => {
         document.body.innerHTML =
-            "<pre style='color:red; font-size:20px; padding:20px; white-space:pre-wrap'>" +
+            "<pre style='color:red; font-size:22px; padding:20px; white-space:pre-wrap'>" +
             (event.reason?.stack || event.reason) +
             "</pre>";
     });
 }
+
 /* ---------- END ERROR LOGGER ---------- */
 
 const manifestUrl = `${window.location.origin}/tonconnect-manifest.json`;
