@@ -17,10 +17,17 @@ export function HeroCard({ level, xp }: HeroCardProps) {
     if (safeLevel >= 5 && safeLevel < 10) {
         heroEmoji = '🧙‍♂️';
         title = 'Охотник';
-    } else if (safeLevel >= 10) {
+    } else if (safeLevel >= 10 && safeLevel < 15) {
+        heroEmoji = '⚔️';
+        title = 'Воин';
+    } else if (safeLevel >= 15 && safeLevel < 25) {
+        heroEmoji = '🦁';
+        title = 'Герой';
+    } else if (safeLevel >= 25) {
         heroEmoji = '🐉';
         title = 'Легенда';
     }
+
 
     const xpForNext = 100 + (safeLevel - 1) * 250;
     const progress = Math.min(
