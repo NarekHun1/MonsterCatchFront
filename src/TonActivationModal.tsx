@@ -36,7 +36,7 @@ export function TonActivationModal({ address, onClose }: {
                 </div>
 
                 <a
-                    href="tonkeeper://"
+                    href="https://t.me/tonkeeper"
                     style={styles.openBtn}
                 >
                     Открыть Tonkeeper
