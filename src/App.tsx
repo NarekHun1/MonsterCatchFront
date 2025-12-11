@@ -941,6 +941,12 @@ function App() {
                                 🎮 Игра
                             </button>
                             <button
+                                className={`menu-tab ${currentPage === 'tournament' ? 'menu-tab--active' : ''}`}
+                                onClick={() => goTo('tournament')}
+                            >
+                                🎯 Турниры
+                            </button>
+                            <button
                                 className={`menu-tab ${
                                     currentPage === 'leaderboard' ? 'menu-tab--active' : ''
                                 }`}
