@@ -22,7 +22,7 @@ export function HeroCard({ level, xp }: HeroCardProps) {
         title = 'Легенда';
     }
 
-    const xpForNext = 100 + (safeLevel - 1) * 50;
+    const xpForNext = 100 + (safeLevel - 1) * 250;
     const progress = Math.min(
         1,
         xpForNext > 0 ? safeXp / xpForNext : 0
