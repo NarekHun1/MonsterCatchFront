@@ -8,6 +8,7 @@ import { apiFetch } from './api';
 import HeroViewer from './HeroViewer'; // 😈 3D демон
 import { initAuth } from './auth/initAuth';
 import { Wallet } from './Wallet';
+import {WalletIcon} from "./WalletIcon.tsx";
 
 
 
@@ -906,6 +907,10 @@ function App() {
                                     <span className="user-pill-icon">🪙</span>
                                     <span className="user-pill-value">{me.coins}</span>
                                 </div>
+                                <div className="header-wallet-btn" onClick={() => setCurrentPage('wallet')}>
+                                    <WalletIcon />
+                                </div>
+
                             </div>
                         </div>
                     )}
