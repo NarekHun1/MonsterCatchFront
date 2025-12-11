@@ -29,7 +29,7 @@ export function HeroCard({ level, xp }: HeroCardProps) {
     }
 
 
-    const xpForNext = 100 + (safeLevel - 1) * 250;
+    const xpForNext = 100 + (safeLevel - 1) * 500;
     const progress = Math.min(
         1,
         xpForNext > 0 ? safeXp / xpForNext : 0
