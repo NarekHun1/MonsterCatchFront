@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { TonConnectButton, useTonWallet } from '@tonconnect/ui-react';
 import { apiFetch } from './api';
 import { Address } from '@ton/core';
+import { TonActivationModal } from "./TonActivationModal.tsx";
 
 type WithdrawalStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'PAID';
 type WithdrawalCurrency = 'USDT' | 'TON';
@@ -47,6 +48,7 @@ export function Wallet({ token, onBack }: WalletProps) {
     const [withdrawCoins, setWithdrawCoins] = useState('');
     const [withdrawLoading, setWithdrawLoading] = useState(false);
     const [withdrawMessage, setWithdrawMessage] = useState<string | null>(null);
+    const [showActivation, setShowActivation] = useState(false);
 
     const wallet = useTonWallet();
     const tonSent = useRef(false);
@@ -201,7 +203,30 @@ export function Wallet({ token, onBack }: WalletProps) {
             loadInfo();
 
         } catch (e: any) {
-            setError(e.message);
+            const msg = e?.message || "";
+
+            if (msg === "TON_WALLET_NOT_ACTIVATED") {
+                setShowActivation(true);
+                return;
+            }
+
+
+            if (msg === "TON_ADDRESS_NOT_SET") {
+                setError("Сначала подключите TON-кошелёк через TonConnect.");
+                return;
+            }
+
+            if (msg === "CANNOT_WITHDRAW_TO_SAME_WALLET") {
+                setError("Нельзя выводить TON на кошелёк выплаты проекта.");
+                return;
+            }
+
+            if (msg === "MIN_WITHDRAW_1_USD") {
+                setError("Минимальная сумма вывода — 1$.");
+                return;
+            }
+
+            setError(msg);
         } finally {
             setWithdrawLoading(false);
         }
@@ -308,6 +333,12 @@ export function Wallet({ token, onBack }: WalletProps) {
                         ))}
                     </div>
                 </>
+            )}
+            {showActivation && info?.tonAddress && (
+                <TonActivationModal
+                    address={info.tonAddress}
+                    onClose={() => setShowActivation(false)}
+                />
             )}
         </div>
     );
