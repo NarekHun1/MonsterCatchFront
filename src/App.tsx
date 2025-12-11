@@ -879,13 +879,9 @@ function App() {
             {/* ХЕДЕР НА ВЕСЬ ЭКРАН */}
             {currentPage !== 'game' && (
                 <header className="app-header">
-                    <div>
-                        <h1 className="app-title">Monster Catch</h1>
-                        <p className="app-subtitle">Telegram mini-game • турниры • призы</p>
-                    </div>
-
                     {me && userId && (
                         <div className="app-userchip">
+                            <div className="chip-title">Monster Catch</div>
                             <div className="user-main">
                                 <div className="user-avatar">
                                     <span>😈</span>

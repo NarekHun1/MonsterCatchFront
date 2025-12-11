@@ -1097,3 +1097,11 @@ button {
     background: rgba(255,255,255,0.18);
     transform: scale(1.06);
 }
+
+.chip-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #fff;
+    opacity: 0.9;
+}
