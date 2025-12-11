@@ -108,10 +108,11 @@ body {
 }
 
 .app-userchip {
+    position: relative;
     padding: 8px 10px;
-    border-radius: 16px;
+    /*border-radius: 16px;*/
     background: rgba(15, 23, 42, 0.95);
-    border: 1px solid rgba(148, 163, 184, 0.5);
+    /*border: 1px solid rgba(148, 163, 184, 0.5);*/
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -1081,18 +1082,17 @@ button {
 /*header */
 
 .header-wallet-btn {
-    width: 40px;
-    height: 40px;
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.2);
+    position: absolute;
+    right: 12px;     /* вправо */
+    bottom: 12px;    /* вниз — самый конец блока */
+    background: rgba(255, 255, 255, 0.08);
+    padding: 8px 10px;
     border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    font-size: 20px;
     cursor: pointer;
-    transition: 0.2s ease;
-    margin-left: 10px;
+    transition: 0.2s;
 }
+
 
 .header-wallet-btn:hover {
     background: rgba(255,255,255,0.18);
@@ -1102,7 +1102,10 @@ button {
 .chip-title {
     font-size: 20px;
     font-weight: 700;
-    margin-bottom: 6px;
+    text-align: center;   /* ставим по центру */
+    width: 100%;
+    margin-bottom: 8px;
     color: #fff;
     opacity: 0.9;
 }
+
