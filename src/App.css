@@ -1041,3 +1041,39 @@ button {
     background: #182618;
     border-radius: 10px;
 }
+/*styl top mnue  */
+
+.menu-nav {
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+    background: #111;
+}
+
+.menu-tab {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;   /* <- ВЕРТИКАЛЬНО */
+    align-items: center;       /* <- ПО ЦЕНТРУ */
+    justify-content: center;
+    gap: 4px;
+    padding: 6px 0;
+    flex: 1;
+}
+
+.menu-tab--active {
+    color: #49ff4a;
+    font-weight: bold;
+}
+
+.tab-icon {
+    font-size: 24px;  /* иконка сверху */
+    line-height: 1;
+}
+
+.tab-label {
+    font-size: 12px;  /* текст снизу */
+}

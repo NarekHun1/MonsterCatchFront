@@ -925,35 +925,36 @@ function App() {
                     <>
                         <nav className="menu-nav">
                             <button
-                                className={`menu-tab ${
-                                    currentPage === 'menu' ? 'menu-tab--active' : ''
-                                }`}
+                                className={`menu-tab ${currentPage === 'menu' ? 'menu-tab--active' : ''}`}
                                 onClick={() => goTo('menu')}
                             >
-                                🏠 Меню
+                                <div className="tab-icon">🏠</div>
+                                <div className="tab-label">Меню</div>
                             </button>
+
                             <button
-                                className={`menu-tab ${
-                                    currentPage === 'game' ? 'menu-tab--active' : ''
-                                }`}
+                                className={`menu-tab ${currentPage === 'game' ? 'menu-tab--active' : ''}`}
                                 onClick={() => goTo('game')}
                             >
-                                🎮 Игра
+                                <div className="tab-icon">🎮</div>
+                                <div className="tab-label">Игра</div>
                             </button>
+
                             <button
                                 className={`menu-tab ${currentPage === 'tournament' ? 'menu-tab--active' : ''}`}
                                 onClick={() => goTo('tournament')}
                             >
-                                🎯 Турниры
+                                <div className="tab-icon">🎯</div>
+                                <div className="tab-label">Турниры</div>
                             </button>
                             <button
-                                className={`menu-tab ${
-                                    currentPage === 'leaderboard' ? 'menu-tab--active' : ''
-                                }`}
+                                className={`menu-tab ${currentPage === 'leaderboard' ? 'menu-tab--active' : ''}`}
                                 onClick={() => goTo('leaderboard')}
                             >
-                                📊 Лидеры
+                                <div className="tab-icon">📊</div>
+                                <div className="tab-label">Лидеры</div>
                             </button>
+
                         </nav>
 
                         {currentPage === 'menu' && me && (
