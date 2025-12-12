@@ -649,6 +649,8 @@ function App() {
     const [currentPage, setCurrentPage] = useState<Page>('menu');
     const [showHero, setShowHero] = useState(false);
     const [tournamentGameId, setTournamentGameId] = useState<number | null>(null);
+    const [tournamentType, setTournamentType] =
+        useState<'HOURLY' | 'DAILY' | null>(null);
     const [isBooting, setIsBooting] = useState(true);
     const [minDelayPassed, setMinDelayPassed] = useState(false);
 
@@ -1057,14 +1059,17 @@ function App() {
                                 <Game
                                     token={token}
                                     tournamentId={tournamentGameId ?? undefined}
+                                    tournamentType={tournamentType ?? undefined} // 🔥 ВАЖНО
                                     onBack={() => {
                                         setCurrentPage('menu');
                                         setTournamentGameId(null);
+                                        setTournamentType(null); // 🔥 очистка
                                     }}
-                                    onStarsChange={handleStarsChange}
+                                   onStarsChange={handleStarsChange}
                                     onStatsChange={handleStatsChange}
                                 />
                             )}
+
 
                             {currentPage === 'wallet' && token && (
                                 <Wallet
@@ -1089,24 +1094,22 @@ function App() {
                                         token={token}
                                         onStartGame={(id) => {
                                             setTournamentGameId(id);
+                                            setTournamentType('HOURLY');
                                             setCurrentPage('game');
                                         }}
-                                        onCoinsChange={(coins) =>
-                                            setMe((p) => (p ? { ...p, coins } : p))
-                                        }
                                     />
+
 
                                     <TournamentCard
                                         type="DAILY"
                                         token={token}
                                         onStartGame={(id) => {
                                             setTournamentGameId(id);
+                                            setTournamentType('DAILY');
                                             setCurrentPage('game');
                                         }}
-                                        onCoinsChange={(coins) =>
-                                            setMe((p) => (p ? { ...p, coins } : p))
-                                        }
                                     />
+
                                 </div>
                             )}
 

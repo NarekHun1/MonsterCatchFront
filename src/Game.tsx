@@ -9,6 +9,7 @@ interface GameProps {
     onStarsChange?: (stars: number) => void;
     onStatsChange?: (stats: { stars: number; level: number; xp: number }) => void;
     tournamentId?: number;
+    tournamentType?: 'HOURLY' | 'DAILY';
 }
 
 type GameStatus = 'idle' | 'running' | 'finished';
@@ -53,7 +54,7 @@ function randomPosition() {
     return { x, y };
 }
 
-export function Game({ token, onBack, onStarsChange, onStatsChange, tournamentId}: GameProps) {
+export function Game({ token, onBack, onStarsChange, onStatsChange, tournamentType}: GameProps) {
     const [phase, setPhase] = useState<GamePhase>('intro');
     const [status, setStatus] = useState<GameStatus>('idle');
     const [gameId, setGameId] = useState<number | null>(null);
@@ -111,6 +112,7 @@ export function Game({ token, onBack, onStarsChange, onStatsChange, tournamentId
         setLoading(true);
 
         try {
+            // 1️⃣ Завершаем игру
             const res = await apiFetch('/game/finish', token, {
                 method: 'POST',
                 body: JSON.stringify({
@@ -121,81 +123,64 @@ export function Game({ token, onBack, onStarsChange, onStatsChange, tournamentId
                 }),
             });
 
-            let data: any = {};
-            try {
-                data = await res.json();
-            } catch {
-                // если сервер ничего не вернул, не падаем
-            }
+            const data = await res.json().catch(() => ({}));
 
             if (!res.ok) {
-                const msg = data?.message ?? data?.error ?? 'Не удалось завершить игру';
-                console.error('finishGame error response:', res.status, data);
-                throw new Error(msg);
+                throw new Error(data?.message || 'Не удалось завершить игру');
             }
 
-            // best score
+            // 2️⃣ Локальные обновления
             setBestScore((prev) => (prev === null || score > prev ? score : prev));
 
-            // звезды
             if (typeof data.totalStars === 'number') {
                 onStarsChange?.(data.totalStars);
             }
 
-            // уровень + XP
-            if (
-                typeof data.level === 'number' &&
-                typeof data.xp === 'number' &&
-                typeof onStatsChange === 'function'
-            ) {
-                onStatsChange({
+            if (typeof data.level === 'number' && typeof data.xp === 'number') {
+                onStatsChange?.({
                     stars: data.totalStars,
                     level: data.level,
                     xp: data.xp,
                 });
             }
 
-            // реферальная награда
-            if (data.referralReward > 0) {
-                alert(`🎉 +${data.referralReward} ⭐ за первую игру друга!`);
-            }
-            // 2) если игра была турнирной — отправляем счёт в турнир
-            if (tournamentId != null) {
-                try {
-                    const tRes = await apiFetch('/tournament/submit-score', token, {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            tournamentId,
-                            score,
-                        }),
-                    });
+            // 3️⃣ 🔥 ОТПРАВКА РЕЗУЛЬТАТА В ТУРНИР
+            if (tournamentType) {
+                const tRes = await apiFetch('/tournament/submit-score', token, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        type: tournamentType,
+                        score,
+                    }),
+                });
 
-                    const tData = await tRes.json().catch(() => ({}));
-                    if (!tRes.ok) {
-                        console.error(
-                            'submit-score error:',
-                            tRes.status,
-                            tData?.message || tData,
-                        );
-                    } else {
-                        console.log('Tournament score submitted:', tData);
-                    }
-                } catch (e) {
-                    console.error('Ошибка отправки результата в турнир', e);
+                const tData = await tRes.json().catch(() => ({}));
+
+                if (!tRes.ok) {
+                    console.error('Tournament submit failed:', tData?.message || tData);
+                } else {
+                    console.log('✅ Tournament score submitted:', tData);
                 }
             }
 
             setStatus('finished');
-            return { success: true, data };
         } catch (e: any) {
             console.error('finishGame failed:', e);
-            setError(e.message ?? 'Ошибка завершения игры');
-            return { success: false, error: e };
+            setError(e.message || 'Ошибка завершения игры');
         } finally {
             setLoading(false);
         }
+    }, [
+        gameId,
+        score,
+        clicks,
+        epicCount,
+        token,
+        tournamentType,
+        onStarsChange,
+        onStatsChange,
+    ]);
 
-    }, [gameId, score, token, onStarsChange, onStatsChange, clicks, epicCount,tournamentId]);
 
     // ✅ ПРАВИЛЬНЫЙ /game/start
     const startGame = useCallback(async () => {
