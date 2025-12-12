@@ -13,6 +13,7 @@ interface TournamentData {
     tournamentId: number;
     endsAt: string;
     prizePool: number;
+    joinDeadline: string;
     entryFee: number;
     participants: Participant[];
     joined?: boolean;
@@ -125,6 +126,16 @@ export function TournamentCard({
 
     const timeLeft = new Date(data.endsAt).getTime() - now;
 
+    const joinDeadlineLeft =
+        data.joinDeadline
+            ? new Date(data.joinDeadline).getTime() - now
+            : 0;
+
+    const canJoin =
+        joinDeadlineLeft > 0 &&
+        !data.joined &&
+        timeLeft > 0;
+
     const title =
         type === 'HOURLY'
             ? '⏱ Почасовой турнир'
@@ -156,7 +167,7 @@ export function TournamentCard({
                     >
                         🎮 Играть
                     </button>
-                ) : (
+                ) : canJoin ? (
                     <button
                         className="tc-btn join"
                         onClick={handleJoin}
@@ -166,6 +177,10 @@ export function TournamentCard({
                             ? 'Входим…'
                             : `Вступить за ${data.entryFee} 🪙`}
                     </button>
+                ) : (
+                    <div className="tc-closed">
+                        🚫 Окно вступления закрыто
+                    </div>
                 )}
             </div>
         </div>
