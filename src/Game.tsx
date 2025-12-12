@@ -400,6 +400,37 @@ export function Game({ token, onBack, onStarsChange, onStatsChange, tournamentId
                     ))}
                 </div>
             )}
+            {status === 'finished' && (
+                <div className="game-finish-overlay">
+                    <div className="game-finish-card">
+                        <h2>🎉 Congratulations!</h2>
+
+                        <p className="game-finish-score">
+                            Вы собрали <strong>{score}</strong> очков
+                        </p>
+
+                        <div className="game-finish-actions">
+                            <button
+                                className="game-restart-btn"
+                                onClick={() => {
+                                    setPhase('intro');
+                                    setStatus('idle');
+                                    setGameId(null);
+                                }}
+                            >
+                                🔄 Начать заново
+                            </button>
+
+                            <button
+                                className="game-back-btn"
+                                onClick={onBack}
+                            >
+                                ⬅ Назад
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {error && <p className="game-error">Ошибка: {error}</p>}
         </div>

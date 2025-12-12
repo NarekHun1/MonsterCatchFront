@@ -332,3 +332,66 @@
     color: #fecaca;
     text-align: center;
 }
+
+/*congretulation*/
+.game-finish-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.game-finish-card {
+    background: #111;
+    border-radius: 16px;
+    padding: 24px 28px;
+    width: 90%;
+    max-width: 360px;
+    text-align: center;
+    color: #fff;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+    animation: popIn 0.25s ease-out;
+}
+
+.game-finish-card h2 {
+    margin-bottom: 12px;
+}
+
+.game-finish-score {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+.game-finish-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.game-restart-btn {
+    background: #22c55e;
+    color: #000;
+    font-weight: bold;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+}
+
+.game-restart-btn:hover {
+    background: #16a34a;
+}
+
+@keyframes popIn {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
