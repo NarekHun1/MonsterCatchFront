@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { apiFetch } from './api';
+import './TournamentLeaderboard.css'
 
 type TournamentType = 'HOURLY' | 'DAILY';
 type TournamentStatus = 'ACTIVE' | 'FINISHED';
@@ -183,26 +184,39 @@ export function TournamentCard({
             {/* LEADERBOARD (как в старом коде) */}
             {/* ───────────────────────────────────── */}
             <div className="tc-leaderboard">
-                <h4>🏆 Текущий топ</h4>
+                <h4 className="tc-lb-title">🏆 Турнирный топ</h4>
 
                 {data.participants.length === 0 ? (
-                    <div className="tc-muted">
-                        Пока ещё никто не отправил результат
+                    <div className="tc-lb-empty">
+                        Пока никто не сыграл — будь первым 💥
                     </div>
                 ) : (
-                    data.participants.map((p, i) => (
-                        <div key={p.userId} className="tc-leaderboard-row">
-                            <span className="tc-place">#{i + 1}</span>
-                            <span className="tc-name">
-                {p.username || 'Игрок'}
-              </span>
-                            <strong className="tc-score">
-                                {p.score}
-                            </strong>
-                        </div>
-                    ))
+                    <div className="tc-lb-list">
+                        {data.participants.map((p, i) => {
+                            const medal =
+                                i === 0 ? '🥇' :
+                                    i === 1 ? '🥈' :
+                                        i === 2 ? '🥉' :
+                                            `#${i + 1}`;
+
+                            return (
+                                <div key={p.userId} className="tc-lb-row">
+                                    <div className="tc-lb-rank">{medal}</div>
+
+                                    <div className="tc-lb-name">
+                                        {p.username || 'Игрок'}
+                                    </div>
+
+                                    <div className="tc-lb-score">
+                                        {p.score} <span>pts</span>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
                 )}
             </div>
+
         </div>
     );
 }

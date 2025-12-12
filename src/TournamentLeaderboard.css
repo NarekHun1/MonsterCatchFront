@@ -1,0 +1,56 @@
+.tc-leaderboard {
+    margin-top: 14px;
+    padding: 14px;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #1c1c2b, #131320);
+    color: #fff;
+}
+
+.tc-lb-title {
+    text-align: center;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.tc-lb-empty {
+    text-align: center;
+    opacity: 0.7;
+    padding: 8px;
+}
+
+.tc-lb-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tc-lb-row {
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.tc-lb-rank {
+    text-align: center;
+    font-size: 18px;
+}
+
+.tc-lb-name {
+    font-weight: 600;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.tc-lb-score {
+    font-weight: bold;
+    color: #facc15;
+}
+
+.tc-lb-score span {
+    font-size: 12px;
+    opacity: 0.8;
+}
