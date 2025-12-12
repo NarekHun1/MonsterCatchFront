@@ -41,20 +41,26 @@ export function TournamentCard({
         return () => clearInterval(t);
     }, []);
 
-    // загрузка турнира
+    // загрузка ОДНОГО турнира по type
     const load = async () => {
         setLoading(true);
         setError('');
+
         try {
             const res = await apiFetch(
-                `/tournament/leaderboard?type=${type}`,
+                `/tournament/current?type=${type}`,
                 token,
             );
-            const json = await res.json();
-            if (!res.ok) throw new Error(json.message || 'Ошибка турнира');
+
+            const json = await res.json().catch(() => ({}));
+
+            if (!res.ok) {
+                throw new Error(json.message || 'Failed to load tournament');
+            }
+
             setData(json);
         } catch (e: any) {
-            setError(e.message);
+            setError(e.message || 'Failed to load tournament');
         } finally {
             setLoading(false);
         }
@@ -66,23 +72,29 @@ export function TournamentCard({
         return () => clearInterval(i);
     }, [type]);
 
+    // вступление
     const handleJoin = async () => {
         if (!data) return;
         setJoining(true);
+
         try {
             const res = await apiFetch('/tournament/join', token, {
                 method: 'POST',
                 body: JSON.stringify({ type }),
             });
-            const json = await res.json();
-            if (!res.ok) throw new Error(json.message || 'Не удалось вступить');
+
+            const json = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                throw new Error(json.message || 'Не удалось вступить');
+            }
 
             if (typeof json.coins === 'number' && onCoinsChange) {
                 onCoinsChange(json.coins);
             }
-            load();
+
+            await load();
         } catch (e: any) {
-            setError(e.message);
+            setError(e.message || 'Ошибка вступления');
         } finally {
             setJoining(false);
         }
@@ -102,7 +114,7 @@ export function TournamentCard({
     };
 
     if (loading) {
-        return <div className="tournament-card">Загрузка...</div>;
+        return <div className="tournament-card">Загрузка…</div>;
     }
 
     if (error) {
@@ -111,8 +123,7 @@ export function TournamentCard({
 
     if (!data) return null;
 
-    const timeLeft =
-        new Date(data.endsAt).getTime() - now;
+    const timeLeft = new Date(data.endsAt).getTime() - now;
 
     const title =
         type === 'HOURLY'
@@ -151,7 +162,9 @@ export function TournamentCard({
                         onClick={handleJoin}
                         disabled={joining}
                     >
-                        {joining ? 'Входим…' : `Вступить за ${data.entryFee} 🪙`}
+                        {joining
+                            ? 'Входим…'
+                            : `Вступить за ${data.entryFee} 🪙`}
                     </button>
                 )}
             </div>
