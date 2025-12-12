@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { apiFetch } from './api';
 
 type TournamentType = 'HOURLY' | 'DAILY';
+type TournamentStatus = 'ACTIVE' | 'FINISHED';
 
 interface Participant {
     userId: number;
@@ -11,12 +12,14 @@ interface Participant {
 
 interface TournamentData {
     tournamentId: number;
+    type: TournamentType;
+    status: TournamentStatus;
+    startsAt: string;
     endsAt: string;
     prizePool: number;
-    joinDeadline: string;
     entryFee: number;
+    joined: boolean;
     participants: Participant[];
-    joined?: boolean;
 }
 
 export function TournamentCard({
@@ -33,16 +36,11 @@ export function TournamentCard({
     const [data, setData] = useState<TournamentData | null>(null);
     const [loading, setLoading] = useState(true);
     const [joining, setJoining] = useState(false);
-    const [now, setNow] = useState(Date.now());
     const [error, setError] = useState('');
 
-    // тик таймера
-    useEffect(() => {
-        const t = setInterval(() => setNow(Date.now()), 1000);
-        return () => clearInterval(t);
-    }, []);
-
-    // загрузка ОДНОГО турнира по type
+    // ─────────────────────────────────────────────
+    // LOAD TOURNAMENT (SERVER = SOURCE OF TRUTH)
+    // ─────────────────────────────────────────────
     const load = async () => {
         setLoading(true);
         setError('');
@@ -59,9 +57,9 @@ export function TournamentCard({
                 throw new Error(json.message || 'Failed to load tournament');
             }
 
-            setData(json);
+            setData(json as TournamentData);
         } catch (e: any) {
-            setError(e.message || 'Failed to load tournament');
+            setError(e.message || 'Ошибка загрузки турнира');
         } finally {
             setLoading(false);
         }
@@ -69,14 +67,18 @@ export function TournamentCard({
 
     useEffect(() => {
         load();
-        const i = setInterval(load, 10000);
+        const i = setInterval(load, 15000); // 🔁 live leaderboard
         return () => clearInterval(i);
     }, [type]);
 
-    // вступление
+    // ─────────────────────────────────────────────
+    // JOIN
+    // ─────────────────────────────────────────────
     const handleJoin = async () => {
         if (!data) return;
+
         setJoining(true);
+        setError('');
 
         try {
             const res = await apiFetch('/tournament/join', token, {
@@ -85,6 +87,7 @@ export function TournamentCard({
             });
 
             const json = await res.json().catch(() => ({}));
+
             if (!res.ok) {
                 throw new Error(json.message || 'Не удалось вступить');
             }
@@ -101,19 +104,20 @@ export function TournamentCard({
         }
     };
 
-    const formatTime = (ms: number) => {
-        if (ms <= 0) return '00:00';
-        const s = Math.floor(ms / 1000);
-        const h = Math.floor(s / 3600);
-        const m = Math.floor((s % 3600) / 60);
-        const sec = s % 60;
-        return h > 0
-            ? `${h}:${m.toString().padStart(2, '0')}:${sec
-                .toString()
-                .padStart(2, '0')}`
-            : `${m}:${sec.toString().padStart(2, '0')}`;
-    };
+    // ─────────────────────────────────────────────
+    // UI STATE (ONLY SERVER STATUS)
+    // ─────────────────────────────────────────────
+    const canJoin =
+        data?.status === 'ACTIVE' && !data.joined;
 
+    const title =
+        type === 'HOURLY'
+            ? '⏱ Почасовой турнир'
+            : '📅 Ежедневный турнир';
+
+    // ─────────────────────────────────────────────
+    // RENDER
+    // ─────────────────────────────────────────────
     if (loading) {
         return <div className="tournament-card">Загрузка…</div>;
     }
@@ -123,23 +127,6 @@ export function TournamentCard({
     }
 
     if (!data) return null;
-
-    const timeLeft = new Date(data.endsAt).getTime() - now;
-
-    const joinDeadlineLeft =
-        data.joinDeadline
-            ? new Date(data.joinDeadline).getTime() - now
-            : 0;
-
-    const canJoin =
-        joinDeadlineLeft > 0 &&
-        !data.joined &&
-        timeLeft > 0;
-
-    const title =
-        type === 'HOURLY'
-            ? '⏱ Почасовой турнир'
-            : '📅 Ежедневный турнир';
 
     return (
         <div className="tournament-card">
@@ -155,8 +142,16 @@ export function TournamentCard({
                 <strong>{data.prizePool} 🪙</strong>
             </div>
 
-            <div className="tc-timer">
-                ⏳ До конца: {formatTime(timeLeft)}
+            <div className="tc-status">
+                {data.status === 'ACTIVE' ? (
+                    <span className="tc-badge tc-badge--active">
+            🟢 Идёт сейчас
+          </span>
+                ) : (
+                    <span className="tc-badge tc-badge--finished">
+            🏁 Завершён
+          </span>
+                )}
             </div>
 
             <div className="tc-actions">
@@ -179,8 +174,33 @@ export function TournamentCard({
                     </button>
                 ) : (
                     <div className="tc-closed">
-                        🚫 Окно вступления закрыто
+                        🚫 Турнир завершён. Жди следующий
                     </div>
+                )}
+            </div>
+
+            {/* ───────────────────────────────────── */}
+            {/* LEADERBOARD (как в старом коде) */}
+            {/* ───────────────────────────────────── */}
+            <div className="tc-leaderboard">
+                <h4>🏆 Текущий топ</h4>
+
+                {data.participants.length === 0 ? (
+                    <div className="tc-muted">
+                        Пока ещё никто не отправил результат
+                    </div>
+                ) : (
+                    data.participants.map((p, i) => (
+                        <div key={p.userId} className="tc-leaderboard-row">
+                            <span className="tc-place">#{i + 1}</span>
+                            <span className="tc-name">
+                {p.username || 'Игрок'}
+              </span>
+                            <strong className="tc-score">
+                                {p.score}
+                            </strong>
+                        </div>
+                    ))
                 )}
             </div>
         </div>
