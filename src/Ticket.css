@@ -1,0 +1,39 @@
+.exchange-card {
+    background: #1c1c1e;
+    border-radius: 12px;
+    padding: 16px;
+    color: #fff;
+    text-align: center;
+    margin-top: 12px;
+}
+
+.exchange-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, #ffd700, #ff9f0a);
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.exchange-btn:disabled {
+    background: #444;
+    cursor: not-allowed;
+}
+
+.hint {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #aaa;
+}
+
+.error {
+    margin-top: 8px;
+    color: #ff453a;
+}
+
+.success {
+    margin-top: 8px;
+    color: #32d74b;
+}
