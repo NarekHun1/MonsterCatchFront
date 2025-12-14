@@ -789,6 +789,13 @@ function App() {
                                                 Почасовые турниры, призовой фонд и топ-3 победителя.
                                             </div>
                                         </button>
+                                        {me && token && (
+                                            <ExchangeTicket
+                                                stars={me.stars}
+                                                token={token}
+                                                onStarsChange={handleStarsChange}
+                                            />
+                                        )}
                                     </div>
 
                                     {token && (
@@ -833,13 +840,7 @@ function App() {
 
                             {currentPage === 'leaderboard' && <Leaderboard />}
 
-                            {me && token && (
-                                <ExchangeTicket
-                                    stars={me.stars}
-                                    token={token}
-                                    onStarsChange={handleStarsChange}
-                                />
-                            )}
+
 
                             {currentPage === 'tournament' && token && (
                                 <div className="tournament-page">
