@@ -21,12 +21,10 @@ export async function apiFetch(
 
     const headers = new Headers(options.headers || {});
 
-    // Авторизация
     if (token) {
         headers.set('Authorization', `Bearer ${token}`);
     }
 
-    // Контент-тайп по умолчанию, если есть body
     if (options.body && !headers.has('Content-Type')) {
         headers.set('Content-Type', 'application/json');
     }
@@ -36,5 +34,33 @@ export async function apiFetch(
         headers,
     });
 
+    // 🔥 ГЛАВНОЕ МЕСТО
+    if (res.status === 401) {
+        let data: any = null;
+
+        try {
+            data = await res.clone().json();
+        } catch {}
+
+        if (data?.message === 'TOKEN_EXPIRED') {
+            console.warn('JWT expired → re-auth');
+
+            // чистим токен
+            localStorage.removeItem('token');
+
+            // Telegram UX
+            (window as any).Telegram?.WebApp?.showAlert?.(
+                'Сессия истекла. Игра будет перезапущена.',
+            );
+
+            setTimeout(() => {
+                window.location.reload();
+            }, 500);
+        }
+
+        throw new Error(data?.message || 'Unauthorized');
+    }
+
     return res;
 }
+
