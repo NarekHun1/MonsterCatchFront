@@ -383,6 +383,8 @@ function App() {
         useState<'HOURLY' | 'DAILY' | null>(null);
     const [isBooting, setIsBooting] = useState(true);
     const [minDelayPassed, setMinDelayPassed] = useState(false);
+    const [tickets, setTickets] = useState<number>(0);
+
 
 
     // 👇 состояние для магазина монет
@@ -439,12 +441,21 @@ function App() {
                     setMe(data);
                     // setIsBooting(false);
                 }
+                const ticketsRes = await apiFetch('/tickets/count', token);
+                const ticketsData = await ticketsRes.json().catch(() => ({}));
+
+                if (typeof ticketsData.count === 'number') {
+                    setTickets(ticketsData.count);
+                }
             } catch (e) {
                 console.error(e);
             }
         };
 
         loadProfile();
+
+
+
 
         const interval = setInterval(loadProfile, 5000);
 
@@ -636,6 +647,11 @@ function App() {
                                     <span className="user-pill-icon">🪙</span>
                                     <span className="user-pill-value">{me.coins}</span>
                                 </div>
+                                <div className="user-pill user-pill--tickets">
+                                    <span className="user-pill-icon">🎟</span>
+                                    <span className="user-pill-value">{tickets}</span>
+                                </div>
+
                                 <div className="header-wallet-btn" onClick={() => setCurrentPage('wallet')}>
                                     <WalletIcon />
                                 </div>

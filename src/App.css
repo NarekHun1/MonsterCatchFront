@@ -1163,3 +1163,8 @@ button {
 .tournament-card.error {
     color: #f87171;
 }
+
+
+.user-pill--tickets {
+    background: linear-gradient(135deg, #6f5cff, #9b7cff);
+}
