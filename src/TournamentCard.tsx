@@ -18,16 +18,18 @@ interface TournamentData {
     startsAt: string;
     endsAt: string;
     prizePool: number;
-    entryFee: number;
     joined: boolean;
     participants: Participant[];
+
+    ticketsCount: number;
+    coins: number;
 }
+
 
 export function TournamentCard({
                                    type,
                                    token,
                                    onStartGame,
-                                   onCoinsChange,
                                }: {
     type: TournamentType;
     token: string;
@@ -75,7 +77,7 @@ export function TournamentCard({
     // ─────────────────────────────────────────────
     // JOIN
     // ─────────────────────────────────────────────
-    const handleJoin = async () => {
+    const handleJoin = async (paymentType: 'TICKETS' | 'COINS') => {
         if (!data) return;
 
         setJoining(true);
@@ -84,17 +86,12 @@ export function TournamentCard({
         try {
             const res = await apiFetch('/tournament/join', token, {
                 method: 'POST',
-                body: JSON.stringify({ type }),
+                body: JSON.stringify({ type, paymentType }),
             });
 
             const json = await res.json().catch(() => ({}));
-
             if (!res.ok) {
                 throw new Error(json.message || 'Не удалось вступить');
-            }
-
-            if (typeof json.coins === 'number' && onCoinsChange) {
-                onCoinsChange(json.coins);
             }
 
             await load();
@@ -104,6 +101,7 @@ export function TournamentCard({
             setJoining(false);
         }
     };
+
 
     // ─────────────────────────────────────────────
     // UI STATE (ONLY SERVER STATUS)
@@ -135,7 +133,7 @@ export function TournamentCard({
 
             <div className="tc-row">
                 <span>Вход</span>
-                <strong>{data.entryFee} 🪙</strong>
+                <strong>🎟 50 или 🪙 50</strong>
             </div>
 
             <div className="tc-row">
@@ -164,21 +162,40 @@ export function TournamentCard({
                         🎮 Играть
                     </button>
                 ) : canJoin ? (
-                    <button
-                        className="tc-btn join"
-                        onClick={handleJoin}
-                        disabled={joining}
-                    >
-                        {joining
-                            ? 'Входим…'
-                            : `Вступить за ${data.entryFee} 🪙`}
-                    </button>
+                    <>
+                        {/* 🎟 ВХОД ЗА БИЛЕТЫ */}
+                        <button
+                            className="tc-btn join"
+                            disabled={joining || data.ticketsCount < 50}
+                            onClick={() => handleJoin('TICKETS')}
+                        >
+                            🎟 Войти за билеты
+                            <div className="tc-btn-sub">
+                                {data.ticketsCount >= 50
+                                    ? `Билеты: ${data.ticketsCount}`
+                                    : `Нужно ещё ${50 - data.ticketsCount}`}
+                            </div>
+                        </button>
+
+                        {/* 🪙 ВХОД ЗА МОНЕТЫ */}
+                        <button
+                            className="tc-btn join secondary"
+                            disabled={joining || data.coins < 50}
+                            onClick={() => handleJoin('COINS')}
+                        >
+                            🪙 Войти за монеты
+                            <div className="tc-btn-sub">
+                                Монеты: {data.coins}
+                            </div>
+                        </button>
+                    </>
                 ) : (
                     <div className="tc-closed">
-                        🚫 Турнир завершён. Жди следующий
+                        🚫 Турнир завершён
                     </div>
                 )}
             </div>
+
 
             {/* ───────────────────────────────────── */}
             {/* LEADERBOARD (как в старом коде) */}
