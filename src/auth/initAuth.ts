@@ -1,23 +1,23 @@
 // src/auth/initAuth.ts
 
 /**
- * Telegram WebApp auth
- * - ВСЕГДА перевыпускает JWT
- * - НЕ доверяет localStorage
- * - Telegram initData = source of truth
+ * Telegram WebApp authentication
+ * ✅ Always re-authenticates
+ * ❌ Does NOT reuse old JWT
+ * ✅ initData = source of truth
  */
 
 export async function initAuth(): Promise<string | null> {
     try {
         const tg = (window as any).Telegram?.WebApp;
 
-        // 1️⃣ Проверка, что мы реально в Telegram
+        // 1️⃣ Убеждаемся, что мы в Telegram
         if (!tg) {
             console.warn('❌ Telegram.WebApp not found');
             return null;
         }
 
-        // 2️⃣ Проверка initData
+        // 2️⃣ Проверяем initData
         if (!tg.initData || tg.initData.length < 20) {
             console.warn('❌ Telegram initData missing or too short');
             return null;
@@ -27,7 +27,10 @@ export async function initAuth(): Promise<string | null> {
             import.meta.env.VITE_API_BASE_URL ||
             'https://monstercatch-production.up.railway.app';
 
-        // 3️⃣ Запрос на backend (ВСЕГДА)
+        // 🔥 ВАЖНО: удаляем старый токен ПЕРЕД авторизацией
+        localStorage.removeItem('authToken');
+
+        // 3️⃣ Всегда вызываем backend
         const res = await fetch(`${backendUrl}/auth/telegram`, {
             method: 'POST',
             headers: {
@@ -38,28 +41,25 @@ export async function initAuth(): Promise<string | null> {
             }),
         });
 
-        // 4️⃣ Ошибка авторизации
         if (!res.ok) {
             const text = await res.text();
             console.error('❌ Telegram auth failed:', res.status, text);
-            localStorage.removeItem('authToken');
             return null;
         }
 
-        // 5️⃣ Читаем ответ
+        // 4️⃣ Получаем новый JWT
         const data = await res.json();
         const token: string | undefined = data?.token;
 
         if (!token) {
             console.error('❌ Backend returned no token');
-            localStorage.removeItem('authToken');
             return null;
         }
 
-        // 6️⃣ Сохраняем НОВЫЙ токен
+        // 5️⃣ Сохраняем ТОЛЬКО НОВЫЙ токен
         localStorage.setItem('authToken', token);
 
-        console.log('✅ Telegram auth success — new JWT stored');
+        console.log('✅ Telegram auth success — NEW JWT issued');
         return token;
 
     } catch (err) {

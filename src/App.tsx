@@ -433,14 +433,22 @@ function App() {
         const loadProfile = async () => {
             try {
                 const res = await apiFetch('/users/me', token);
-                const data = await res.json().catch(() => ({}));
 
+                if (res.status === 401) {
+                    console.warn('401 → reauth');
+                    const newToken = await initAuth();
+                    if (newToken) setToken(newToken);
+                    return;
+                }
+
+                const data = await res.json().catch(() => ({}));
                 if (!res.ok) return;
 
                 if (!cancelled) {
                     setMe(data);
-                    // setIsBooting(false);
+                    setUserId(data.id);
                 }
+
                 const ticketsRes = await apiFetch('/tickets/count', token);
                 const ticketsData = await ticketsRes.json().catch(() => ({}));
 
@@ -454,16 +462,11 @@ function App() {
 
         loadProfile();
 
-
-
-
-        // const interval = setInterval(loadProfile, 5000);
-
         return () => {
             cancelled = true;
-            // clearInterval(interval);
         };
     }, [token]);
+
 
     // кнопка "Купить монеты" в меню
     const buyCoinsMenu = () => {
@@ -521,15 +524,15 @@ function App() {
 
             setToken(t);
 
-            try {
-                const payload = JSON.parse(atob(t.split('.')[1]));
-                if (payload.userId) {
-                    setUserId(payload.userId);
-                }
-            } catch (e) {
-                console.error(e);
-                setError('Не получилось прочитать JWT payload');
-            }
+            // try {
+            //     const payload = JSON.parse(atob(t.split('.')[1]));
+            //     if (payload.userId) {
+            //         setUserId(payload.userId);
+            //     }
+            // } catch (e) {
+            //     console.error(e);
+            //     setError('Не получилось прочитать JWT payload');
+            // }
         })();
     }, []);
 
