@@ -26,6 +26,8 @@ interface TournamentData {
 }
 
 
+
+
 export function TournamentCard({
                                    type,
                                    token,
@@ -38,7 +40,8 @@ export function TournamentCard({
 }) {
     const [data, setData] = useState<TournamentData | null>(null);
     const [loading, setLoading] = useState(true);
-    const [joining, setJoining] = useState(false);
+    const [,setJoining] = useState(false);
+    const [hint, setHint] = useState<string | null>(null);
     const [error, setError] = useState('');
 
     // ─────────────────────────────────────────────
@@ -165,11 +168,19 @@ export function TournamentCard({
                     <>
                         {/* 🎟 ВХОД ЗА БИЛЕТЫ */}
                         <button
-                            className="tc-btn join"
-                            disabled={joining || data.ticketsCount < 50}
-                            onClick={() => handleJoin('TICKETS')}
+                            className={`tc-join-card ${
+                                data.ticketsCount < 50 ? 'disabled' : 'ticket'
+                            }`}
+                            onClick={() => {
+                                if (data.ticketsCount < 50) {
+                                    setHint(`❌ Не хватает билетов: нужно ещё ${50 - data.ticketsCount}`);
+                                    setTimeout(() => setHint(null), 2500);
+                                    return;
+                                }
+                                handleJoin('TICKETS');
+                            }}
                         >
-                            🎟 Войти за билеты
+                        🎟 Войти за билеты
                             <div className="tc-btn-sub">
                                 {data.ticketsCount >= 50
                                     ? `Билеты: ${data.ticketsCount}`
@@ -179,15 +190,31 @@ export function TournamentCard({
 
                         {/* 🪙 ВХОД ЗА МОНЕТЫ */}
                         <button
-                            className="tc-btn join secondary"
-                            disabled={joining || data.coins < data.entryFee}
-                            onClick={() => handleJoin('COINS')}
+                            className={`tc-join-card ${
+                                data.coins < data.entryFee ? 'disabled' : 'coin'
+                            }`}
+                            onClick={() => {
+                                if (data.coins < data.entryFee) {
+                                    setHint(
+                                        `❌ Не хватает монет: нужно ещё ${data.entryFee - data.coins} 🪙`,
+                                    );
+                                    setTimeout(() => setHint(null), 2500);
+                                    return;
+                                }
+                                handleJoin('COINS');
+                            }}
                         >
-                            🪙 Войти за {data.entryFee} монет
+                        🪙 Войти за {data.entryFee} монет
                             <div className="tc-btn-sub">
                                 Монеты: {data.coins}
                             </div>
                         </button>
+                        {hint && (
+                            <div className="tc-hint">
+                                {hint}
+                            </div>
+                        )}
+
                     </>
                 ) : (
                     <div className="tc-closed">
