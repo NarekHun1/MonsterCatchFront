@@ -156,72 +156,72 @@ export function TournamentCard({
             </div>
 
             <div className="tc-actions">
-                {/* 🎮 УЖЕ ВСТУПИЛ → ИГРАТЬ */}
+
+                {/* 🎮 УЖЕ ВСТУПИЛ */}
                 {data.joined ? (
                     <button
-                        className="tc-btn play"
+                        className="tc-play-main"
                         onClick={() => onStartGame(data.tournamentId)}
                     >
-                        🎮 Играть
+                        <span className="glow" />
+                        🎮 ИГРАТЬ
                     </button>
                 ) : canJoin ? (
-                    <>
-                        {/* 🎟 ВХОД ЗА БИЛЕТЫ */}
-                        <button
-                            className={`tc-join-card ${
-                                data.ticketsCount < 50 ? 'disabled' : 'ticket'
+                    <div className="tc-entry-cards">
+
+                        {/* 🎟 БИЛЕТЫ */}
+                        <div
+                            className={`entry-card ticket ${
+                                data.ticketsCount < 50 ? 'locked' : ''
                             }`}
                             onClick={() => {
                                 if (data.ticketsCount < 50) {
-                                    setHint(`❌ Не хватает билетов: нужно ещё ${50 - data.ticketsCount}`);
+                                    setHint(`❌ Нужно ещё ${50 - data.ticketsCount} 🎟`);
                                     setTimeout(() => setHint(null), 2500);
                                     return;
                                 }
                                 handleJoin('TICKETS');
                             }}
                         >
-                        🎟 Войти за билеты
-                            <div className="tc-btn-sub">
+                            <div className="entry-glow" />
+                            <div className="entry-icon">🎟</div>
+                            <div className="entry-title">Войти за билеты</div>
+                            <div className="entry-sub">
                                 {data.ticketsCount >= 50
                                     ? `Билеты: ${data.ticketsCount}`
                                     : `Нужно ещё ${50 - data.ticketsCount}`}
                             </div>
-                        </button>
+                        </div>
 
-                        {/* 🪙 ВХОД ЗА МОНЕТЫ */}
-                        <button
-                            className={`tc-join-card ${
-                                data.coins < data.entryFee ? 'disabled' : 'coin'
+                        {/* 🪙 МОНЕТЫ */}
+                        <div
+                            className={`entry-card coin ${
+                                data.coins < data.entryFee ? 'locked' : ''
                             }`}
                             onClick={() => {
                                 if (data.coins < data.entryFee) {
-                                    setHint(
-                                        `❌ Не хватает монет: нужно ещё ${data.entryFee - data.coins} 🪙`,
-                                    );
+                                    setHint(`❌ Нужно ещё ${data.entryFee - data.coins} 🪙`);
                                     setTimeout(() => setHint(null), 2500);
                                     return;
                                 }
                                 handleJoin('COINS');
                             }}
                         >
-                        🪙 Войти за {data.entryFee} монет
-                            <div className="tc-btn-sub">
-                                Монеты: {data.coins}
+                            <div className="entry-glow" />
+                            <div className="entry-icon">🪙</div>
+                            <div className="entry-title">Войти за монеты</div>
+                            <div className="entry-sub">
+                                Цена: {data.entryFee} · Баланс: {data.coins}
                             </div>
-                        </button>
-                        {hint && (
-                            <div className="tc-hint">
-                                {hint}
-                            </div>
-                        )}
+                        </div>
 
-                    </>
-                ) : (
-                    <div className="tc-closed">
-                        🚫 Турнир завершён
+                        {hint && <div className="tc-hint">{hint}</div>}
                     </div>
+                ) : (
+                    <div className="tc-closed">🚫 Турнир завершён</div>
                 )}
             </div>
+
 
 
 
