@@ -457,11 +457,11 @@ function App() {
 
 
 
-        const interval = setInterval(loadProfile, 5000);
+        // const interval = setInterval(loadProfile, 5000);
 
         return () => {
             cancelled = true;
-            clearInterval(interval);
+            // clearInterval(interval);
         };
     }, [token]);
 
