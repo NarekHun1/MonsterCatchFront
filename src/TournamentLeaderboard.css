@@ -54,17 +54,111 @@
     font-size: 12px;
     opacity: 0.8;
 }
-/*hint*/
-/* ====== HINT ====== */
+
+/* ===== ENTRY CARDS ===== */
+
+.tc-entry-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 16px;
+}
+
+/* ===== CARD ===== */
+
+.entry-card {
+    position: relative;
+    padding: 16px 12px;
+    border-radius: 18px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+    user-select: none;
+}
+
+.entry-card:hover {
+    transform: translateY(-3px) scale(1.02);
+}
+
+/* ICON */
+
+.entry-icon {
+    font-size: 34px;
+    margin-bottom: 6px;
+}
+
+/* TEXT */
+
+.entry-title {
+    font-size: 14px;
+    font-weight: 800;
+    margin-bottom: 2px;
+}
+
+.entry-sub {
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+/* ===== TICKET ===== */
+
+.entry-card.ticket {
+    background: linear-gradient(135deg, #1e90ff, #00d4ff);
+    color: #001b2e;
+}
+
+/* ===== COIN ===== */
+
+.entry-card.coin {
+    background: linear-gradient(135deg, #ffb347, #ff7a18);
+    color: #2a1200;
+}
+
+/* ===== LOCKED ===== */
+
+.entry-card.locked {
+    opacity: 0.45;
+    filter: grayscale(0.7);
+}
+
+.entry-card.locked:hover {
+    transform: none;
+}
+
+/* ===== PLAY BUTTON ===== */
+
+.tc-play-main {
+    width: 100%;
+    padding: 16px;
+    border-radius: 18px;
+    font-size: 18px;
+    font-weight: 900;
+    border: none;
+    cursor: pointer;
+    background: linear-gradient(135deg, #ff4d4d, #ffb347);
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 10px 30px rgba(255, 77, 77, 0.45);
+}
+
+.tc-play-main:hover {
+    transform: scale(1.03);
+}
+
+/* ===== HINT ===== */
 
 .tc-hint {
-    margin-top: 10px;
-    padding: 10px 12px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #ff4d4d, #ff7849);
+    margin-top: 14px;
+    padding: 12px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #ff4d4d, #ff7a18);
     color: #000;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
     text-align: center;
     animation: hintPop 0.2s ease-out;
 }
