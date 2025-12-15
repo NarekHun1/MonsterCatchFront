@@ -426,6 +426,13 @@ function App() {
     }, []);
 
     useEffect(() => {
+        if (currentPage !== 'menu') {
+            setShowHero(false);
+        }
+    }, [currentPage]);
+
+
+    useEffect(() => {
         if (!token) return;
 
         let cancelled = false;
@@ -914,7 +921,7 @@ function App() {
                     <span>Powered by твоё безумие и JS ⚡️</span>
                 </footer>
 
-                {me && (
+                {me && currentPage === 'menu' && (
                     <>
                         <button
                             className="hero-floating-bar"
@@ -955,6 +962,7 @@ function App() {
                         )}
                     </>
                 )}
+
             </main>
         </div>
     );
