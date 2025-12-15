@@ -20,7 +20,7 @@ interface TournamentData {
     prizePool: number;
     joined: boolean;
     participants: Participant[];
-
+    entryFee: number;
     ticketsCount: number;
     coins: number;
 }
@@ -77,30 +77,29 @@ export function TournamentCard({
     // ─────────────────────────────────────────────
     // JOIN
     // ─────────────────────────────────────────────
-    const handleJoin = async (paymentType: 'TICKETS' | 'COINS') => {
-        if (!data) return;
-
-        setJoining(true);
-        setError('');
-
+    const handleJoin = async (entry: 'TICKETS' | 'COINS') => {
         try {
+            setJoining(true);
+            setError('');
+
             const res = await apiFetch('/tournament/join', token, {
                 method: 'POST',
-                body: JSON.stringify({ type, paymentType }),
+                body: JSON.stringify({ type, entry }),
             });
 
-            const json = await res.json().catch(() => ({}));
+            const json = await res.json();
             if (!res.ok) {
-                throw new Error(json.message || 'Не удалось вступить');
+                throw new Error(json.message || 'Ошибка входа');
             }
 
-            await load();
+            await load(); // 🔄 обновляем турнир
         } catch (e: any) {
-            setError(e.message || 'Ошибка вступления');
+            setError(e.message);
         } finally {
             setJoining(false);
         }
     };
+
 
 
     // ─────────────────────────────────────────────
@@ -154,6 +153,7 @@ export function TournamentCard({
             </div>
 
             <div className="tc-actions">
+                {/* 🎮 УЖЕ ВСТУПИЛ → ИГРАТЬ */}
                 {data.joined ? (
                     <button
                         className="tc-btn play"
@@ -180,10 +180,10 @@ export function TournamentCard({
                         {/* 🪙 ВХОД ЗА МОНЕТЫ */}
                         <button
                             className="tc-btn join secondary"
-                            disabled={joining || data.coins < 50}
+                            disabled={joining || data.coins < data.entryFee}
                             onClick={() => handleJoin('COINS')}
                         >
-                            🪙 Войти за монеты
+                            🪙 Войти за {data.entryFee} монет
                             <div className="tc-btn-sub">
                                 Монеты: {data.coins}
                             </div>
@@ -195,6 +195,7 @@ export function TournamentCard({
                     </div>
                 )}
             </div>
+
 
 
             {/* ───────────────────────────────────── */}
