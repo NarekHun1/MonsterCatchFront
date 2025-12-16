@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import {BlueStarIcon} from "./styles/BlueStarIcon.tsx";
 
 interface Props {
     stars: number;
@@ -62,13 +63,21 @@ export function ExchangeTicket({
         >
             <div className="menu-icon">🎟</div>
             <div className="menu-card-title">Турнирный билет</div>
+
             <div className="menu-card-text">
-                {loading
-                    ? '⏳ Обмен...'
-                    : canExchange
-                        ? 'Обменять 2000 ⭐ на билет'
-                        : `Нужно ещё ${COST - stars} ⭐`}
+                {loading ? (
+                    '⏳ Обмен...'
+                ) : canExchange ? (
+                    <>
+                        Обменять {COST} <BlueStarIcon size={16}/> на билет
+                    </>
+                ) : (
+                    <>
+                        Нужно ещё {COST - stars} <BlueStarIcon size={16}/>
+                    </>
+                )}
             </div>
         </button>
+
     );
 }
