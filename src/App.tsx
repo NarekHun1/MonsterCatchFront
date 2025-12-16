@@ -11,6 +11,7 @@ import { Wallet } from './Wallet';
 import {WalletIcon} from "./WalletIcon.tsx";
 import {TournamentCard} from "./TournamentCard.tsx";
 import { ExchangeTicket } from './ExchangeTicket';
+import {BlueStarIcon} from "./styles/BlueStarIcon.tsx";
 
 
 
@@ -650,9 +651,10 @@ function App() {
 
                             <div className="user-stats-row">
                                 <div className="user-pill user-pill--stars">
-                                    <span className="user-pill-icon">⭐</span>
+                                    <BlueStarIcon size={14} />
                                     <span className="user-pill-value">{me.stars}</span>
                                 </div>
+
 
                                 <div className="user-pill user-pill--coins">
                                     <span className="user-pill-icon">🪙</span>
