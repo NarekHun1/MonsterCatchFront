@@ -276,6 +276,12 @@ body {
     gap: 10px;
     margin-top: 6px;
 }
+.menu-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 14px; /* расстояние между карточкой и кнопкой */
+    margin-top: 16px;
+}
 
 .menu-card {
     position: relative;
