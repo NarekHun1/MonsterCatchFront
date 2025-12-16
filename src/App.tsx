@@ -319,7 +319,7 @@ function Shop({ token }: { token: string }) {
     return (
         <div className="panel">
             <h2 className="panel-title">🛒 Магазин улучшений</h2>
-            <p className="panel-muted">Твои звёзды: ⭐ {stars}</p>
+            <p className="panel-muted">Твои звёзды:  <BlueStarIcon /> {stars}</p>
 
             {loading && <p className="panel-muted">Загрузка...</p>}
             {error && <p className="panel-error">Ошибка: {error}</p>}
@@ -334,7 +334,7 @@ function Shop({ token }: { token: string }) {
                             </span>
                         </div>
                         <div className="shop-row">
-                            <span className="shop-price">Цена: {item.price} ⭐</span>
+                            <span className="shop-price">Цена: {item.price}  <BlueStarIcon /></span>
                             <button
                                 className="shop-buy-btn"
                                 onClick={() => handleBuy(item.id)}
