@@ -174,6 +174,11 @@ body {
     font-weight: 500;
     color: #e5e7eb;
 }
+.user-pill--stars {
+    background: rgba(59, 130, 246, 0.25);
+    color: #e0f2fe;
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+}
 
 .user-pill-icon {
     font-size: 12px;

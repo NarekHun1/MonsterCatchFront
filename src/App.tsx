@@ -649,10 +649,11 @@ function App() {
                             </div>
 
                             <div className="user-stats-row">
-                                <div className="user-pill">
+                                <div className="user-pill user-pill--stars">
                                     <span className="user-pill-icon">⭐</span>
                                     <span className="user-pill-value">{me.stars}</span>
                                 </div>
+
                                 <div className="user-pill user-pill--coins">
                                     <span className="user-pill-icon">🪙</span>
                                     <span className="user-pill-value">{me.coins}</span>
