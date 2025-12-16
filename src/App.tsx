@@ -651,7 +651,7 @@ function App() {
 
                             <div className="user-stats-row">
                                 <div className="user-pill user-pill--stars">
-                                    <BlueStarIcon size={14} />
+                                    <BlueStarIcon size={18} />
                                     <span className="user-pill-value">{me.stars}</span>
                                 </div>
 
