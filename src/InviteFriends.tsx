@@ -1,6 +1,7 @@
 // src/InviteFriends.tsx
 import React, { useEffect, useState } from 'react';
 import { apiFetch } from './api';
+import {BlueStarIcon} from "./styles/BlueStarIcon.tsx";
 
 interface InviteFriendsProps {
     token: string;
@@ -77,7 +78,7 @@ export const InviteFriends: React.FC<InviteFriendsProps> = ({ token, onBack }) =
                 <>
                     <p className="panel-muted">
                         Отправь эту ссылку друзьям, чтобы они зашли в игру через тебя и ты
-                        получил бонусы ⭐
+                        получил бонусы <BlueStarIcon size={16} />
                     </p>
 
                     <div className="referral-box">

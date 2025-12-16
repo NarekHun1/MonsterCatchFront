@@ -8,7 +8,7 @@ import { apiFetch } from './api';
 import HeroViewer from './HeroViewer'; // 😈 3D демон
 import { initAuth } from './auth/initAuth';
 import { Wallet } from './Wallet';
-import {WalletIcon} from "./WalletIcon.tsx";
+import {WalletIcon} from "./styles/WalletIcon.tsx";
 import {TournamentCard} from "./TournamentCard.tsx";
 import { ExchangeTicket } from './ExchangeTicket';
 import {BlueStarIcon} from "./styles/BlueStarIcon.tsx";
@@ -319,7 +319,7 @@ function Shop({ token }: { token: string }) {
     return (
         <div className="panel">
             <h2 className="panel-title">🛒 Магазин улучшений</h2>
-            <p className="panel-muted">Твои звёзды:  <BlueStarIcon /> {stars}</p>
+            <p className="panel-muted">Твои звёзды:  <BlueStarIcon size={16} /> {stars}</p>
 
             {loading && <p className="panel-muted">Загрузка...</p>}
             {error && <p className="panel-error">Ошибка: {error}</p>}
@@ -334,7 +334,7 @@ function Shop({ token }: { token: string }) {
                             </span>
                         </div>
                         <div className="shop-row">
-                            <span className="shop-price">Цена: {item.price}  <BlueStarIcon /></span>
+                            <span className="shop-price">Цена: {item.price}  <BlueStarIcon size={16}/></span>
                             <button
                                 className="shop-buy-btn"
                                 onClick={() => handleBuy(item.id)}
@@ -531,16 +531,6 @@ function App() {
             }
 
             setToken(t);
-
-            // try {
-            //     const payload = JSON.parse(atob(t.split('.')[1]));
-            //     if (payload.userId) {
-            //         setUserId(payload.userId);
-            //     }
-            // } catch (e) {
-            //     console.error(e);
-            //     setError('Не получилось прочитать JWT payload');
-            // }
         })();
     }, []);
 
@@ -651,7 +641,7 @@ function App() {
 
                             <div className="user-stats-row">
                                 <div className="user-pill user-pill--stars">
-                                    <BlueStarIcon size={18} />
+                                    <BlueStarIcon size={16} />
                                     <span className="user-pill-value">{me.stars}</span>
                                 </div>
 
