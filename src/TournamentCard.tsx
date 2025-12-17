@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { apiFetch } from './api';
 import './TournamentLeaderboard.css'
 
-type TournamentType = 'HOURLY' | 'DAILY';
+type TournamentType = 'HOURLY' | 'DAILY' | 'CASH_CUP';
 type TournamentStatus = 'ACTIVE' | 'FINISHED';
 
 interface Participant {
@@ -80,14 +80,14 @@ export function TournamentCard({
     // ─────────────────────────────────────────────
     // JOIN
     // ─────────────────────────────────────────────
-    const handleJoin = async (entry: 'TICKETS' | 'COINS') => {
+    const handleJoin = async () => {
         try {
             setJoining(true);
             setError('');
 
             const res = await apiFetch('/tournament/join', token, {
                 method: 'POST',
-                body: JSON.stringify({ type, entry }),
+                body: JSON.stringify({ type }),
             });
 
             const json = await res.json();
@@ -180,7 +180,7 @@ export function TournamentCard({
                                     setTimeout(() => setHint(null), 2500);
                                     return;
                                 }
-                                handleJoin('TICKETS');
+                                handleJoin();
                             }}
                         >
                             <div className="entry-glow" />
@@ -204,7 +204,7 @@ export function TournamentCard({
                                     setTimeout(() => setHint(null), 2500);
                                     return;
                                 }
-                                handleJoin('COINS');
+                                handleJoin();
                             }}
                         >
                             <div className="entry-glow" />
