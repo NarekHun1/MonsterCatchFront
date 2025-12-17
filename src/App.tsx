@@ -16,7 +16,7 @@ import {BlueStarIcon} from "./styles/BlueStarIcon.tsx";
 
 
 
-type Page = 'menu' | 'game' | 'leaderboard' | 'invite' | 'tournament' | 'wallet';
+type Page = 'menu' | 'game' | 'leaderboard' | 'invite' | 'tournament' | 'wallet' | 'cashcup';
 
 interface MeResponse {
     id: number;
@@ -910,6 +910,17 @@ function App() {
                         </div>
                     </div>
                 )}
+                {/* 💰 CASH CUP */}
+                <div
+                    className="menu-card menu-card--gold"
+                    onClick={() => setCurrentPage('cashcup')}
+                >
+                    <div className="menu-icon">💰</div>
+                    <div className="menu-card-title">Cash Cup</div>
+                    <div className="menu-card-text">
+                        Турнир каждые 30 минут · Можно заработать
+                    </div>
+                </div>
 
                 <footer className="app-footer">
                     <span>Monster Catch · alpha</span>
