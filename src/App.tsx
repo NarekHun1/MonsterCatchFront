@@ -13,11 +13,13 @@ import {TournamentCard} from "./TournamentCard.tsx";
 import { ExchangeTicket } from './ExchangeTicket';
 import {BlueStarIcon} from "./styles/BlueStarIcon.tsx";
 import {CashCupCard} from "./CashCupCard.tsx";
+import { RouletteWheel } from './RouletteWheel';
 
 
 
 
-type Page = 'menu' | 'game' | 'leaderboard' | 'invite' | 'tournament' | 'wallet' | 'cashcup';
+
+type Page = 'menu' | 'game' | 'leaderboard' | 'invite' | 'tournament' | 'wallet' | 'cashcup'| 'roulette';
 
 interface MeResponse {
     id: number;
@@ -384,6 +386,7 @@ function App() {
     const [tournamentType, setTournamentType] =
         useState<'HOURLY' | 'DAILY' | null>(null);
     const [isBooting, setIsBooting] = useState(true);
+    const [showRoulette, setShowRoulette] = useState(false);
     const [minDelayPassed, setMinDelayPassed] = useState(false);
     const [tickets, setTickets] = useState<number>(0);
 
@@ -865,6 +868,23 @@ function App() {
                                     )}
                                     {token && <Shop token={token} />}
                                 </div>
+
+                            )}
+                            <div className="menu-card menu-card--gold" onClick={() => setShowRoulette(true)}>
+                                <div className="menu-icon">🎰</div>
+                                <div className="menu-card-title">Рулетка удачи</div>
+                                <div className="menu-card-text">Зарабатывай реальные 💰 деньги</div>
+                            </div>
+                            {showRoulette && (
+                                <RouletteWheel
+                                    token={token}
+                                    onClose={() => setShowRoulette(false)}
+                                    onReward={() => {
+                                        // после спина можно обновить профиль/тикеты
+                                        // самый простой вариант: дернуть /users/me и /tickets/count как ты уже делаешь
+                                        // или просто ничего (UI уже покажет результат)
+                                    }}
+                                />
                             )}
 
                             {currentPage === 'game' && token && (
