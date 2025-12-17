@@ -140,7 +140,7 @@ export function TournamentCard({
 
             <div className="tc-row">
                 <span>Призовой фонд</span>
-                <strong>{data.prizePool} 🪙</strong>
+                <strong>{data.prizePool ?? 0} 🪙</strong>
             </div>
 
             <div className="tc-status">
@@ -187,7 +187,7 @@ export function TournamentCard({
                             <div className="entry-icon">🎟</div>
                             <div className="entry-title">Войти за билеты</div>
                             <div className="entry-sub">
-                                {data.ticketsCount >= 50
+                                {(data.ticketsCount ?? 0)  >= 50
                                     ? `Билеты: ${data.ticketsCount}`
                                     : `Нужно ещё ${50 - data.ticketsCount}`}
                             </div>
