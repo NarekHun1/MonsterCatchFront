@@ -727,6 +727,12 @@ function App() {
                             <div className="panel panel-menu">
                                 <HeroCard level={me.level} xp={me.xp} />
 
+                                <button
+                                    className="menu-btn"
+                                    onClick={() => setCurrentPage('game')}
+                                >
+                                    🎮 Играть
+                                </button>
                                 <div className="menu-actions">
                                     {/* КУПИТЬ МОНЕТЫ */}
                                     <div className="menu-card" onClick={buyCoinsMenu}>
@@ -764,12 +770,6 @@ function App() {
                                         </div>
                                     </div>
 
-                                    <button
-                                        className="menu-btn"
-                                        onClick={() => setCurrentPage('game')}
-                                    >
-                                        🎮 Играть
-                                    </button>
                                 </div>
                             </div>
                         )}
