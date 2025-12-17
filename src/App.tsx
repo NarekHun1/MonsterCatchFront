@@ -735,11 +735,23 @@ function App() {
                                 </button>
                                 <div className="menu-actions">
                                     {/* КУПИТЬ МОНЕТЫ */}
-                                    <div className="menu-card" onClick={buyCoinsMenu}>
-                                        <div className="menu-icon">🪙</div>
-                                        <div className="menu-card-title">Купить монеты</div>
-                                        <div className="menu-card-text">
-                                            Пополнить баланс монет через Stars
+                                    <div className="buy-coins-card" onClick={buyCoinsMenu}>
+                                        <div className="buy-coins-glow" />
+
+                                        <div className="buy-coins-icon">🪙</div>
+
+                                        <div className="buy-coins-content">
+                                            <div className="buy-coins-title">
+                                                Купить монеты
+                                            </div>
+
+                                            <div className="buy-coins-subtitle">
+                                                💰 Играй • выигрывай • выводи
+                                            </div>
+
+                                            <div className="buy-coins-note">
+                                                Оплата через Telegram Stars ⭐
+                                            </div>
                                         </div>
                                     </div>
 
