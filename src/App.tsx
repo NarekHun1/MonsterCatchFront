@@ -736,17 +736,34 @@ function App() {
                                             Пополнить баланс монет через Stars
                                         </div>
                                     </div>
+
                                     {/* 💰 CASH CUP */}
                                     <div
-                                        className="menu-card menu-card--gold"
+                                        className="cashcup-card"
                                         onClick={() => setCurrentPage('cashcup')}
                                     >
-                                        <div className="menu-icon">💰</div>
-                                        <div className="menu-card-title">Cash Cup</div>
-                                        <div className="menu-card-text">
-                                            Турнир каждые 30 минут · Можно заработать
+                                        <div className="cashcup-glow" />
+
+                                        <div className="cashcup-header">
+                                            <span className="cashcup-badge">LIVE</span>
+                                            <span className="cashcup-title">💰 CASH CUP</span>
+                                        </div>
+
+                                        <div className="cashcup-body">
+                                            <div className="cashcup-prize">Призовой фонд</div>
+                                            <div className="cashcup-amount">🪙 Зарабатывай монеты</div>
+
+                                            <div className="cashcup-info">
+                                                ⏱ каждые 30 минут <br />
+                                                🎟 вход: 10 билетов
+                                            </div>
+                                        </div>
+
+                                        <div className="cashcup-footer">
+                                            <span>▶ Войти и выиграть</span>
                                         </div>
                                     </div>
+
                                     <button
                                         className="menu-btn"
                                         onClick={() => setCurrentPage('game')}
