@@ -751,7 +751,7 @@ function App() {
 
                                         <div className="cashcup-body">
                                             <div className="cashcup-prize">Призовой фонд</div>
-                                            <div className="cashcup-amount">💰 Играй и забирай реальные деньги</div>
+                                            <div className="cashcup-amount">💰REAL CASH PRIZ</div>
 
                                             <div className="cashcup-info">
                                                 ⏱ каждые 30 минут <br />
