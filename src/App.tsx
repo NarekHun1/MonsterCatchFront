@@ -736,7 +736,17 @@ function App() {
                                             Пополнить баланс монет через Stars
                                         </div>
                                     </div>
-
+                                    {/* 💰 CASH CUP */}
+                                    <div
+                                        className="menu-card menu-card--gold"
+                                        onClick={() => setCurrentPage('cashcup')}
+                                    >
+                                        <div className="menu-icon">💰</div>
+                                        <div className="menu-card-title">Cash Cup</div>
+                                        <div className="menu-card-text">
+                                            Турнир каждые 30 минут · Можно заработать
+                                        </div>
+                                    </div>
                                     <button
                                         className="menu-btn"
                                         onClick={() => setCurrentPage('game')}
@@ -923,17 +933,6 @@ function App() {
                         </div>
                     </div>
                 )}
-                {/* 💰 CASH CUP */}
-                <div
-                    className="menu-card menu-card--gold"
-                    onClick={() => setCurrentPage('cashcup')}
-                >
-                    <div className="menu-icon">💰</div>
-                    <div className="menu-card-title">Cash Cup</div>
-                    <div className="menu-card-text">
-                        Турнир каждые 30 минут · Можно заработать
-                    </div>
-                </div>
 
                 <footer className="app-footer">
                     <span>Monster Catch · alpha</span>
