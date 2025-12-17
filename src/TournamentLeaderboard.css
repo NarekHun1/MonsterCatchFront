@@ -203,3 +203,11 @@
         opacity: 1;
     }
 }
+.tc-timer {
+    margin: 6px 0 12px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 16px;
+    color: #ffd35a;
+    text-shadow: 0 0 6px rgba(255, 211, 90, 0.6);
+}

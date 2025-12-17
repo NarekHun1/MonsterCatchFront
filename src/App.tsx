@@ -12,6 +12,7 @@ import {WalletIcon} from "./styles/WalletIcon.tsx";
 import {TournamentCard} from "./TournamentCard.tsx";
 import { ExchangeTicket } from './ExchangeTicket';
 import {BlueStarIcon} from "./styles/BlueStarIcon.tsx";
+import {CashCupCard} from "./CashCupCard.tsx";
 
 
 
@@ -710,6 +711,18 @@ function App() {
 
                         </nav>
 
+                        {currentPage === 'cashcup' && token && (
+                            <CashCupCard
+                                token={token}
+                                onStartGame={(tournamentId) => {
+                                    setTournamentGameId(tournamentId);
+                                    setTournamentType(null);
+                                    setCurrentPage('game');
+                                }}
+                            />
+                        )}
+
+
                         {currentPage === 'menu' && me && (
                             <div className="panel panel-menu">
                                 <HeroCard level={me.level} xp={me.xp} />
@@ -961,7 +974,6 @@ function App() {
                                     >
                                         ✕
                                     </button>
-
                                     <HeroViewer />
                                 </div>
                             </div>

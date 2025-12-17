@@ -21,6 +21,17 @@ interface CashCupData {
     ticketsCount: number;
 }
 
+/* ───────────────── TIMER HELPER ───────────────── */
+function formatMs(ms: number) {
+    if (ms <= 0) return '00:00';
+    const total = Math.floor(ms / 1000);
+    const m = Math.floor(total / 60);
+    const s = total % 60;
+    return `${m.toString().padStart(2, '0')}:${s
+        .toString()
+        .padStart(2, '0')}`;
+}
+
 export function CashCupCard({
                                 token,
                                 onStartGame,
@@ -32,7 +43,9 @@ export function CashCupCard({
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [hint, setHint] = useState<string | null>(null);
+    const [timeLeft, setTimeLeft] = useState(0);
 
+    /* ───────────────── LOAD ───────────────── */
     const load = async () => {
         try {
             setLoading(true);
@@ -60,6 +73,21 @@ export function CashCupCard({
         return () => clearInterval(i);
     }, []);
 
+    /* ───────────────── TIMER ───────────────── */
+    useEffect(() => {
+        if (!data?.endsAt) return;
+
+        const tick = () => {
+            const end = new Date(data.endsAt).getTime();
+            setTimeLeft(end - Date.now());
+        };
+
+        tick();
+        const i = setInterval(tick, 1000);
+        return () => clearInterval(i);
+    }, [data?.endsAt]);
+
+    /* ───────────────── JOIN ───────────────── */
     const join = async () => {
         try {
             setError('');
@@ -79,6 +107,7 @@ export function CashCupCard({
         }
     };
 
+    /* ───────────────── RENDER ───────────────── */
     if (loading) {
         return <div className="tournament-card">Загрузка…</div>;
     }
@@ -95,9 +124,9 @@ export function CashCupCard({
         <div className="tournament-card cash-cup">
             <h3>💰 CASH CUP</h3>
 
-            <div className="tc-row">
-                <span>⏱ Старт</span>
-                <strong>каждые 30 минут</strong>
+            {/* ⏳ TIMER */}
+            <div className="tc-timer">
+                ⏳ {timeLeft > 0 ? formatMs(timeLeft) : 'Следующий раунд…'}
             </div>
 
             <div className="tc-row">
@@ -107,7 +136,7 @@ export function CashCupCard({
 
             <div className="tc-row">
                 <span>💎 Призовой фонд</span>
-                <strong>{data.prizePool} 🪙</strong>
+                <strong>{data.prizePool ?? 0} 🪙</strong>
             </div>
 
             <div className="tc-row small">
@@ -145,7 +174,7 @@ export function CashCupCard({
                 {hint && <div className="tc-hint">{hint}</div>}
             </div>
 
-            {/* LEADERBOARD */}
+            {/* ───────────── LEADERBOARD ───────────── */}
             <div className="tc-leaderboard">
                 <h4>🏆 Топ игроков</h4>
 
@@ -158,7 +187,13 @@ export function CashCupCard({
                         {data.participants.map((p, i) => (
                             <div key={p.userId} className="tc-lb-row">
                                 <div className="tc-lb-rank">
-                                    {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}
+                                    {i === 0
+                                        ? '🥇'
+                                        : i === 1
+                                            ? '🥈'
+                                            : i === 2
+                                                ? '🥉'
+                                                : `#${i + 1}`}
                                 </div>
                                 <div className="tc-lb-name">
                                     {p.username || 'Игрок'}
