@@ -727,12 +727,14 @@ function App() {
                             <div className="panel panel-menu">
                                 <HeroCard level={me.level} xp={me.xp} />
 
-                                <button
-                                    className="menu-btn"
-                                    onClick={() => setCurrentPage('game')}
-                                >
-                                    🎮 Играть
+                                <button className="play-main-btn" onClick={() => setCurrentPage('game')}>
+                                    <span className="play-glow" />
+                                    <span className="play-shine" />
+
+                                    <span className="play-icon">🎮</span>
+                                    <span className="play-text">ИГРАТЬ</span>
                                 </button>
+
                                 <div className="menu-actions">
                                     {/* КУПИТЬ МОНЕТЫ */}
                                     <div className="buy-coins-card" onClick={buyCoinsMenu}>

@@ -318,6 +318,103 @@ body {
     background: radial-gradient(circle at top left, rgba(148, 163, 184, 0.25), rgba(15, 23, 42, 1));
 }
 
+/*play buttn*/
+.play-main-btn {
+    position: relative;
+    width: 100%;
+    height: 64px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+
+    border-radius: 24px;
+    border: none;
+    cursor: pointer;
+
+    background: linear-gradient(
+            135deg,
+            #00ff9d,
+            #00c3ff,
+            #00ff9d
+    );
+
+    box-shadow:
+            0 12px 30px rgba(0, 255, 180, 0.45),
+            inset 0 0 12px rgba(255,255,255,0.25);
+
+    font-weight: 900;
+    font-size: 20px;
+    color: #002f2a;
+
+    overflow: hidden;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.play-main-btn:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow:
+            0 18px 45px rgba(0, 255, 180, 0.6),
+            inset 0 0 18px rgba(255,255,255,0.35);
+}
+
+.play-main-btn:active {
+    transform: scale(0.96);
+}
+
+/* 🔥 ГЛОУ */
+.play-glow {
+    position: absolute;
+    inset: -40%;
+    background: radial-gradient(
+            circle,
+            rgba(255,255,255,0.35),
+            transparent 60%
+    );
+    animation: playGlowMove 3.5s linear infinite;
+}
+
+@keyframes playGlowMove {
+    0% { transform: translateX(-30%); }
+    100% { transform: translateX(30%); }
+}
+
+/* ✨ БЛИК */
+.play-shine {
+    position: absolute;
+    top: -60%;
+    left: -40%;
+    width: 40%;
+    height: 200%;
+    background: linear-gradient(
+            120deg,
+            transparent,
+            rgba(255,255,255,0.55),
+            transparent
+    );
+    transform: rotate(20deg);
+    animation: playShine 4s infinite;
+}
+
+@keyframes playShine {
+    0% { left: -40%; }
+    40% { left: 140%; }
+    100% { left: 140%; }
+}
+
+/* 🎮 ИКОНКА */
+.play-icon {
+    font-size: 26px;
+    filter: drop-shadow(0 0 6px rgba(255,255,255,0.7));
+}
+
+/* ТЕКСТ */
+.play-text {
+    position: relative;
+    z-index: 1;
+    letter-spacing: 1px;
+}
 
 /*BUY COINS*/
 .buy-coins-card {
