@@ -785,13 +785,13 @@ function App() {
                                         <div className="cashcup-footer">
                                             <span>▶ Войти и выиграть</span>
                                         </div>
-                                        <div className="menu-card menu-card--gold" onClick={() => setShowRoulette(true)}>
-                                            <div className="menu-icon">🎰</div>
-                                            <div className="menu-card-title">Рулетка удачи</div>
-                                            <div className="menu-card-text">Зарабатывай реальные 💰 деньги</div>
-                                        </div>
-                                    </div>
 
+                                    </div>
+                                    <div className="menu-card menu-card--gold" onClick={() => setShowRoulette(true)}>
+                                        <div className="menu-icon">🎰</div>
+                                        <div className="menu-card-title">Рулетка удачи</div>
+                                        <div className="menu-card-text">Зарабатывай реальные 💰 деньги</div>
+                                    </div>
                                 </div>
                             </div>
                         )}
