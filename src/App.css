@@ -1532,3 +1532,26 @@ button {
 .menu-card--gold .menu-card-text {
     color: #fde68a;
 }
+/* 🟡 SOON BADGE */
+.menu-card--gold::after {
+    content: 'SOON';
+    position: absolute;
+    top: 12px;
+    right: 12px;
+
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 1px;
+
+    color: #78350f;
+    background: linear-gradient(135deg, #fde68a, #facc15);
+
+    border-radius: 999px;
+
+    box-shadow:
+            0 4px 12px rgba(250, 204, 21, 0.6),
+            inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+
+    z-index: 2;
+}
