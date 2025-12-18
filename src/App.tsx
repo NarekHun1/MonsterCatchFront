@@ -785,6 +785,17 @@ function App() {
                                         <div className="cashcup-footer">
                                             <span>▶ Войти и выиграть</span>
                                         </div>
+                                        {showRoulette && (
+                                            <RouletteWheel
+                                                token={token}
+                                                onClose={() => setShowRoulette(false)}
+                                                onReward={() => {
+                                                    // после спина можно обновить профиль/тикеты
+                                                    // самый простой вариант: дернуть /users/me и /tickets/count как ты уже делаешь
+                                                    // или просто ничего (UI уже покажет результат)
+                                                }}
+                                            />
+                                        )}
                                     </div>
 
                                 </div>
@@ -875,17 +886,6 @@ function App() {
                                 <div className="menu-card-title">Рулетка удачи</div>
                                 <div className="menu-card-text">Зарабатывай реальные 💰 деньги</div>
                             </div>
-                            {showRoulette && (
-                                <RouletteWheel
-                                    token={token}
-                                    onClose={() => setShowRoulette(false)}
-                                    onReward={() => {
-                                        // после спина можно обновить профиль/тикеты
-                                        // самый простой вариант: дернуть /users/me и /tickets/count как ты уже делаешь
-                                        // или просто ничего (UI уже покажет результат)
-                                    }}
-                                />
-                            )}
 
                             {currentPage === 'game' && token && (
                                 <Game

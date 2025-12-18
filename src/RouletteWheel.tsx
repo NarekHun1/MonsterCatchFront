@@ -184,10 +184,9 @@ export function RouletteWheel({
                             🎉 Выпало: <b>{result.label || sectors[getIndexBySectorId(result.sectorId)].label}</b>
                         </div>
                     )}
-
                     <div className="roulette-note">
-                        🥇 50% · 🥈 20% · 🥉 10% · 🏦 20% — это для Cash Cup.
-                        Рулетка — отдельные призы (бэк решает).
+                        🎁 Приз определяется случайно.
+                        Шансы и награды настраиваются сервером.
                     </div>
                 </div>
             </div>
