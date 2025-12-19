@@ -35,6 +35,15 @@ export const translations: Record<Lang, Record<string, string>> = {
         inProgress: 'В процессе',
         error: 'Ошибка',
 
+        shopTitle: 'Магазин улучшений',
+        yourStars: 'Твои звёзды',
+        price: 'Цена',
+        buy: 'Купить',
+        max: 'Макс',
+        timeMonster: 'Монстр времени!',
+        timeBonus: '+5 секунд к каждому раунду',
+        cool: 'Круто',
+
     },
 
     en: {
@@ -70,6 +79,15 @@ export const translations: Record<Lang, Record<string, string>> = {
         claim: 'Claim',
         inProgress: 'In progress',
         error: 'Error',
+
+        shopTitle: 'Upgrade Shop',
+        yourStars: 'Your stars',
+        price: 'Price',
+        buy: 'Buy',
+        max: 'Max',
+        timeMonster: 'Time Monster!',
+        timeBonus: '+5 seconds per round',
+        cool: 'Awesome',
 
     },
 };

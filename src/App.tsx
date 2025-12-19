@@ -258,7 +258,8 @@ interface ShopItem {
     canBuy: boolean;
 }
 
-function Shop({ token }: { token: string }) {
+function Shop({ token, translate }: { token: string ,translate: (key: string) => string; })
+{
     const [items, setItems] = useState<ShopItem[]>([]);
     const [stars, setStars] = useState<number>(0);
     const [error, setError] = useState('');
@@ -326,11 +327,11 @@ function Shop({ token }: { token: string }) {
 
     return (
         <div className="panel">
-            <h2 className="panel-title">🛒 Магазин улучшений</h2>
-            <p className="panel-muted">Твои звёзды:  <BlueStarIcon size={16} /> {stars}</p>
+            <h2 className="panel-title">🛒 {translate('shopTitle')}</h2>
+            <p className="panel-muted">{translate('yourStars')}:  <BlueStarIcon size={16} /> {stars}</p>
 
-            {loading && <p className="panel-muted">Загрузка...</p>}
-            {error && <p className="panel-error">Ошибка: {error}</p>}
+            {loading && <p className="panel-muted">{translate('loading')}</p>}
+            {error && <p className="panel-error">{translate('error')}:{error}</p>}
 
             <div className="shop-list">
                 {items.map((item) => (
@@ -342,13 +343,13 @@ function Shop({ token }: { token: string }) {
                             </span>
                         </div>
                         <div className="shop-row">
-                            <span className="shop-price">Цена: {item.price}  <BlueStarIcon size={16}/></span>
+                            <span className="shop-price">{translate('price')}: {item.price}  <BlueStarIcon size={16}/></span>
                             <button
                                 className="shop-buy-btn"
                                 onClick={() => handleBuy(item.id)}
                                 disabled={!item.canBuy}
                             >
-                                {item.level >= item.maxLevel ? 'Макс' : 'Купить'}
+                                {item.level >= item.maxLevel ? translate('max') : translate('buy')}
                             </button>
                         </div>
                     </div>
@@ -359,10 +360,10 @@ function Shop({ token }: { token: string }) {
                 <div className="reward-overlay" onClick={() => setRewardPopup(null)}>
                     <div className="reward-card">
                         <div className="reward-emoji">⏳</div>
-                        <div className="reward-title">Монстр времени!</div>
-                        <div className="reward-text">+5 секунд к каждому раунду</div>
+                        <div className="reward-title">{translate('timeMonster')}</div>
+                        <div className="reward-text">{translate('timeBonus')}</div>
                         <div className="reward-level">
-                            Уровень времени: {rewardPopup.newLevel} / 5
+                            {translate('cool')}: {rewardPopup.newLevel} / 5
                         </div>
                         <button
                             className="reward-btn"
@@ -897,7 +898,7 @@ function App() {
                                             t={t}
                                         />
                                     )}
-                                    {token && <Shop token={token} />}
+                                    {token && <Shop token={token} translate={t} />}
                                 </div>
 
                             )}
