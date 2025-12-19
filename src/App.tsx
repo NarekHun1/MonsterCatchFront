@@ -777,11 +777,11 @@ function App() {
                                             </div>
 
                                             <div className="buy-coins-subtitle">
-                                                💰 Играй • выигрывай • выводи
+                                                {t('buyCoinsSubtitle')}
                                             </div>
 
                                             <div className="buy-coins-note">
-                                                Оплата через Telegram Stars ⭐
+                                                {t('buyCoinsNote')}
                                             </div>
                                         </div>
                                     </div>
@@ -803,19 +803,19 @@ function App() {
                                             <div className="cashcup-amount">💰REAL CASH PRIZ</div>
 
                                             <div className="cashcup-info">
-                                                ⏱ каждые 30 минут <br />
-                                                🎟 вход: 10 билетов
+                                                ⏱ {t('every30min')} <br />
+                                                🎟{t('entryTickets')}: 10 билетов
                                             </div>
                                         </div>
 
                                         <div className="cashcup-footer">
-                                            <span>▶ Войти и выиграть</span>
+                                            <span>▶ {t('enterAndWin')}</span>
                                         </div>
 
                                     </div>
                                     <div className="menu-card menu-card--gold" onClick={() => setShowRoulette(true)}>
                                         <div className="menu-icon">🎰</div>
-                                        <div className="menu-card-title">Рулетка удачи</div>
+                                        <div className="menu-card-title">{t('rouletteDesc')}</div>
                                         <div className="menu-card-text">Зарабатывай реальные 💰 деньги</div>
                                     </div>
                                 </div>

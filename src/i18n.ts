@@ -43,6 +43,14 @@ export const translations: Record<Lang, Record<string, string>> = {
         timeMonster: 'Монстр времени!',
         timeBonus: '+5 секунд к каждому раунду',
         cool: 'Круто',
+        buyCoinsSubtitle: '💰 Играй • выигрывай • выводи',
+        buyCoinsNote: 'Оплата через Telegram Stars ⭐',
+
+        prizePool: 'Призовой фонд',
+        every30min: 'каждые 30 минут',
+        enterAndWin: 'Войти и выиграть',
+
+        rouletteDesc: 'Зарабатывай реальные 💰 деньги',
 
     },
 
@@ -88,6 +96,14 @@ export const translations: Record<Lang, Record<string, string>> = {
         timeMonster: 'Time Monster!',
         timeBonus: '+5 seconds per round',
         cool: 'Awesome',
+        buyCoinsSubtitle: '💰 Play • win • withdraw',
+        buyCoinsNote: 'Payment via Telegram Stars ⭐',
+
+        prizePool: 'Prize pool',
+        every30min: 'every 30 minutes',
+        enterAndWin: 'Enter and win',
+
+        rouletteDesc: 'Earn real 💰 money',
 
     },
 };
