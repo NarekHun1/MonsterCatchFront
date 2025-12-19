@@ -107,9 +107,11 @@ interface Quest {
 function DailyQuests({
                          token,
                          onStarsChange,
+                         t
                      }: {
     token: string;
     onStarsChange?: (stars: number) => void;
+    t: (key: string) => string;
 }) {
     const [quests, setQuests] = useState<Quest[]>([]);
     const [error, setError] = useState('');
@@ -186,8 +188,8 @@ function DailyQuests({
     if (loading) {
         return (
             <div className="panel">
-                <h2 className="panel-title">🎯 Ежедневные задания</h2>
-                <p className="panel-muted">Загружаем...</p>
+                <h2 className="panel-title">{t('dailyQuests')}</h2>
+                <p className="panel-muted">{t('loading')}</p>
             </div>
         );
     }
@@ -195,15 +197,15 @@ function DailyQuests({
     if (error) {
         return (
             <div className="panel">
-                <h2 className="panel-title">🎯 Ежедневные задания</h2>
-                <p className="panel-muted">Ошибка: {error}</p>
+                <h2 className="panel-title">{t('dailyQuests')}</h2>
+                <p className="panel-muted">{t('error')}: {error}</p>
             </div>
         );
     }
 
     return (
         <div className="panel">
-            <h2 className="panel-title">🎯 Ежедневные задания</h2>
+            <h2 className="panel-title">{t('dailyQuests')}</h2>
             <div className="daily-list">
                 {quests.map((q) => {
                     const progress = Math.min(1, q.current / q.target);
@@ -225,17 +227,17 @@ function DailyQuests({
                                 <span className="daily-reward">{q.rewardLabel}</span>
 
                                 {q.claimed ? (
-                                    <span className="daily-badge">Получено</span>
+                                    <span className="daily-badge">{t('claimed')}</span>
                                 ) : q.claimable ? (
                                     <button
                                         className="daily-claim-btn"
                                         onClick={() => handleClaim(q.id)}
                                     >
-                                        Забрать
+                                        {t('claim')}
                                     </button>
                                 ) : (
                                     <span className="daily-badge daily-badge--grey">
-                                        В процессе
+                                        {t('inProgress')}
                                     </span>
                                 )}
                             </div>
@@ -393,6 +395,7 @@ function App() {
     const [minDelayPassed, setMinDelayPassed] = useState(false);
     const [tickets, setTickets] = useState<number>(0);
     const [lang, setLang] = useState<Lang>('ru');
+
 
     const t = (key: string) => translations[lang][key] || key;
 
@@ -891,6 +894,7 @@ function App() {
                                         <DailyQuests
                                             token={token}
                                             onStarsChange={handleStarsChange}
+                                            t={t}
                                         />
                                     )}
                                     {token && <Shop token={token} />}

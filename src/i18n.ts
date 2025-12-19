@@ -30,6 +30,11 @@ export const translations: Record<Lang, Record<string, string>> = {
         shop: '🛒 Магазин улучшений',
 
         leaderboardTitle: '🏆 Таблица лидеров',
+        claimed: 'Получено',
+        claim: 'Забрать',
+        inProgress: 'В процессе',
+        error: 'Ошибка',
+
     },
 
     en: {
@@ -61,5 +66,10 @@ export const translations: Record<Lang, Record<string, string>> = {
         shop: '🛒 Upgrade Shop',
 
         leaderboardTitle: '🏆 Leaderboard',
+        claimed: 'Claimed',
+        claim: 'Claim',
+        inProgress: 'In progress',
+        error: 'Error',
+
     },
 };
