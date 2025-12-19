@@ -29,7 +29,7 @@ export const translations: Record<Lang, Record<string, string>> = {
         dailyQuests: '🎯 Ежедневные задания',
         shop: '🛒 Магазин улучшений',
 
-        leaderboardTitle: '🏆 Таблица лидеров',
+        leaderboardTitle: 'Таблица лидеров',
         claimed: 'Получено',
         claim: 'Забрать',
         inProgress: 'В процессе',

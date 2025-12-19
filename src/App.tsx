@@ -396,6 +396,7 @@ function App() {
     const [minDelayPassed, setMinDelayPassed] = useState(false);
     const [tickets, setTickets] = useState<number>(0);
     const [lang, setLang] = useState<Lang>('ru');
+    const [showLangMenu, setShowLangMenu] = useState(false);
 
 
     const t = (key: string) => translations[lang][key] || key;
@@ -680,13 +681,40 @@ function App() {
                                     <span className="user-pill-icon">🎟</span>
                                     <span className="user-pill-value">{tickets}</span>
                                 </div>
-                                <div className="lang-switch">
-                                    <button onClick={() => setLang('ru')}>🇷🇺</button>
-                                    <button onClick={() => setLang('en')}>🇬🇧</button>
-                                </div>
-
                                 <div className="header-wallet-btn" onClick={() => setCurrentPage('wallet')}>
                                     <WalletIcon />
+                                </div>
+                                <div className="header-lang-wrapper">
+                                    <button
+                                        className="header-lang-btn"
+                                        onClick={() => setShowLangMenu((v) => !v)}
+                                    >
+                                        🌍
+                                    </button>
+
+                                    {showLangMenu && (
+                                        <div className="lang-dropdown">
+                                            <button
+                                                className={`lang-item ${lang === 'ru' ? 'active' : ''}`}
+                                                onClick={() => {
+                                                    setLang('ru');
+                                                    setShowLangMenu(false);
+                                                }}
+                                            >
+                                                🇷🇺 Русский
+                                            </button>
+
+                                            <button
+                                                className={`lang-item ${lang === 'en' ? 'active' : ''}`}
+                                                onClick={() => {
+                                                    setLang('en');
+                                                    setShowLangMenu(false);
+                                                }}
+                                            >
+                                                🇬🇧 English
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
 
                             </div>
