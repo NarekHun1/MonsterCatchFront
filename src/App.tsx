@@ -701,7 +701,7 @@ function App() {
                                         </button>
 
                                         {showLangMenu && (
-                                            <div className="lang-menu-clean">
+                                            <div className="lang-glass-menu">
                                                 <button
                                                     className={lang === 'ru' ? 'active' : ''}
                                                     onClick={() => {
@@ -711,7 +711,6 @@ function App() {
                                                 >
                                                     🇷🇺 Русский
                                                 </button>
-
                                                 <button
                                                     className={lang === 'en' ? 'active' : ''}
                                                     onClick={() => {
