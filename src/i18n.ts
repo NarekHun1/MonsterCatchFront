@@ -51,6 +51,12 @@ export const translations: Record<Lang, Record<string, string>> = {
         enterAndWin: 'Войти и выиграть',
 
         rouletteDesc: 'Зарабатывай реальные 💰 деньги',
+        walletDesc: 'Выводи награды в USDT или TON.',
+        inviteFriend: 'Пригласить друга',
+        leaderboardDesc: 'Посмотри топ игроков и свои лучшие результаты.',
+        tournamentDesc: 'Почасовые турниры, призовой фонд и топ-3 победителя.',
+        buyCoinsTitle: 'Покупка монет',
+        summonDemon: 'Нажми, чтобы призвать демона',
 
     },
 
@@ -104,6 +110,12 @@ export const translations: Record<Lang, Record<string, string>> = {
         enterAndWin: 'Enter and win',
 
         rouletteDesc: 'Earn real 💰 money',
+        walletDesc: 'Withdraw rewards in USDT or TON.',
+        inviteFriend: 'Invite a friend',
+        leaderboardDesc: 'Check top players and your best results.',
+        tournamentDesc: 'Hourly tournaments, prize pool and top 3 winners.',
+        buyCoinsTitle: 'Buy coins',
+        summonDemon: 'Tap to summon the demon',
 
     },
 };

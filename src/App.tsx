@@ -699,7 +699,7 @@ function App() {
             <main className={`app-shell ${currentPage === 'game' ? 'game-active' : ''}`}>
                 {error && (
                     <div className="panel panel-error-box">
-                        <h3 className="panel-title">Ошибка</h3>
+                        <h3 className="panel-title">{t('error')}</h3>
                         <p>{error}</p>
                     </div>
                 )}
@@ -799,7 +799,7 @@ function App() {
                                         </div>
 
                                         <div className="cashcup-body">
-                                            <div className="cashcup-prize">Призовой фонд</div>
+                                            <div className="cashcup-prize">{t('prizePool')}</div>
                                             <div className="cashcup-amount">💰REAL CASH PRIZ</div>
 
                                             <div className="cashcup-info">
@@ -816,7 +816,7 @@ function App() {
                                     <div className="menu-card menu-card--gold" onClick={() => setShowRoulette(true)}>
                                         <div className="menu-icon">🎰</div>
                                         <div className="menu-card-title">{t('rouletteDesc')}</div>
-                                        <div className="menu-card-text">Зарабатывай реальные 💰 деньги</div>
+                                        <div className="menu-card-text">{t('rouletteDesc')}</div>
                                     </div>
                                 </div>
                             </div>
@@ -836,9 +836,9 @@ function App() {
                                             onClick={() => setCurrentPage('wallet')}
                                         >
                                             <div className="menu-icon">👛</div>
-                                            <div className="menu-card-title">Кошелёк</div>
+                                            <div className="menu-card-title">{t('wallet')}</div>
                                             <div className="menu-card-text">
-                                                Выводи награды в USDT или TON.
+                                                {t('walletDesc')}
                                             </div>
                                         </button>
 
@@ -849,38 +849,35 @@ function App() {
                                         >
                                             <div className="menu-icon">🎮</div>
                                             <div className="menu-card-title">
-                                                Одиночная игра
-                                            </div>
+                                                {t('singleGame')}                                            </div>
                                             <div className="menu-card-text">
-                                                60 секунд, один раунд, сколько монстров успеешь
-                                                поймать?
+                                                {t('singleGameDesc')}
                                             </div>
                                         </button>
                                         <button
                                             className="menu-btn menu-btn--secondary"
                                             onClick={() => setCurrentPage('invite')}
                                         >
-                                            👥 Пригласить друга
+                                                👥 {t('inviteFriend')}
                                         </button>
                                         <button
                                             className="menu-card"
                                             onClick={() => goTo('leaderboard')}
                                         >
                                             <div className="menu-icon">🏆</div>
-                                            <div className="menu-card-title">Таблица лидеров</div>
+                                            <div className="menu-card-title">{t('leaderboardTitle')}</div>
                                             <div className="menu-card-text">
-                                                Посмотри топ игроков и свои лучшие результаты.
-                                            </div>
+                                                {t('leaderboardDesc')}                                            </div>
                                         </button>
                                         <button
                                             className="menu-card"
                                             onClick={() => goTo('tournament')}
                                         >
                                             <div className="menu-icon">🎯</div>
-                                            <div className="menu-card-title">Турниры</div>
-                                            <div className="menu-card-text">
-                                                Почасовые турниры, призовой фонд и топ-3 победителя.
-                                            </div>
+                                            <div className="menu-card-title">{t('tournaments')}</div>
+                                                <div className="menu-card-text">
+                                                    {t('tournamentDesc')}
+                                                </div>
                                         </button>
                                         {me && token && (
                                             <ExchangeTicket
@@ -988,7 +985,7 @@ function App() {
                             className="shop-popup"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <h3 className="panel-title">🪙 Покупка монет</h3>
+                            <h3 className="panel-title">🪙 {t('buyCoinsTitle')}</h3>
 
                             <button className="menu-btn" onClick={() => buyCoinsPack('coins_500')}>
                                 100 монет — 100 Stars
@@ -1031,7 +1028,7 @@ function App() {
                                     {me.username || me.firstName || 'Герой'}
                                 </div>
                                 <div className="hero-floating-meta">
-                                    <span>Нажми, чтобы призвать демона</span>
+                                    <span>{t('summonDemon')}</span>
                                 </div>
                             </div>
                         </button>
