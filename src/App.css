@@ -1557,55 +1557,59 @@ button {
 }
 /*language*/
 .header-lang-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 8px;
     position: relative;
 }
 
-.header-lang-btn {
-    margin-top: 6px;
+.lang-glass-btn {
     width: 34px;
     height: 34px;
     border-radius: 50%;
     border: none;
     background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(8px);
     color: #fff;
     font-size: 18px;
     cursor: pointer;
+    transition: background 0.2s ease, transform 0.15s ease;
 }
 
-.header-lang-btn:hover {
+.lang-glass-btn:hover {
     background: rgba(255,255,255,0.16);
+    transform: scale(1.05);
 }
 
-.lang-dropdown {
+.lang-glass-menu {
     position: absolute;
     top: 42px;
-    right: 0;
-    background: #0b0b0f;
-    border-radius: 12px;
+    background: rgba(15,15,25,0.95);
+    backdrop-filter: blur(12px);
+    border-radius: 14px;
     padding: 6px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-    z-index: 50;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+    z-index: 100;
 }
 
-.lang-item {
+.lang-glass-menu button {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 12px;
+    width: 100%;
+    padding: 8px 14px;
     background: transparent;
     border: none;
     color: #fff;
-    width: 100%;
-    text-align: left;
-    border-radius: 8px;
-    cursor: pointer;
+    border-radius: 10px;
     font-size: 14px;
+    cursor: pointer;
 }
 
-.lang-item:hover {
+.lang-glass-menu button:hover {
     background: rgba(255,255,255,0.08);
 }
 
-.lang-item.active {
+.lang-glass-menu button.active {
     background: rgba(96,165,250,0.25);
 }

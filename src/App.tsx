@@ -686,16 +686,16 @@ function App() {
                                 </div>
                                 <div className="header-lang-wrapper">
                                     <button
-                                        className="header-lang-btn"
-                                        onClick={() => setShowLangMenu((v) => !v)}
+                                        className="lang-glass-btn"
+                                        onClick={() => setShowLangMenu(v => !v)}
                                     >
                                         🌍
                                     </button>
 
                                     {showLangMenu && (
-                                        <div className="lang-dropdown">
+                                        <div className="lang-glass-menu">
                                             <button
-                                                className={`lang-item ${lang === 'ru' ? 'active' : ''}`}
+                                                className={lang === 'ru' ? 'active' : ''}
                                                 onClick={() => {
                                                     setLang('ru');
                                                     setShowLangMenu(false);
@@ -705,7 +705,7 @@ function App() {
                                             </button>
 
                                             <button
-                                                className={`lang-item ${lang === 'en' ? 'active' : ''}`}
+                                                className={lang === 'en' ? 'active' : ''}
                                                 onClick={() => {
                                                     setLang('en');
                                                     setShowLangMenu(false);
@@ -716,6 +716,7 @@ function App() {
                                         </div>
                                     )}
                                 </div>
+
 
                             </div>
                         </div>
