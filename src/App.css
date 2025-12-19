@@ -1556,18 +1556,31 @@ button {
     z-index: 2;
 }
 /* ─────────────────────────────────────────
+   Header actions (wallet + language)
+   ───────────────────────────────────────── */
+
+.header-actions-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+}
+
+/* ─────────────────────────────────────────
    Language selector (🌍) — Glass UI
    ───────────────────────────────────────── */
 
 .header-lang-wrapper {
     position: relative;
-    display: inline-flex;
+    display: flex;
+    justify-content: center;
 }
 
 /* 🌍 кнопка */
 .lang-glass-btn {
-    width: 34px;
-    height: 34px;
+    width: 28px;
+    height: 28px;
 
     display: flex;
     align-items: center;
@@ -1577,15 +1590,15 @@ button {
     border: none;
 
     background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(6px);
 
-    color: #fff;
-    font-size: 18px;
+    color: #ffffff;
+    font-size: 15px;
     cursor: pointer;
 
     box-shadow:
             0 0 0 1px rgba(255, 255, 255, 0.06),
-            0 8px 20px rgba(0, 0, 0, 0.35);
+            0 6px 14px rgba(0, 0, 0, 0.35);
 
     transition:
             background 0.2s ease,
@@ -1594,19 +1607,23 @@ button {
 
 .lang-glass-btn:hover {
     background: rgba(255, 255, 255, 0.16);
-    transform: scale(1.05);
+    transform: scale(1.08);
 }
 
-/* ▼ dropdown */
+/* ─────────────────────────────────────────
+   Language dropdown
+   ───────────────────────────────────────── */
+
 .lang-glass-menu {
     position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
+    top: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
 
-    min-width: 150px;
+    min-width: 140px;
 
-    background: rgba(15, 15, 25, 0.95);
-    backdrop-filter: blur(12px);
+    background: rgba(15, 15, 25, 0.96);
+    backdrop-filter: blur(14px);
 
     border-radius: 14px;
     padding: 6px;
@@ -1615,24 +1632,27 @@ button {
 
     box-shadow:
             0 0 0 1px rgba(255, 255, 255, 0.06),
-            0 20px 40px rgba(0, 0, 0, 0.65);
+            0 18px 40px rgba(0, 0, 0, 0.7);
 }
 
-/* ▲ стрелка */
+/* стрелка */
 .lang-glass-menu::before {
     content: '';
     position: absolute;
-    top: -6px;
-    right: 12px;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
 
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
 
-    background: rgba(15, 15, 25, 0.95);
-    transform: rotate(45deg);
+    background: rgba(15, 15, 25, 0.96);
 }
 
-/* кнопки языков */
+/* ─────────────────────────────────────────
+   Language buttons
+   ───────────────────────────────────────── */
+
 .lang-glass-menu button {
     all: unset;
     cursor: pointer;

@@ -684,37 +684,46 @@ function App() {
                                 <div className="header-wallet-btn" onClick={() => setCurrentPage('wallet')}>
                                     <WalletIcon />
                                 </div>
-                                <div className="header-lang-wrapper">
-                                    <button
-                                        className="lang-glass-btn"
-                                        onClick={() => setShowLangMenu(v => !v)}
+                                <div className="header-actions-column">
+                                    <div
+                                        className="header-wallet-btn"
+                                        onClick={() => setCurrentPage('wallet')}
                                     >
-                                        🌍
-                                    </button>
+                                        <WalletIcon />
+                                    </div>
 
-                                    {showLangMenu && (
-                                        <div className="lang-glass-menu">
-                                            <button
-                                                className={lang === 'ru' ? 'active' : ''}
-                                                onClick={() => {
-                                                    setLang('ru');
-                                                    setShowLangMenu(false);
-                                                }}
-                                            >
-                                                🇷🇺 Русский
-                                            </button>
+                                    <div className="header-lang-wrapper">
+                                        <button
+                                            className="lang-glass-btn"
+                                            onClick={() => setShowLangMenu(v => !v)}
+                                        >
+                                            🌍
+                                        </button>
 
-                                            <button
-                                                className={lang === 'en' ? 'active' : ''}
-                                                onClick={() => {
-                                                    setLang('en');
-                                                    setShowLangMenu(false);
-                                                }}
-                                            >
-                                                🇬🇧 English
-                                            </button>
-                                        </div>
-                                    )}
+                                        {showLangMenu && (
+                                            <div className="lang-menu-clean">
+                                                <button
+                                                    className={lang === 'ru' ? 'active' : ''}
+                                                    onClick={() => {
+                                                        setLang('ru');
+                                                        setShowLangMenu(false);
+                                                    }}
+                                                >
+                                                    🇷🇺 Русский
+                                                </button>
+
+                                                <button
+                                                    className={lang === 'en' ? 'active' : ''}
+                                                    onClick={() => {
+                                                        setLang('en');
+                                                        setShowLangMenu(false);
+                                                    }}
+                                                >
+                                                    🇬🇧 English
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
 
 
