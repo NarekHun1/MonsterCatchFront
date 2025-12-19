@@ -1555,61 +1555,108 @@ button {
 
     z-index: 2;
 }
-/*language*/
+/* ─────────────────────────────────────────
+   Language selector (🌍) — Glass UI
+   ───────────────────────────────────────── */
+
 .header-lang-wrapper {
-    display: flex;
-    justify-content: center;
-    margin-top: 8px;
     position: relative;
+    display: inline-flex;
 }
 
+/* 🌍 кнопка */
 .lang-glass-btn {
     width: 34px;
     height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     border-radius: 50%;
     border: none;
-    background: rgba(255,255,255,0.08);
+
+    background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(8px);
+
     color: #fff;
     font-size: 18px;
     cursor: pointer;
-    transition: background 0.2s ease, transform 0.15s ease;
+
+    box-shadow:
+            0 0 0 1px rgba(255, 255, 255, 0.06),
+            0 8px 20px rgba(0, 0, 0, 0.35);
+
+    transition:
+            background 0.2s ease,
+            transform 0.15s ease;
 }
 
 .lang-glass-btn:hover {
-    background: rgba(255,255,255,0.16);
+    background: rgba(255, 255, 255, 0.16);
     transform: scale(1.05);
 }
 
+/* ▼ dropdown */
 .lang-glass-menu {
     position: absolute;
-    top: 42px;
-    background: rgba(15,15,25,0.95);
+    top: calc(100% + 8px);
+    right: 0;
+
+    min-width: 150px;
+
+    background: rgba(15, 15, 25, 0.95);
     backdrop-filter: blur(12px);
+
     border-radius: 14px;
     padding: 6px;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.7);
-    z-index: 100;
+
+    z-index: 9999;
+
+    box-shadow:
+            0 0 0 1px rgba(255, 255, 255, 0.06),
+            0 20px 40px rgba(0, 0, 0, 0.65);
 }
 
+/* ▲ стрелка */
+.lang-glass-menu::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    right: 12px;
+
+    width: 12px;
+    height: 12px;
+
+    background: rgba(15, 15, 25, 0.95);
+    transform: rotate(45deg);
+}
+
+/* кнопки языков */
 .lang-glass-menu button {
+    all: unset;
+    cursor: pointer;
+
     display: flex;
     align-items: center;
     gap: 8px;
+
     width: 100%;
-    padding: 8px 14px;
-    background: transparent;
-    border: none;
-    color: #fff;
+    padding: 8px 12px;
+
     border-radius: 10px;
+
     font-size: 14px;
-    cursor: pointer;
+    color: #e5e7eb;
+
+    transition: background 0.15s ease;
 }
 
 .lang-glass-menu button:hover {
-    background: rgba(255,255,255,0.08);
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .lang-glass-menu button.active {
-    background: rgba(96,165,250,0.25);
+    background: rgba(56, 189, 248, 0.25);
+    color: #7dd3fc;
 }
