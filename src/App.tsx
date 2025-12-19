@@ -14,6 +14,9 @@ import { ExchangeTicket } from './ExchangeTicket';
 import {BlueStarIcon} from "./styles/BlueStarIcon.tsx";
 import {CashCupCard} from "./CashCupCard.tsx";
 import { RouletteWheel } from './RouletteWheel';
+import { translations } from './i18n';
+import type { Lang } from './i18n';
+
 
 
 
@@ -389,6 +392,21 @@ function App() {
     const [showRoulette, setShowRoulette] = useState(false);
     const [minDelayPassed, setMinDelayPassed] = useState(false);
     const [tickets, setTickets] = useState<number>(0);
+    const [lang, setLang] = useState<Lang>('ru');
+
+    const t = (key: string) => translations[lang][key] || key;
+
+    useEffect(() => {
+        const tgLang =
+            (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.language_code;
+
+        if (tgLang === 'en') {
+            setLang('en');
+        } else {
+            setLang('ru');
+        }
+    }, []);
+
 
 
 
@@ -658,6 +676,10 @@ function App() {
                                     <span className="user-pill-icon">🎟</span>
                                     <span className="user-pill-value">{tickets}</span>
                                 </div>
+                                <div className="lang-switch">
+                                    <button onClick={() => setLang('ru')}>🇷🇺</button>
+                                    <button onClick={() => setLang('en')}>🇬🇧</button>
+                                </div>
 
                                 <div className="header-wallet-btn" onClick={() => setCurrentPage('wallet')}>
                                     <WalletIcon />
@@ -686,7 +708,7 @@ function App() {
                                 onClick={() => goTo('menu')}
                             >
                                 <div className="tab-icon">🏠</div>
-                                <div className="tab-label">Меню</div>
+                                <div className="tab-label">{t('menu')}</div>
                             </button>
 
                             <button
@@ -694,7 +716,7 @@ function App() {
                                 onClick={() => goTo('game')}
                             >
                                 <div className="tab-icon">🎮</div>
-                                <div className="tab-label">Игра</div>
+                                <div className="tab-label">{t('game')}</div>
                             </button>
 
                             <button
@@ -702,14 +724,14 @@ function App() {
                                 onClick={() => goTo('tournament')}
                             >
                                 <div className="tab-icon">🎯</div>
-                                <div className="tab-label">Турниры</div>
+                                <div className="tab-label">{t('tournaments')}</div>
                             </button>
                             <button
                                 className={`menu-tab ${currentPage === 'leaderboard' ? 'menu-tab--active' : ''}`}
                                 onClick={() => goTo('leaderboard')}
                             >
                                 <div className="tab-icon">📊</div>
-                                <div className="tab-label">Лидеры</div>
+                                <div className="tab-label">{t('leaderboard')}</div>
                             </button>
 
                         </nav>
@@ -735,7 +757,7 @@ function App() {
                                     <span className="play-shine" />
 
                                     <span className="play-icon">🎮</span>
-                                    <span className="play-text">ИГРАТЬ</span>
+                                    <span className="play-text">{t('play')}</span>
                                 </button>
 
                                 <div className="menu-actions">
@@ -747,7 +769,7 @@ function App() {
 
                                         <div className="buy-coins-content">
                                             <div className="buy-coins-title">
-                                                Купить монеты
+                                                {t('buyCoins')}
                                             </div>
 
                                             <div className="buy-coins-subtitle">
@@ -799,9 +821,9 @@ function App() {
                         <section className="app-content">
                             {currentPage === 'menu' && (
                                 <div className="panel panel-menu">
-                                    <h2 className="panel-title">Главное меню</h2>
+                                    <h2 className="panel-title">{t('mainMenuTitle')}</h2>
                                     <p className="panel-muted">
-                                        Лови монстров, набирай очки и поднимайся в таблице лидеров.
+                                        {t('mainMenuDesc')}
                                     </p>
                                     <div className="menu-grid">
 
