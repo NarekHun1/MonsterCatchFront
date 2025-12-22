@@ -71,8 +71,17 @@ export const translations: Record<Lang, Record<string, string>> = {
         tournamentTop: 'Турнирный топ',
         noPlayersYet: 'Пока никто не сыграл — будь первым 💥',
         player: 'Игрок',
-
-
+        gameGoal:'Цель игры',
+        gameGoalDesc:'Лови как можно больше монстров за ограниченное время.',
+        startGame:'Начать игру',
+        congratulations:'Поздравляем!',
+        youScored:'Вы собрали',
+        restart:'Начать заново',
+        score:'Счёт',
+        best:'Лучший',
+        time:'Время',
+        back:'Назад',
+        points:'очков',
     },
 
     en: {
@@ -146,6 +155,16 @@ export const translations: Record<Lang, Record<string, string>> = {
         tournamentTop: 'Tournament leaderboard',
         noPlayersYet: 'No players yet — be the first 💥',
         player: 'Player',
-
+        gameGoal:'Game goal',
+        gameGoalDesc:'Catch as many monsters as possible within limited time.',
+        startGame:'Start game',
+        congratulations:'Congratulations!',
+        youScored:'You scored',
+        restart:'Restart',
+        score:'Score',
+        best:'Best',
+        time:'Time',
+        back:'Back',
+        points:'points',
     },
 };

@@ -951,6 +951,7 @@ function App() {
                             {currentPage === 'game' && token && (
                                 <Game
                                     token={token}
+                                    t={t}
                                     tournamentId={tournamentGameId ?? undefined}
                                     tournamentType={tournamentType ?? undefined} // 🔥 ВАЖНО
                                     onBack={() => {

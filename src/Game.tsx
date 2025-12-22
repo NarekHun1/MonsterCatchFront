@@ -6,6 +6,7 @@ import { apiFetch } from './api';
 interface GameProps {
     token: string;
     onBack: () => void;
+    t: (key: string) => string;
     onStarsChange?: (stars: number) => void;
     onStatsChange?: (stats: { stars: number; level: number; xp: number }) => void;
     tournamentId?: number;
@@ -54,7 +55,7 @@ function randomPosition() {
     return { x, y };
 }
 
-export function Game({ token, onBack, onStarsChange, onStatsChange, tournamentType}: GameProps) {
+export function Game({ token, onBack, onStarsChange, onStatsChange,t, tournamentType}: GameProps) {
     const [phase, setPhase] = useState<GamePhase>('intro');
     const [status, setStatus] = useState<GameStatus>('idle');
     const [gameId, setGameId] = useState<number | null>(null);
@@ -281,23 +282,23 @@ export function Game({ token, onBack, onStarsChange, onStatsChange, tournamentTy
                     }}
                     disabled={loading}
                 >
-                    ← Назад
+                    ← {t('back')}
                 </button>
 
                 {phase === 'playing' && (
                     <div className="game-hud">
                         <div className="game-hud-item">
-                            <span className="game-hud-label">Счёт</span>
+                            <span className="game-hud-label">{t('score')}</span>
                             <span className="game-hud-value">{score}</span>
                         </div>
                         <div className="game-hud-item">
-                            <span className="game-hud-label">Лучший</span>
+                            <span className="game-hud-label">{t('best')}</span>
                             <span className="game-hud-value">
                                 {bestScore !== null ? bestScore : '—'}
                             </span>
                         </div>
                         <div className="game-hud-item">
-                            <span className="game-hud-label">Время</span>
+                            <span className="game-hud-label">{t('time')}</span>
                             <span className="game-hud-value">
                                 {status === 'running' ? `${secondsLeft}s` : '—'}
                             </span>
@@ -320,10 +321,9 @@ export function Game({ token, onBack, onStarsChange, onStatsChange, tournamentTy
             {phase === 'intro' && (
                 <div className="game-intro">
                     <div className="game-intro-top">
-                        <h2 className="game-intro-title">Цель игры</h2>
+                        <h2 className="game-intro-title">{t('gameGoal')}</h2>
                         <p className="game-intro-text">
-                            Лови как можно больше монстров за ограниченное время.
-                            У разных монстров разное количество очков.
+                            {t('gameGoalDesc')}
                         </p>
                     </div>
 
@@ -332,7 +332,7 @@ export function Game({ token, onBack, onStarsChange, onStatsChange, tournamentTy
                             <div key={m.rarity} className="game-intro-monster-card">
                                 <div className="game-intro-monster-emoji">{m.emoji}</div>
                                 <div className="game-intro-monster-score">
-                                    +{m.score} очк.
+                                    +{m.score} {t('points')}.
                                 </div>
                             </div>
                         ))}
@@ -343,7 +343,7 @@ export function Game({ token, onBack, onStarsChange, onStatsChange, tournamentTy
                         onClick={() => void startGame()}
                         disabled={loading}
                     >
-                        {loading ? 'Загрузка...' : 'Начать игру'}
+                        {loading ? t('loading') : t('startGame')}
                     </button>
                 </div>
             )}
@@ -391,7 +391,7 @@ export function Game({ token, onBack, onStarsChange, onStatsChange, tournamentTy
                         <h2>🎉 Congratulations!</h2>
 
                         <p className="game-finish-score">
-                            Вы собрали <strong>{score}</strong> очков
+                            {t('youScored')} <strong>{score}</strong> {t('points')}
                         </p>
 
                         <div className="game-finish-actions">
@@ -403,14 +403,14 @@ export function Game({ token, onBack, onStarsChange, onStatsChange, tournamentTy
                                     setGameId(null);
                                 }}
                             >
-                                🔄 Начать заново
+                                🔄 {t('restart')}
                             </button>
 
                             <button
                                 className="game-back-btn"
                                 onClick={onBack}
                             >
-                                ⬅ Назад
+                                ⬅ {t('back')}
                             </button>
                         </div>
                     </div>
