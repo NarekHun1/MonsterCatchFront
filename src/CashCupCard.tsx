@@ -134,6 +134,7 @@ export function CashCupCard({
             <div className="tc-row">
                 <span>🎟 {t('entry')}</span>
                 <strong>{t('ticketsCount' )} 10</strong>
+            </div>
 
             <div className="tc-row">
                 <span>💎 {t('prizePool')}</span>
@@ -206,7 +207,6 @@ export function CashCupCard({
                     </div>
                 )}
             </div>
-        </div>
         </div>
     );
 }
