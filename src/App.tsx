@@ -780,6 +780,7 @@ function App() {
                         {currentPage === 'cashcup' && token && (
                             <CashCupCard
                                 token={token}
+                                t={t}
                                 onStartGame={(tournamentId) => {
                                     setTournamentGameId(tournamentId);
                                     setTournamentType(null);

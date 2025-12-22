@@ -82,6 +82,11 @@ export const translations: Record<Lang, Record<string, string>> = {
         time:'Время',
         back:'Назад',
         points:'очков',
+        nextRound:'Следующий раунд…',
+        joinCashCup:'Войти в Cash Cup',
+        waitingNextRound:'Ожидание следующего раунда',
+        needMoreTickets:'❌ Нужно ещё билетов',
+        topPlayers:'Топ игроков',
     },
 
     en: {
@@ -166,5 +171,10 @@ export const translations: Record<Lang, Record<string, string>> = {
         time:'Time',
         back:'Back',
         points:'points',
+        nextRound:'Next round…',
+        joinCashCup:'Join Cash Cup',
+        waitingNextRound:'Waiting for next round',
+        needMoreTickets:'❌ Need more tickets',
+        topPlayers:'Top players',
     },
 };

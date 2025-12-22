@@ -35,8 +35,10 @@ function formatMs(ms: number) {
 export function CashCupCard({
                                 token,
                                 onStartGame,
+                                t,
                             }: {
     token: string;
+    t: (key: string) => string;
     onStartGame: (tournamentId: number) => void;
 }) {
     const [data, setData] = useState<CashCupData | null>(null);
@@ -109,7 +111,7 @@ export function CashCupCard({
 
     /* ───────────────── RENDER ───────────────── */
     if (loading) {
-        return <div className="tournament-card">Загрузка…</div>;
+        return <div className="tournament-card">{t('loading')}</div>;
     }
 
     if (error) {
@@ -126,16 +128,15 @@ export function CashCupCard({
 
             {/* ⏳ TIMER */}
             <div className="tc-timer">
-                ⏳ {timeLeft > 0 ? formatMs(timeLeft) : 'Следующий раунд…'}
+                ⏳ {timeLeft > 0 ? formatMs(timeLeft) : t('nextRound')}
             </div>
 
             <div className="tc-row">
-                <span>🎟 Вход</span>
-                <strong>10 билетов</strong>
-            </div>
+                <span>🎟 {t('entry')}</span>
+                <strong>{t('ticketsCount' )} 10</strong>
 
             <div className="tc-row">
-                <span>💎 Призовой фонд</span>
+                <span>💎 {t('prizePool')}</span>
                 <strong>{data.prizePool ?? 0} 🪙</strong>
             </div>
 
@@ -149,7 +150,7 @@ export function CashCupCard({
                         className="tc-play-main"
                         onClick={() => onStartGame(data.tournamentId)}
                     >
-                        🎮 ИГРАТЬ
+                        🎮 {t('play')}
                     </button>
                 ) : canJoin ? (
                     <button
@@ -158,17 +159,18 @@ export function CashCupCard({
                         }`}
                         onClick={() => {
                             if (data.ticketsCount < 10) {
-                                setHint(`❌ Нужно ещё ${10 - data.ticketsCount} 🎟`);
+                                setHint(`❌ ${t('needMoreTickets')} ${10 - data.ticketsCount} 🎟`);
                                 setTimeout(() => setHint(null), 2500);
                                 return;
                             }
                             join();
                         }}
                     >
-                        💰 Войти в Cash Cup
+                        💰 {t('joinCashCup')}
+
                     </button>
                 ) : (
-                    <div className="tc-closed">⏳ Ожидание следующего раунда</div>
+                    <div className="tc-closed">⏳ {t('waitingNextRound')}</div>
                 )}
 
                 {hint && <div className="tc-hint">{hint}</div>}
@@ -176,11 +178,11 @@ export function CashCupCard({
 
             {/* ───────────── LEADERBOARD ───────────── */}
             <div className="tc-leaderboard">
-                <h4>🏆 Топ игроков</h4>
+                <h4>🏆{t('topPlayers')}</h4>
 
                 {(data.participants?.length ?? 0) === 0 ? (
                     <div className="tc-lb-empty">
-                        Пока никто не сыграл — будь первым 💥
+                        {t('noPlayersYet')}
                     </div>
                 ) : (
                     <div className="tc-lb-list">
@@ -196,7 +198,7 @@ export function CashCupCard({
                                                 : `#${i + 1}`}
                                 </div>
                                 <div className="tc-lb-name">
-                                    {p.username || 'Игрок'}
+                                    {p.username || t('player')}
                                 </div>
                                 <div className="tc-lb-score">{p.score}</div>
                             </div>
@@ -204,6 +206,7 @@ export function CashCupCard({
                     </div>
                 )}
             </div>
+        </div>
         </div>
     );
 }
