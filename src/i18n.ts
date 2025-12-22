@@ -117,7 +117,7 @@ export const translations: Record<Lang, Record<string, string>> = {
         dailyQuests: '🎯 Daily Quests',
         shop: '🛒 Upgrade Shop',
 
-        leaderboardTitle: '🏆 Leaderboard',
+        leaderboardTitle: 'Leaderboard',
         claimed: 'Claimed',
         claim: 'Claim',
         inProgress: 'In progress',
