@@ -32,11 +32,13 @@ export function TournamentCard({
                                    type,
                                    token,
                                    onStartGame,
+                                   t,
                                }: {
     type: TournamentType;
     token: string;
     onStartGame: (tournamentId: number) => void;
     onCoinsChange?: (coins: number) => void;
+    t: (key: string) => string;
 }) {
     const [data, setData] = useState<TournamentData | null>(null);
     const [loading, setLoading] = useState(true);
@@ -113,14 +115,14 @@ export function TournamentCard({
 
     const title =
         type === 'HOURLY'
-            ? '⏱ Почасовой турнир'
-            : '📅 Ежедневный турнир';
+            ? t('hourlyTournament')
+            : t('dailyTournament');
 
     // ─────────────────────────────────────────────
     // RENDER
     // ─────────────────────────────────────────────
     if (loading) {
-        return <div className="tournament-card">Загрузка…</div>;
+        return <div className="tournament-card">{t('loading')}</div>;
     }
 
     if (error) {
@@ -134,23 +136,24 @@ export function TournamentCard({
             <h3>{title}</h3>
 
             <div className="tc-row">
-                <span>Вход</span>
-                <strong>🎟 50 или 🪙 50</strong>
+                <span>{t('entry')}</span>
+                <strong>🎟 50 {t('or')} 🪙 50</strong>
             </div>
 
             <div className="tc-row">
-                <span>Призовой фонд</span>
+                <span>{t('prizePool')}</span>
                 <strong>{data.prizePool ?? 0} 🪙</strong>
             </div>
 
             <div className="tc-status">
                 {data.status === 'ACTIVE' ? (
                     <span className="tc-badge tc-badge--active">
-            🟢 Идёт сейчас
+            🟢 {t('activeNow')}
+
           </span>
                 ) : (
                     <span className="tc-badge tc-badge--finished">
-            🏁 Завершён
+            🏁 {t('finished')}
           </span>
                 )}
             </div>
@@ -164,7 +167,7 @@ export function TournamentCard({
                         onClick={() => onStartGame(data.tournamentId)}
                     >
                         <span className="glow" />
-                        🎮 ИГРАТЬ
+                        🎮 {t('play')}
                     </button>
                 ) : canJoin ? (
                     <div className="tc-entry-cards">
@@ -185,11 +188,11 @@ export function TournamentCard({
                         >
                             <div className="entry-glow" />
                             <div className="entry-icon">🎟</div>
-                            <div className="entry-title">Войти за билеты</div>
+                            <div className="entry-title">{t('joinWithTickets')}</div>
                             <div className="entry-sub">
                                 {(data.ticketsCount ?? 0)  >= 50
-                                    ? `Билеты: ${data.ticketsCount}`
-                                    : `Нужно ещё ${50 - data.ticketsCount}`}
+                                    ? `${t('tickets')}: ${data.ticketsCount}`
+                                    : `${t('needMore')} ${50 - data.ticketsCount}`}
                             </div>
                         </div>
 
@@ -209,16 +212,15 @@ export function TournamentCard({
                         >
                             <div className="entry-glow" />
                             <div className="entry-icon">🪙</div>
-                            <div className="entry-title">Войти за монеты</div>
+                            <div className="entry-title">{t('joinWithCoins')}</div>
                             <div className="entry-sub">
-                                Цена: {data.entryFee} · Баланс: {data.coins}
-                            </div>
+                                {t('price')}: {data.entryFee} · {t('balance')}: {data.coins}                            </div>
                         </div>
 
                         {hint && <div className="tc-hint">{hint}</div>}
                     </div>
                 ) : (
-                    <div className="tc-closed">🚫 Турнир завершён</div>
+                    <div className="tc-closed">🚫 {t('tournamentFinished')}</div>
                 )}
             </div>
 
@@ -229,11 +231,11 @@ export function TournamentCard({
             {/* LEADERBOARD (как в старом коде) */}
             {/* ───────────────────────────────────── */}
             <div className="tc-leaderboard">
-                <h4 className="tc-lb-title">🏆 Турнирный топ</h4>
+                <h4 className="tc-lb-title">🏆 {t('tournamentTop')}</h4>
 
                 {data.participants.length === 0 ? (
                     <div className="tc-lb-empty">
-                        Пока никто не сыграл — будь первым 💥
+                        {t('noPlayersYet')}
                     </div>
                 ) : (
                     <div className="tc-lb-list">
@@ -249,7 +251,7 @@ export function TournamentCard({
                                     <div className="tc-lb-rank">{medal}</div>
 
                                     <div className="tc-lb-name">
-                                        {p.username || 'Игрок'}
+                                        {p.username || t('player')}
                                     </div>
 
                                     <div className="tc-lb-score">

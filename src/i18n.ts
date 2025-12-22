@@ -57,6 +57,21 @@ export const translations: Record<Lang, Record<string, string>> = {
         tournamentDesc: 'Почасовые турниры, призовой фонд и топ-3 победителя.',
         buyCoinsTitle: 'Покупка монет',
         summonDemon: 'Нажми, чтобы призвать демона',
+        hourlyTournament: 'Почасовой турнир',
+        dailyTournament: 'Ежедневный турнир',
+        entry: 'Вход',
+        or: 'или',
+        activeNow: 'Идёт сейчас',
+        finished: 'Завершён',
+        joinWithTickets: 'Войти за билеты',
+        joinWithCoins: 'Войти за монеты',
+        tickets: 'Билеты',
+        balance: 'Баланс',
+        tournamentFinished: 'Турнир завершён',
+        tournamentTop: 'Турнирный топ',
+        noPlayersYet: 'Пока никто не сыграл — будь первым 💥',
+        player: 'Игрок',
+
 
     },
 
@@ -116,6 +131,21 @@ export const translations: Record<Lang, Record<string, string>> = {
         tournamentDesc: 'Hourly tournaments, prize pool and top 3 winners.',
         buyCoinsTitle: 'Buy coins',
         summonDemon: 'Tap to summon the demon',
+
+        hourlyTournament: 'Hourly tournament',
+        dailyTournament: 'Daily tournament',
+        entry: 'Entry',
+        or: 'or',
+        activeNow: 'Live now',
+        finished: 'Finished',
+        joinWithTickets: 'Join with tickets',
+        joinWithCoins: 'Join with coins',
+        tickets: 'Tickets',
+        balance: 'Balance',
+        tournamentFinished: 'Tournament finished',
+        tournamentTop: 'Tournament leaderboard',
+        noPlayersYet: 'No players yet — be the first 💥',
+        player: 'Player',
 
     },
 };

@@ -987,6 +987,7 @@ function App() {
                                     <TournamentCard
                                         type="HOURLY"
                                         token={token}
+                                        t={t}
                                         onStartGame={(id) => {
                                             setTournamentGameId(id);
                                             setTournamentType('HOURLY');
@@ -998,6 +999,7 @@ function App() {
                                     <TournamentCard
                                         type="DAILY"
                                         token={token}
+                                        t={t}
                                         onStartGame={(id) => {
                                             setTournamentGameId(id);
                                             setTournamentType('DAILY');
