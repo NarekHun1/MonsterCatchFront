@@ -140,11 +140,6 @@ export function CashCupCard({
                 <span>💎 {t('prizePool')}</span>
                 <strong>{data.prizePool ?? 0} 🪙</strong>
             </div>
-
-            <div className="tc-row small">
-                🥇 50% · 🥈 20% · 🥉 10% · 🏦 20%
-            </div>
-
             <div className="tc-actions">
                 {data.joined ? (
                     <button
