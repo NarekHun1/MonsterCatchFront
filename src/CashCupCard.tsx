@@ -19,6 +19,7 @@ interface CashCupData {
     joined: boolean;
     participants: Participant[];
     ticketsCount: number;
+    coins: number;
 }
 
 /* ───────────────── TIMER HELPER ───────────────── */
@@ -50,7 +51,6 @@ export function CashCupCard({
     /* ───────────────── LOAD ───────────────── */
     const load = async () => {
         try {
-            setLoading(true);
             const res = await apiFetch(
                 '/tournament/current?type=CASH_CUP',
                 token,
@@ -69,9 +69,10 @@ export function CashCupCard({
         }
     };
 
+    /* ───────────── POLLING (3s) ───────────── */
     useEffect(() => {
         load();
-        const i = setInterval(load, 15000);
+        const i = setInterval(load, 3000);
         return () => clearInterval(i);
     }, []);
 
@@ -93,6 +94,17 @@ export function CashCupCard({
     const join = async () => {
         try {
             setError('');
+            setHint(null);
+
+            const canByTickets = data!.ticketsCount >= 10;
+            const canByCoins = data!.coins >= 10;
+
+            if (!canByTickets && !canByCoins) {
+                setHint(`❌ ${t('needTicketsOrCoins')} (🎟 10 / 🪙 10)`);
+                setTimeout(() => setHint(null), 2500);
+                return;
+            }
+
             const res = await apiFetch('/tournament/join', token, {
                 method: 'POST',
                 body: JSON.stringify({ type: 'CASH_CUP' }),
@@ -121,6 +133,8 @@ export function CashCupCard({
     if (!data) return null;
 
     const canJoin = data.status === 'ACTIVE' && !data.joined;
+    const canByTickets = data.ticketsCount >= 10;
+    const canByCoins = data.coins >= 10;
 
     return (
         <div className="tournament-card cash-cup">
@@ -132,14 +146,15 @@ export function CashCupCard({
             </div>
 
             <div className="tc-row">
-                <span>🎟 {t('entry')}</span>
-                <strong>{t('ticketsCount' )} 10</strong>
+                <span>🎟 / 🪙 {t('entry')}</span>
+                <strong>10</strong>
             </div>
 
             <div className="tc-row">
                 <span>💎 {t('prizePool')}</span>
-                <strong>{data.prizePool ?? 0} 🪙</strong>
+                <strong>{data.prizePool} 🪙</strong>
             </div>
+
             <div className="tc-actions">
                 {data.joined ? (
                     <button
@@ -149,21 +164,15 @@ export function CashCupCard({
                         🎮 {t('play')}
                     </button>
                 ) : canJoin ? (
-                    <button
-                        className={`tc-join ${
-                            data.ticketsCount < 10 ? 'locked' : ''
-                        }`}
-                        onClick={() => {
-                            if (data.ticketsCount < 10) {
-                                setHint(`❌ ${t('needMoreTickets')} ${10 - data.ticketsCount} 🎟`);
-                                setTimeout(() => setHint(null), 2500);
-                                return;
-                            }
-                            join();
-                        }}
-                    >
+                    <button className="tc-join" onClick={join}>
                         💰 {t('joinCashCup')}
-
+                        <div className="tc-sub">
+                            {canByTickets
+                                ? '🎟 tickets'
+                                : canByCoins
+                                    ? '🪙 coins'
+                                    : '❌'}
+                        </div>
                     </button>
                 ) : (
                     <div className="tc-closed">⏳ {t('waitingNextRound')}</div>
@@ -174,12 +183,10 @@ export function CashCupCard({
 
             {/* ───────────── LEADERBOARD ───────────── */}
             <div className="tc-leaderboard">
-                <h4>🏆{t('topPlayers')}</h4>
+                <h4>🏆 {t('topPlayers')}</h4>
 
                 {(data.participants?.length ?? 0) === 0 ? (
-                    <div className="tc-lb-empty">
-                        {t('noPlayersYet')}
-                    </div>
+                    <div className="tc-lb-empty">{t('noPlayersYet')}</div>
                 ) : (
                     <div className="tc-lb-list">
                         {data.participants.map((p, i) => (
