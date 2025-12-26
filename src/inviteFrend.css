@@ -1,59 +1,61 @@
-.referral-preview{
-    display:flex;
-    gap:12px;
-    padding:12px;
-    border-radius:16px;
-    background: rgba(255,255,255,0.06);
+.referral-preview {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.07);
+    margin: 8px 0 10px;
+    align-items: center;
+}
+
+.referral-preview-img {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    object-fit: cover;
     border: 1px solid rgba(255,255,255,0.08);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-    margin: 10px 0 14px;
-    align-items:center;
 }
 
-.referral-preview-img{
-    width:64px;
-    height:64px;
-    border-radius:14px;
-    object-fit:cover;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.35);
-    border: 1px solid rgba(255,255,255,0.10);
+.referral-preview-title {
+    font-weight: 700;
+    font-size: 13px;
 }
 
-.referral-preview-title{
-    font-weight:800;
-    font-size:14px;
+.referral-preview-sub {
+    opacity: 0.85;
+    font-size: 12px;
+    line-height: 1.2;
 }
 
-.referral-preview-sub{
-    opacity:0.9;
-    font-size:13px;
-    line-height:1.25;
+.referral-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    border-radius: 12px;
+    background: rgba(0,0,0,0.30);
+    border: 1px solid rgba(255,255,255,0.07);
+    cursor: pointer;
+    user-select: none;
+    margin: 8px 0 10px;
 }
 
-.referral-box{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:10px;
-    padding:12px 12px;
-    border-radius:14px;
-    background: rgba(0,0,0,0.35);
-    border: 1px solid rgba(255,255,255,0.08);
-    cursor:pointer;
-    user-select:none;
-    margin: 10px 0 12px;
+.referral-link {
+    font-size: 11px;
+    opacity: 0.9;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 75%;
 }
 
-.referral-link{
-    font-size:12px;
-    opacity:0.95;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-    max-width: 70%;
+.referral-copy {
+    font-size: 11px;
+    opacity: 0.7;
 }
-
-.referral-copy{
-    font-size:12px;
-    opacity:0.85;
+.referral-box:active {
+    transform: scale(0.98);
+    background: rgba(0,0,0,0.4);
 }

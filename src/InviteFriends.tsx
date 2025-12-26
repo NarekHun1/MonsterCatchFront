@@ -1,7 +1,6 @@
 // src/InviteFriends.tsx
 import React, { useEffect, useMemo, useState } from 'react';
 import { apiFetch } from './api';
-import { BlueStarIcon } from './styles/BlueStarIcon';
 import './inviteFrend.css'
 
 interface InviteFriendsProps {
@@ -115,7 +114,7 @@ export const InviteFriends: React.FC<InviteFriendsProps> = ({ token, onBack }) =
                 <>
                     <p className="panel-muted">
                         Отправь ссылку друзьям. После первой завершённой игры друга ты получишь бонусы{' '}
-                        <BlueStarIcon size={16} /> (и 🎟 билеты).
+                         (и 🎟 билеты).
                     </p>
 
                     <div className="referral-box" onClick={handleCopy} role="button" tabIndex={0}>
