@@ -922,7 +922,11 @@ function App() {
                                                 stars={me.stars}
                                                 token={token}
                                                 onStarsChange={handleStarsChange}
+                                                onTicketChange={(delta) =>
+                                                    setTickets((prev) => prev + delta)
+                                                }
                                             />
+
                                         )}
                                     </div>
 

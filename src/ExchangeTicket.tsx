@@ -1,22 +1,23 @@
 import { useState } from 'react';
-import {BlueStarIcon} from "./styles/BlueStarIcon.tsx";
+import { BlueStarIcon } from './styles/BlueStarIcon';
 
 interface Props {
     stars: number;
     token: string;
     onStarsChange: (stars: number) => void;
+    onTicketChange?: (delta: number) => void; // 🎟 + / -
 }
 
 export function ExchangeTicket({
                                    stars,
                                    token,
                                    onStarsChange,
+                                   onTicketChange,
                                }: Props) {
-    const COST = 100;
+    const COST = 100; // ⭐ 100 stars = 1 билет
     const [loading, setLoading] = useState(false);
 
     const canExchange = stars >= COST;
-    const missing = Math.max(0, COST - stars);
 
     async function exchange() {
         if (!canExchange || loading) return;
@@ -40,8 +41,13 @@ export function ExchangeTicket({
                 throw new Error(data.message || 'Ошибка обмена');
             }
 
+            // ⭐ обновляем stars
             onStarsChange(data.starsLeft);
 
+            // 🎟 сразу добавляем билет
+            onTicketChange?.(1);
+
+            // Telegram UX
             (window as any).Telegram?.WebApp?.HapticFeedback?.notificationOccurred(
                 'success',
             );
@@ -68,11 +74,12 @@ export function ExchangeTicket({
                     '⏳ Обмен...'
                 ) : canExchange ? (
                     <>
-                        Обменять {COST} <BlueStarIcon size={16}/> на билет
+                        Обменять {COST} <BlueStarIcon size={16} /> на билет
                     </>
                 ) : (
                     <>
-                        Нужно ещё {missing} <BlueStarIcon size={16}/>
+                        Нужно ещё {COST - stars}{' '}
+                        <BlueStarIcon size={16} />
                     </>
                 )}
             </div>
