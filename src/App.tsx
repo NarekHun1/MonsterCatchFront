@@ -389,7 +389,7 @@ function App() {
     const [currentPage, setCurrentPage] = useState<Page>('menu');
     const [showHero, setShowHero] = useState(false);
     const [tournamentGameId, setTournamentGameId] = useState<number | null>(null);
-    const [tournamentType, setTournamentType] =
+    const [,setTournamentType] =
         useState<'HOURLY' | 'DAILY' | null>(null);
     const [isBooting, setIsBooting] = useState(true);
     const [showRoulette, setShowRoulette] = useState(false);
@@ -954,8 +954,7 @@ function App() {
                                     token={token}
                                     t={t}
                                     tournamentId={tournamentGameId ?? undefined}
-                                    tournamentType={tournamentType ?? undefined} // 🔥 ВАЖНО
-                                    onBack={() => {
+                                        onBack={() => {
                                         setCurrentPage('menu');
                                         setTournamentGameId(null);
                                         setTournamentType(null); // 🔥 очистка
