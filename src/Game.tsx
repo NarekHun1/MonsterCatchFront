@@ -9,9 +9,9 @@ interface GameProps {
     t: (key: string) => string;
     onStarsChange?: (stars: number) => void;
     onStatsChange?: (stats: { stars: number; level: number; xp: number }) => void;
-    tournamentId?: number;
-    tournamentType?: 'HOURLY' | 'DAILY';
+    tournamentId?: number; // ✅ ЕДИНСТВЕННЫЙ ИСТОЧНИК
 }
+
 
 type GameStatus = 'idle' | 'running' | 'finished';
 type GamePhase = 'intro' | 'playing';
@@ -55,7 +55,7 @@ function randomPosition() {
     return { x, y };
 }
 
-export function Game({ token, onBack, onStarsChange, onStatsChange,t, tournamentType}: GameProps) {
+export function Game({ token, onBack, onStarsChange, onStatsChange,t, tournamentId}: GameProps) {
     const [phase, setPhase] = useState<GamePhase>('intro');
     const [status, setStatus] = useState<GameStatus>('idle');
     const [gameId, setGameId] = useState<number | null>(null);
@@ -131,7 +131,9 @@ export function Game({ token, onBack, onStarsChange, onStatsChange,t, tournament
             }
 
             // 2️⃣ Локальные обновления
-            setBestScore((prev) => (prev === null || score > prev ? score : prev));
+            setBestScore((prev) =>
+                prev === null || score > prev ? score : prev,
+            );
 
             if (typeof data.totalStars === 'number') {
                 onStarsChange?.(data.totalStars);
@@ -145,12 +147,12 @@ export function Game({ token, onBack, onStarsChange, onStatsChange,t, tournament
                 });
             }
 
-            // 3️⃣ 🔥 ОТПРАВКА РЕЗУЛЬТАТА В ТУРНИР
-            if (tournamentType) {
+            // 3️⃣ 🔥 ОТПРАВКА РЕЗУЛЬТАТА В ТУРНИР (НОВЫЙ КОНТРАКТ)
+            if (tournamentId) {
                 const tRes = await apiFetch('/tournament/submit-score', token, {
                     method: 'POST',
                     body: JSON.stringify({
-                        type: tournamentType,
+                        tournamentId, // ✅ ЧИСЛО
                         score,
                     }),
                 });
@@ -158,7 +160,10 @@ export function Game({ token, onBack, onStarsChange, onStatsChange,t, tournament
                 const tData = await tRes.json().catch(() => ({}));
 
                 if (!tRes.ok) {
-                    console.error('Tournament submit failed:', tData?.message || tData);
+                    console.error(
+                        'Tournament submit failed:',
+                        tData?.message || tData,
+                    );
                 } else {
                     console.log('✅ Tournament score submitted:', tData);
                 }
@@ -177,10 +182,11 @@ export function Game({ token, onBack, onStarsChange, onStatsChange,t, tournament
         clicks,
         epicCount,
         token,
-        tournamentType,
+        tournamentId, // 🔥 ВАЖНО
         onStarsChange,
         onStatsChange,
     ]);
+
 
 
     // ✅ ПРАВИЛЬНЫЙ /game/start
