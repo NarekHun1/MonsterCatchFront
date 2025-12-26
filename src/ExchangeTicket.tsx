@@ -15,10 +15,11 @@ export function ExchangeTicket({
     const COST = 100;
     const [loading, setLoading] = useState(false);
 
+    const canExchange = stars >= COST;
     const missing = Math.max(0, COST - stars);
 
     async function exchange() {
-        if (!missing || loading) return;
+        if (!canExchange || loading) return;
 
         setLoading(true);
 
@@ -39,10 +40,8 @@ export function ExchangeTicket({
                 throw new Error(data.message || 'Ошибка обмена');
             }
 
-            // обновляем stars в App.tsx
             onStarsChange(data.starsLeft);
 
-            // Telegram UX
             (window as any).Telegram?.WebApp?.HapticFeedback?.notificationOccurred(
                 'success',
             );
@@ -58,7 +57,7 @@ export function ExchangeTicket({
     return (
         <button
             className="menu-card"
-            disabled={!missing || loading}
+            disabled={!canExchange || loading}
             onClick={exchange}
         >
             <div className="menu-icon">🎟</div>
@@ -67,7 +66,7 @@ export function ExchangeTicket({
             <div className="menu-card-text">
                 {loading ? (
                     '⏳ Обмен...'
-                ) : missing ? (
+                ) : canExchange ? (
                     <>
                         Обменять {COST} <BlueStarIcon size={16}/> на билет
                     </>
@@ -78,6 +77,5 @@ export function ExchangeTicket({
                 )}
             </div>
         </button>
-
     );
 }
