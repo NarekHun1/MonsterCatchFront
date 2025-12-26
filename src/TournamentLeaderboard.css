@@ -211,3 +211,78 @@
     color: #ffd35a;
     text-shadow: 0 0 6px rgba(255, 211, 90, 0.6);
 }
+/* ───────── CASH CUP JOIN BUTTONS ───────── */
+
+.cashcup-join-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 16px;
+}
+
+.cashcup-join-card {
+    border: none;
+    border-radius: 18px;
+    padding: 18px 14px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+
+    text-align: center;
+    cursor: pointer;
+    color: #111;
+
+    box-shadow:
+            0 10px 30px rgba(0, 0, 0, 0.35),
+            inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+
+    transition: all 0.25s ease;
+}
+
+/* 🎟 TICKET */
+.cashcup-join-card.ticket {
+    background: linear-gradient(180deg, #5b6b75, #4a5962);
+    color: #0b0f12;
+}
+
+/* 🪙 COIN */
+.cashcup-join-card.coin {
+    background: linear-gradient(180deg, #ffb547, #ff9c1a);
+    color: #1a1200;
+}
+
+/* HOVER */
+.cashcup-join-card:hover:not(.locked) {
+    transform: translateY(-3px);
+    box-shadow:
+            0 14px 36px rgba(0, 0, 0, 0.45),
+            inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+/* ICON */
+.cashcup-join-card .join-icon {
+    font-size: 34px;
+}
+
+/* TITLE */
+.cashcup-join-card .join-title {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+/* SUB */
+.cashcup-join-card .join-sub {
+    font-size: 13px;
+    opacity: 0.85;
+}
+
+/* LOCKED */
+.cashcup-join-card.locked {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow:
+            inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+}

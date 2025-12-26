@@ -90,14 +90,16 @@ export function CashCupCard({
         return () => clearInterval(i);
     }, [data?.endsAt]);
 
-    /* ───────────────── JOIN ───────────────── */
+    /* ───────────────── JOIN (🎟 or 🪙) ───────────────── */
     const join = async () => {
+        if (!data) return;
+
         try {
             setError('');
             setHint(null);
 
-            const canByTickets = data!.ticketsCount >= 10;
-            const canByCoins = data!.coins >= 10;
+            const canByTickets = data.ticketsCount >= 10;
+            const canByCoins = data.coins >= 10;
 
             if (!canByTickets && !canByCoins) {
                 setHint(`❌ ${t('needTicketsOrCoins')} (🎟 10 / 🪙 10)`);
@@ -132,7 +134,6 @@ export function CashCupCard({
 
     if (!data) return null;
 
-    const canJoin = data.status === 'ACTIVE' && !data.joined;
     const canByTickets = data.ticketsCount >= 10;
     const canByCoins = data.coins >= 10;
 
@@ -155,31 +156,54 @@ export function CashCupCard({
                 <strong>{data.prizePool} 🪙</strong>
             </div>
 
-            <div className="tc-actions">
-                {data.joined ? (
+            {/* ───────── JOIN POLICY UI ───────── */}
+            <div className="cashcup-join-grid">
+                {/* 🎟 TICKETS */}
+                <button
+                    className={`cashcup-join-card ticket ${
+                        !canByTickets ? 'locked' : ''
+                    }`}
+                    disabled={!canByTickets}
+                    onClick={join}
+                >
+                    <div className="join-icon">🎟</div>
+                    <div className="join-title">{t('joinWithTickets')}</div>
+                    <div className="join-sub">
+                        {canByTickets
+                            ? `Цена: 10 · Баланс: ${data.ticketsCount}`
+                            : `Нужно ещё ${10 - data.ticketsCount}`}
+                    </div>
+                </button>
+
+                {/* 🪙 COINS */}
+                <button
+                    className={`cashcup-join-card coin ${
+                        !canByCoins ? 'locked' : ''
+                    }`}
+                    disabled={!canByCoins}
+                    onClick={join}
+                >
+                    <div className="join-icon">🪙</div>
+                    <div className="join-title">{t('joinWithCoins')}</div>
+                    <div className="join-sub">
+                        Цена: 10 · Баланс: {data.coins}
+                    </div>
+                </button>
+            </div>
+
+            {hint && <div className="tc-hint">{hint}</div>}
+
+            {/* 🎮 PLAY */}
+            {data.joined && (
+                <div className="tc-actions">
                     <button
                         className="tc-play-main"
                         onClick={() => onStartGame(data.tournamentId)}
                     >
                         🎮 {t('play')}
                     </button>
-                ) : canJoin ? (
-                    <button className="tc-join" onClick={join}>
-                        💰 {t('joinCashCup')}
-                        <div className="tc-sub">
-                            {canByTickets
-                                ? '🎟 tickets'
-                                : canByCoins
-                                    ? '🪙 coins'
-                                    : '❌'}
-                        </div>
-                    </button>
-                ) : (
-                    <div className="tc-closed">⏳ {t('waitingNextRound')}</div>
-                )}
-
-                {hint && <div className="tc-hint">{hint}</div>}
-            </div>
+                </div>
+            )}
 
             {/* ───────────── LEADERBOARD ───────────── */}
             <div className="tc-leaderboard">
