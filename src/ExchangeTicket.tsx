@@ -12,13 +12,13 @@ export function ExchangeTicket({
                                    token,
                                    onStarsChange,
                                }: Props) {
-    const COST = 2000;
+    const COST = 100;
     const [loading, setLoading] = useState(false);
 
-    const canExchange = stars >= COST;
+    const missing = Math.max(0, COST - stars);
 
     async function exchange() {
-        if (!canExchange || loading) return;
+        if (!missing || loading) return;
 
         setLoading(true);
 
@@ -58,7 +58,7 @@ export function ExchangeTicket({
     return (
         <button
             className="menu-card"
-            disabled={!canExchange || loading}
+            disabled={!missing || loading}
             onClick={exchange}
         >
             <div className="menu-icon">🎟</div>
@@ -67,13 +67,13 @@ export function ExchangeTicket({
             <div className="menu-card-text">
                 {loading ? (
                     '⏳ Обмен...'
-                ) : canExchange ? (
+                ) : missing ? (
                     <>
                         Обменять {COST} <BlueStarIcon size={16}/> на билет
                     </>
                 ) : (
                     <>
-                        Нужно ещё {COST - stars} <BlueStarIcon size={16}/>
+                        Нужно ещё {missing} <BlueStarIcon size={16}/>
                     </>
                 )}
             </div>
