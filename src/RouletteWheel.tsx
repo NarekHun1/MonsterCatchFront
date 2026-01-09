@@ -6,7 +6,8 @@ type PrizeType = 'COINS' | 'TICKETS' | 'STARS' | 'NOTHING' | 'JACKPOT';
 
 type Sector = {
     id: string;
-    label: string;
+    title: string;     // краткий текст (+10 и т.д.)
+    icon: string;      // emoji / можно потом заменить на img
 };
 
 type SpinResponse = {
@@ -15,19 +16,19 @@ type SpinResponse = {
     type?: PrizeType;
     amount?: number;
 
-    costCoins?: number;        // 0 или 10 (если бек возвращает)
-    freeTodayUsed?: boolean;   // true => бесплатный уже был сегодня
+    costCoins?: number;
+    freeTodayUsed?: boolean;
 };
 
 const DEFAULT_SECTORS: Sector[] = [
-    { id: 'ticket_1', label: '🎟 +1' },
-    { id: 'coins_10', label: '🪙 +10' },
-    { id: 'coins_25', label: '🪙 +25' },
-    { id: 'stars_5', label: '⭐ +5' },
-    { id: 'ticket_3', label: '🎟 +3' },
-    { id: 'stars_10', label: '⭐ +10' },
-    { id: 'jackpot', label: '💥 JACKPOT' },
-    { id: 'nothing', label: '❌' },
+    { id: 'ticket_1', title: '+1', icon: '🎟️' },
+    { id: 'coins_10', title: '+10', icon: '🪙' },
+    { id: 'coins_25', title: '+25', icon: '🪙' },
+    { id: 'stars_5', title: '+5', icon: '⭐' },
+    { id: 'ticket_3', title: '+3', icon: '🎟️' },
+    { id: 'stars_10', title: '+10', icon: '⭐' },
+    { id: 'jackpot', title: 'JACKPOT', icon: '💥' },
+    { id: 'nothing', title: '0', icon: '❌' },
 ];
 
 function easeOutCubic(t: number) {
@@ -65,10 +66,8 @@ export function RouletteWheel({
         return idx >= 0 ? idx : 0;
     };
 
-    const getLabelBySectorId = (sectorId: string) => {
-        const idx = getIndexBySectorId(sectorId);
-        return sectors[idx]?.label ?? sectorId;
-    };
+    const getSectorById = (sectorId: string) =>
+        sectors.find((s) => s.id === sectorId) || sectors[0];
 
     const spin = async () => {
         if (!token) {
@@ -84,7 +83,7 @@ export function RouletteWheel({
 
         let payload: SpinResponse;
 
-        // ✅ ВАЖНО: БЕЗ fallback-рандома, чтобы не было "фейковых" призов
+        // ❗️ВАЖНО: без фейкового fallback
         try {
             const res = await apiFetch('/roulette/spin', token, {
                 method: 'POST',
@@ -103,7 +102,7 @@ export function RouletteWheel({
 
         const targetIndex = getIndexBySectorId(payload.sectorId);
 
-        // остановка по центру сектора под стрелкой сверху
+        // остановка ровно по центру сектора под стрелкой сверху
         const spins = 6;
         const centerOffset = sectorAngle / 2;
         const targetAngle =
@@ -117,8 +116,7 @@ export function RouletteWheel({
         const animate = (now: number) => {
             const t = Math.min(1, (now - start) / duration);
             const eased = easeOutCubic(t);
-            const next = startAngle + delta * eased;
-            setAngle(next);
+            setAngle(startAngle + delta * eased);
 
             if (t < 1) {
                 rafRef.current = requestAnimationFrame(animate);
@@ -133,6 +131,8 @@ export function RouletteWheel({
         rafRef.current = requestAnimationFrame(animate);
     };
 
+    const winSector = result ? getSectorById(result.sectorId) : null;
+
     return (
         <div className="roulette-overlay" onClick={onClose}>
             <div className="roulette-modal" onClick={(e) => e.stopPropagation()}>
@@ -141,12 +141,7 @@ export function RouletteWheel({
                         <div className="roulette-title">🎰 Рулетка удачи</div>
                         <div className="roulette-sub">Крути и получай бонус 🎁</div>
                     </div>
-
-                    <button
-                        className="roulette-close"
-                        onClick={onClose}
-                        aria-label="Close"
-                    >
+                    <button className="roulette-close" onClick={onClose} aria-label="Close">
                         ✕
                     </button>
                 </div>
@@ -154,25 +149,26 @@ export function RouletteWheel({
                 {error && <div className="roulette-error">{error}</div>}
 
                 <div className="roulette-stage">
+                    {/* стрелка */}
                     <div className="roulette-pointer" />
 
-                    <div
-                        className="roulette-wheel"
-                        style={{ transform: `rotate(${angle}deg)` }}
-                    >
+                    {/* колесо */}
+                    <div className="roulette-wheel" style={{ transform: `rotate(${angle}deg)` }}>
                         {sectors.map((s, i) => (
                             <div
                                 key={s.id}
-                                className={`roulette-sector ${
-                                    winningId === s.id ? 'is-winning' : ''
-                                }`}
+                                className={`roulette-sector ${winningId === s.id ? 'is-winning' : ''}`}
                                 style={{ transform: `rotate(${i * sectorAngle}deg)` }}
                             >
                                 <div
                                     className="roulette-sector-inner"
                                     style={{ transform: `skewY(${90 - sectorAngle}deg)` }}
                                 >
-                                    <div className="roulette-label">{s.label}</div>
+                                    {/* Контент сектора: иконка + текст */}
+                                    <div className="roulette-sector-content">
+                                        <div className="roulette-sector-icon">{s.icon}</div>
+                                        <div className="roulette-sector-text">{s.title}</div>
+                                    </div>
                                 </div>
                             </div>
                         ))}
@@ -180,11 +176,12 @@ export function RouletteWheel({
                         <div className="roulette-center" />
                     </div>
 
+                    {/* overlay WIN — но главное: сектор уже подсвечен */}
                     {result && (
                         <div className="roulette-win">
-                            <div className="roulette-win-title">🎉 WIN</div>
+                            <div className="roulette-win-title">WIN</div>
                             <div className="roulette-win-sub">
-                                {result.label || getLabelBySectorId(result.sectorId)}
+                                {winSector?.icon} {winSector?.title}
                             </div>
                         </div>
                     )}
@@ -202,8 +199,7 @@ export function RouletteWheel({
                     {result && (
                         <>
                             <div className="roulette-result">
-                                🎯 Остановилось на:{' '}
-                                <b>{result.label || getLabelBySectorId(result.sectorId)}</b>
+                                🎯 Остановилось на: <b>{winSector?.icon} {winSector?.title}</b>
                             </div>
 
                             <div className="roulette-price">
@@ -218,8 +214,7 @@ export function RouletteWheel({
 
                     {!result && (
                         <div className="roulette-note">
-                            🎁 1 бесплатный спин в день, затем 10 🪙 за спин. Приз определяет
-                            сервер.
+                            🎁 1 бесплатный спин в день, затем 10 🪙 за спин. Приз определяет сервер.
                         </div>
                     )}
                 </div>
