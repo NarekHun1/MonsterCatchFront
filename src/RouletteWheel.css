@@ -102,7 +102,7 @@
     filter:
             drop-shadow(0 8px 18px rgba(255,211,77,.35))
             drop-shadow(0 2px 0 rgba(0,0,0,.25));
-    z-index: 5;
+    z-index: 7;
 }
 
 /* Tiny pointer cap */
@@ -160,48 +160,34 @@
     to   { transform: rotate(360deg); }
 }
 
-/* Sector */
+/* Sector wedge */
 .roulette-sector{
     position:absolute;
     inset: 0;
     border-radius: 50%;
     clip-path: polygon(50% 50%, 100% 0, 100% 100%);
+    overflow: hidden; /* важно для контента внутри клина */
 }
 
-/* Sector fill */
+/* Wedge fill */
 .roulette-sector-inner{
     position:absolute;
     inset: 0;
     transform-origin: 50% 50%;
-    background:
-            linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,0));
+    background: linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,0));
     border-left: 1px solid rgba(255,255,255,.08);
+    pointer-events: none;
 }
 
-/* Alternating warm sectors */
+/* Alternating warm wedges */
 .roulette-sector:nth-child(odd) .roulette-sector-inner{
-    background:
-            linear-gradient(135deg, rgba(255,211,77,.18), rgba(255,255,255,0));
+    background: linear-gradient(135deg, rgba(255,211,77,.18), rgba(255,255,255,0));
 }
 
-/* Labels - clearer */
-.roulette-label{
-    position:absolute;
-    top: 18px;
-    left: 50%;
-    transform: translateX(-50%) rotate(90deg);
-    transform-origin: center;
-    font-weight: 900;
-    font-size: 12px;
-    letter-spacing: .2px;
-    color: rgba(255,255,255,.92);
-    text-shadow:
-            0 10px 24px rgba(0,0,0,.65),
-            0 2px 0 rgba(0,0,0,.35);
-    white-space: nowrap;
-}
+/* OLD label (unused now) */
+.roulette-label{ display:none; }
 
-/* Center button look */
+/* Center button */
 .roulette-center{
     position:absolute;
     left: 50%;
@@ -217,6 +203,7 @@
     box-shadow:
             0 18px 55px rgba(0,0,0,.7),
             inset 0 0 0 2px rgba(255,255,255,.06);
+    z-index: 4;
 }
 
 .roulette-center::after{
@@ -229,93 +216,22 @@
 }
 
 /* ─────────────────────────────
-   Actions / Button
+   ICONS ON WHEEL (main fix)
+   Works with TSX that sets --rot per sector
 ───────────────────────────── */
 
-.roulette-actions{
-    padding: 12px 16px 16px;
-}
-
-.roulette-spin{
-    width: 100%;
-    padding: 14px 14px;
-    border-radius: 14px;
-    border: 0;
-    cursor: pointer;
-    font-weight: 950;
-    letter-spacing: .7px;
-    color: #1a1400;
-    background: linear-gradient(90deg, #ffe07a, #ff9b2f);
-    box-shadow:
-            0 18px 46px rgba(255,170,50,.25),
-            inset 0 0 0 1px rgba(255,255,255,.25);
-    transition: transform .15s ease, filter .15s ease, opacity .15s ease;
-}
-
-.roulette-spin:hover{
-    transform: translateY(-1px);
-    filter: brightness(1.03);
-}
-
-.roulette-spin:active{
-    transform: translateY(0px) scale(.995);
-}
-
-.roulette-spin.is-disabled{
-    opacity: .60;
-    cursor: not-allowed;
-    filter: grayscale(.1);
-}
-
-/* Result */
-.roulette-result{
-    margin-top: 10px;
-    padding: 10px 12px;
-    border-radius: 12px;
-    background: rgba(255,255,255,.06);
-    border: 1px solid rgba(255,255,255,.10);
-    font-size: 13px;
-}
-
-/* Price / info line (for your TSX) */
-.roulette-price{
-    margin-top: 10px;
-    font-size: 12px;
-    opacity: .78;
-    text-align: center;
-    line-height: 1.35;
-}
-
-/* Note */
-.roulette-note{
-    margin-top: 10px;
-    font-size: 12px;
-    opacity: .65;
-    line-height: 1.35;
-}
-
-/* Mobile */
-@media (max-width: 420px){
-    .roulette-wheel{ width: 280px; height: 280px; }
-    .roulette-center{ width: 68px; height: 68px; }
-}
-/* ─────────────────────────────
-   Sector content (icons on wheel)
-   Добавь в КОНЕЦ файла
-───────────────────────────── */
-
-/* если у тебя раньше был .roulette-label — скрываем, чтобы не мешал */
-.roulette-label { display: none; }
-
-/* контейнер с иконкой + текстом внутри сектора */
 .roulette-sector-content{
     position: absolute;
-    top: 28px;
-    left: 50%;
-    transform: translateX(-50%) rotate(90deg);
-    display: flex;
+    left: 72%;     /* ключ: клин направлен вправо, поэтому контент ближе к правому краю */
+    top: 50%;
+    transform:
+            translate(-50%, -50%)
+            rotate(calc(-1 * var(--rot))); /* выравниваем, чтобы не крутилось по кругу */
+
+    display: inline-flex;
     align-items: center;
     gap: 8px;
+
     padding: 7px 10px;
     border-radius: 12px;
 
@@ -324,11 +240,12 @@
     box-shadow: 0 10px 26px rgba(0,0,0,.45);
 
     white-space: nowrap;
-    z-index: 2;
+    z-index: 6;
 }
 
 .roulette-sector-icon{
     font-size: 18px;
+    line-height: 1;
     filter: drop-shadow(0 8px 16px rgba(0,0,0,.45));
 }
 
@@ -340,10 +257,7 @@
     text-shadow: 0 10px 24px rgba(0,0,0,.60);
 }
 
-/* ─────────────────────────────
-   Winning sector highlight
-───────────────────────────── */
-
+/* Winning highlight */
 .roulette-sector.is-winning .roulette-sector-inner{
     background: linear-gradient(135deg, rgba(255,220,120,.46), rgba(255,255,255,0));
     box-shadow:
@@ -359,7 +273,7 @@
 }
 
 /* ─────────────────────────────
-   WIN overlay (над колесом)
+   WIN overlay (above wheel)
 ───────────────────────────── */
 
 .roulette-win{
@@ -400,48 +314,72 @@
     border: 1px solid rgba(255,255,255,.10);
     box-shadow: 0 14px 40px rgba(0,0,0,.55);
 }
-/* показываем иконки внутри сектора корректно (анти-skew) */
-.roulette-sector-inner{
-    overflow: visible;
+
+/* ─────────────────────────────
+   Actions / Button + info
+───────────────────────────── */
+
+.roulette-actions{
+    padding: 12px 16px 16px;
 }
 
-/* сам блок с эмодзи/текстом */
-.roulette-sector-content{
-    position: absolute;
-    top: 28px;
-    left: 50%;
-    /* rotate(90deg) оставляем как было + ДОБАВЛЯЕМ обратный skew */
-    transform: translateX(-50%) rotate(90deg) skewY(calc(-1 * (90deg - var(--sa))));
-    transform-origin: center;
-
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-
-    padding: 7px 10px;
-    border-radius: 12px;
-
-    background: rgba(0,0,0,.22);
-    border: 1px solid rgba(255,255,255,.10);
-    box-shadow: 0 10px 26px rgba(0,0,0,.45);
-
-    white-space: nowrap;
-    z-index: 3;
-}
-
-.roulette-sector-icon{
-    font-size: 18px;
-    line-height: 1;
-    filter: drop-shadow(0 8px 16px rgba(0,0,0,.45));
-}
-
-.roulette-sector-text{
+.roulette-spin{
+    width: 100%;
+    padding: 14px 14px;
+    border-radius: 14px;
+    border: 0;
+    cursor: pointer;
     font-weight: 950;
-    font-size: 12px;
-    letter-spacing: .25px;
-    color: rgba(255,255,255,.92);
-    text-shadow: 0 10px 24px rgba(0,0,0,.60);
+    letter-spacing: .7px;
+    color: #1a1400;
+    background: linear-gradient(90deg, #ffe07a, #ff9b2f);
+    box-shadow:
+            0 18px 46px rgba(255,170,50,.25),
+            inset 0 0 0 1px rgba(255,255,255,.25);
+    transition: transform .15s ease, filter .15s ease, opacity .15s ease;
 }
 
-/* если раньше был label — скрываем, чтобы не дублировалось */
-.roulette-label{ display:none; }
+.roulette-spin:hover{
+    transform: translateY(-1px);
+    filter: brightness(1.03);
+}
+
+.roulette-spin:active{
+    transform: translateY(0px) scale(.995);
+}
+
+.roulette-spin.is-disabled{
+    opacity: .60;
+    cursor: not-allowed;
+    filter: grayscale(.1);
+}
+
+.roulette-result{
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.10);
+    font-size: 13px;
+}
+
+.roulette-price{
+    margin-top: 10px;
+    font-size: 12px;
+    opacity: .78;
+    text-align: center;
+    line-height: 1.35;
+}
+
+.roulette-note{
+    margin-top: 10px;
+    font-size: 12px;
+    opacity: .65;
+    line-height: 1.35;
+}
+
+/* Mobile */
+@media (max-width: 420px){
+    .roulette-wheel{ width: 280px; height: 280px; }
+    .roulette-center{ width: 68px; height: 68px; }
+}

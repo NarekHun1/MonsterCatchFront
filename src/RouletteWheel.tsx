@@ -6,8 +6,8 @@ type PrizeType = 'COINS' | 'TICKETS' | 'STARS' | 'NOTHING' | 'JACKPOT';
 
 type Sector = {
     id: string;
-    title: string;     // краткий текст (+10 и т.д.)
-    icon: string;      // emoji / можно потом заменить на img
+    title: string; // +10, JACKPOT, 0
+    icon: string;  // emoji (можно потом заменить на <img/>)
 };
 
 type SpinResponse = {
@@ -83,7 +83,7 @@ export function RouletteWheel({
 
         let payload: SpinResponse;
 
-        // ❗️ВАЖНО: без фейкового fallback
+        // ❗️важно: без фейкового fallback (иначе будут "фейковые" призы)
         try {
             const res = await apiFetch('/roulette/spin', token, {
                 method: 'POST',
@@ -102,7 +102,7 @@ export function RouletteWheel({
 
         const targetIndex = getIndexBySectorId(payload.sectorId);
 
-        // остановка ровно по центру сектора под стрелкой сверху
+        // остановка по центру сектора под стрелкой (стрелка в 0deg)
         const spins = 6;
         const centerOffset = sectorAngle / 2;
         const targetAngle =
@@ -149,40 +149,46 @@ export function RouletteWheel({
                 {error && <div className="roulette-error">{error}</div>}
 
                 <div className="roulette-stage">
-                    {/* стрелка */}
                     <div className="roulette-pointer" />
 
-                    {/* колесо */}
+                    {/* ВАЖНО: рисуем эмодзи как overlay внутри каждого сектора (НЕ внутри skew блока) */}
                     <div
                         className="roulette-wheel"
                         style={{
                             transform: `rotate(${angle}deg)`,
-                            ['--sa' as any]: `${sectorAngle}deg`, // ✅ для CSS
+                            ['--sa' as any]: `${sectorAngle}deg`,
                         }}
                     >
-                        {sectors.map((s, i) => (
-                            <div
-                                key={s.id}
-                                className={`roulette-sector ${winningId === s.id ? 'is-winning' : ''}`}
-                                style={{ transform: `rotate(${i * sectorAngle}deg)` }}
-                            >
+                        {sectors.map((s, i) => {
+                            const rot = i * sectorAngle;
+
+                            return (
                                 <div
-                                    className="roulette-sector-inner"
-                                    style={{ transform: `skewY(${90 - sectorAngle}deg)` }}
+                                    key={s.id}
+                                    className={`roulette-sector ${winningId === s.id ? 'is-winning' : ''}`}
+                                    style={{
+                                        transform: `rotate(${rot}deg)`,
+                                        ['--rot' as any]: `${rot}deg`,
+                                    }}
                                 >
-                                    {/* Контент сектора: иконка + текст */}
+                                    {/* клин (фон сектора) */}
+                                    <div
+                                        className="roulette-sector-inner"
+                                        style={{ transform: `skewY(${90 - sectorAngle}deg)` }}
+                                    />
+
+                                    {/* контент сектора (иконка + текст) — отдельно, чтобы не клипалось skew */}
                                     <div className="roulette-sector-content">
                                         <div className="roulette-sector-icon">{s.icon}</div>
                                         <div className="roulette-sector-text">{s.title}</div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
 
                         <div className="roulette-center" />
                     </div>
 
-                    {/* overlay WIN — но главное: сектор уже подсвечен */}
                     {result && (
                         <div className="roulette-win">
                             <div className="roulette-win-title">WIN</div>
@@ -220,7 +226,7 @@ export function RouletteWheel({
 
                     {!result && (
                         <div className="roulette-note">
-                            🎁 1 бесплатный спин в день, затем 10 🪙 за спин. Приз определяет сервер.
+                            🎁 1 бесплатный спин в день, затем 10 🪙 за спин.
                         </div>
                     )}
                 </div>
