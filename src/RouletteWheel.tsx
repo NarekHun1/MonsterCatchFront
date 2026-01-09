@@ -153,7 +153,13 @@ export function RouletteWheel({
                     <div className="roulette-pointer" />
 
                     {/* колесо */}
-                    <div className="roulette-wheel" style={{ transform: `rotate(${angle}deg)` }}>
+                    <div
+                        className="roulette-wheel"
+                        style={{
+                            transform: `rotate(${angle}deg)`,
+                            ['--sa' as any]: `${sectorAngle}deg`, // ✅ для CSS
+                        }}
+                    >
                         {sectors.map((s, i) => (
                             <div
                                 key={s.id}
