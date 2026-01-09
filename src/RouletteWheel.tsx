@@ -1,3 +1,4 @@
+// src/RouletteWheel.tsx
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { apiFetch } from './api';
 import './RouletteWheel.css';
@@ -83,7 +84,6 @@ export function RouletteWheel({
 
         let payload: SpinResponse;
 
-        // ❗️важно: без фейкового fallback (иначе будут "фейковые" призы)
         try {
             const res = await apiFetch('/roulette/spin', token, {
                 method: 'POST',
@@ -91,7 +91,7 @@ export function RouletteWheel({
             });
 
             const json = await res.json().catch(() => ({}));
-            if (!res.ok) throw new Error(json?.message || 'Spin failed');
+            if (!res.ok) throw new Error((json as any)?.message || 'Spin failed');
 
             payload = json as SpinResponse;
         } catch (e: any) {
@@ -151,7 +151,6 @@ export function RouletteWheel({
                 <div className="roulette-stage">
                     <div className="roulette-pointer" />
 
-                    {/* ВАЖНО: рисуем эмодзи как overlay внутри каждого сектора (НЕ внутри skew блока) */}
                     <div
                         className="roulette-wheel"
                         style={{
@@ -185,6 +184,10 @@ export function RouletteWheel({
                                 </div>
                             );
                         })}
+
+                        {/* ✨ Real casino layers (bulbs + glass dome) */}
+                        <div className="roulette-bulbs" aria-hidden="true" />
+                        <div className="roulette-dome" aria-hidden="true" />
 
                         <div className="roulette-center" />
                     </div>
