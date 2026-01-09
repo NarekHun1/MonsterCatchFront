@@ -1,4 +1,3 @@
-// src/RouletteWheel.tsx
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { apiFetch } from './api';
 import './RouletteWheel.css';
@@ -8,7 +7,7 @@ type PrizeType = 'COINS' | 'TICKETS' | 'STARS' | 'NOTHING' | 'JACKPOT';
 type Sector = {
     id: string;
     title: string; // +10, JACKPOT, 0
-    icon: string;  // emoji (можно потом заменить на <img/>)
+    icon: string;  // emoji (потом можно заменить на <img/>)
 };
 
 type SpinResponse = {
@@ -92,7 +91,6 @@ export function RouletteWheel({
 
             const json = await res.json().catch(() => ({}));
             if (!res.ok) throw new Error((json as any)?.message || 'Spin failed');
-
             payload = json as SpinResponse;
         } catch (e: any) {
             setSpinning(false);
@@ -102,7 +100,7 @@ export function RouletteWheel({
 
         const targetIndex = getIndexBySectorId(payload.sectorId);
 
-        // остановка по центру сектора под стрелкой (стрелка в 0deg)
+        // остановка по центру сектора под стрелкой (стрелка сверху, 0deg)
         const spins = 6;
         const centerOffset = sectorAngle / 2;
         const targetAngle =
@@ -141,6 +139,7 @@ export function RouletteWheel({
                         <div className="roulette-title">🎰 Рулетка удачи</div>
                         <div className="roulette-sub">Крути и получай бонус 🎁</div>
                     </div>
+
                     <button className="roulette-close" onClick={onClose} aria-label="Close">
                         ✕
                     </button>
@@ -176,7 +175,7 @@ export function RouletteWheel({
                                         style={{ transform: `skewY(${90 - sectorAngle}deg)` }}
                                     />
 
-                                    {/* контент сектора (иконка + текст) — отдельно, чтобы не клипалось skew */}
+                                    {/* контент сектора — отдельно, чтобы не клипалось skew */}
                                     <div className="roulette-sector-content">
                                         <div className="roulette-sector-icon">{s.icon}</div>
                                         <div className="roulette-sector-text">{s.title}</div>
@@ -185,7 +184,7 @@ export function RouletteWheel({
                             );
                         })}
 
-                        {/* ✨ Real casino layers (bulbs + glass dome) */}
+                        {/* Real casino layers */}
                         <div className="roulette-bulbs" aria-hidden="true" />
                         <div className="roulette-dome" aria-hidden="true" />
 
