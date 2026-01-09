@@ -1,4 +1,20 @@
 /* ─────────────────────────────
+   GLOBAL FIX (Telegram WebApp)
+───────────────────────────── */
+
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    overflow: hidden;
+}
+
+/* ─────────────────────────────
    Base panel
 ───────────────────────────── */
 
@@ -9,23 +25,30 @@
 .panel-menu{
     max-width: 520px;
     margin: 0 auto;
+
+    /* ✅ КРИТИЧЕСКИ ВАЖНО */
+    height: 100dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+
+    padding-bottom: max(28px, env(safe-area-inset-bottom));
 }
 
 .panel-title{
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 900;
     margin-bottom: 10px;
 }
 
 .panel-muted{
     opacity: 0.75;
-    font-size: 14px;
-    line-height: 1.4;
+    font-size: 13px;
+    line-height: 1.35;
     margin-bottom: 10px;
 }
 
 /* ─────────────────────────────
-   Referral preview (FIXED IMAGE)
+   Referral preview
 ───────────────────────────── */
 
 .referral-preview{
@@ -40,13 +63,13 @@
     align-items:center;
 }
 
-/* 🔒 защита от глобальных img стилей */
+/* защита от глобальных img */
 .referral-preview img{
     display:block;
     max-width:100%;
 }
 
-/* ✅ КРИТИЧЕСКИЙ ФИКС — картинка НЕ растягивается */
+/* ✅ КАРТИНКА НИКОГДА НЕ РАСТЯГИВАЕТСЯ */
 .referral-preview-img{
     width: 72px !important;
     height: 72px !important;
@@ -55,7 +78,7 @@
 
     border-radius:14px;
     object-fit:cover;
-    flex_toggle: 0 0 72px;
+    flex: 0 0 72px;
 
     box-shadow: 0 10px 20px rgba(0,0,0,0.35);
     border: 1px solid rgba(255,255,255,0.10);
@@ -125,7 +148,7 @@
 
 .menu-btn{
     width:100%;
-    padding:14px 14px;
+    padding:12px 14px;
     margin-top:10px;
 
     border-radius:14px;
@@ -133,7 +156,7 @@
     cursor:pointer;
 
     font-weight:900;
-    font-size:15px;
+    font-size:14px;
     letter-spacing:.3px;
 
     color:#1a1400;
@@ -197,10 +220,15 @@
         padding: 14px;
     }
 
+    .panel-title{
+        font-size: 18px;
+    }
+
     .referral-preview-img{
         width:64px !important;
         height:64px !important;
         min-width:64px;
         min-height:64px;
+        flex: 0 0 64px;
     }
 }
