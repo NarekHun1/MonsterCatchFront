@@ -6,8 +6,8 @@ type PrizeType = 'COINS' | 'TICKETS' | 'STARS' | 'NOTHING' | 'JACKPOT';
 
 type Sector = {
     id: string;
-    title: string; // +10, JACKPOT, 0
-    icon: string;  // emoji (потом можно заменить на <img/>)
+    title: string;
+    icon: string;
 };
 
 type SpinResponse = {
@@ -15,7 +15,6 @@ type SpinResponse = {
     label?: string;
     type?: PrizeType;
     amount?: number;
-
     costCoins?: number;
     freeTodayUsed?: boolean;
 };
@@ -35,15 +34,83 @@ function easeOutCubic(t: number) {
     return 1 - Math.pow(1 - t, 3);
 }
 
+/** Жёсткий lock body scroll (Telegram WebView fix) */
+function useBodyScrollLock(enabled: boolean) {
+    useEffect(() => {
+        if (!enabled) return;
+
+        const body = document.body;
+        const html = document.documentElement;
+
+        const scrollY = window.scrollY || 0;
+
+        const prevBody = {
+            position: body.style.position,
+            top: body.style.top,
+            left: body.style.left,
+            right: body.style.right,
+            width: body.style.width,
+            overflow: body.style.overflow,
+            touchAction: (body.style as any).touchAction,
+        };
+
+        const prevHtml = {
+            overflow: html.style.overflow,
+            overscrollBehavior: (html.style as any).overscrollBehavior,
+        };
+
+        // lock
+        body.style.position = 'fixed';
+        body.style.top = `-${scrollY}px`;
+        body.style.left = '0';
+        body.style.right = '0';
+        body.style.width = '100%';
+        body.style.overflow = 'hidden';
+        (body.style as any).touchAction = 'none';
+
+        html.style.overflow = 'hidden';
+        (html.style as any).overscrollBehavior = 'none';
+
+        return () => {
+            // restore
+            body.style.position = prevBody.position;
+            body.style.top = prevBody.top;
+            body.style.left = prevBody.left;
+            body.style.right = prevBody.right;
+            body.style.width = prevBody.width;
+            body.style.overflow = prevBody.overflow;
+            (body.style as any).touchAction = prevBody.touchAction;
+
+            html.style.overflow = prevHtml.overflow;
+            (html.style as any).overscrollBehavior = prevHtml.overscrollBehavior;
+
+            // вернуть позицию скролла
+            const y = Math.abs(parseInt(body.style.top || '0', 10)) || scrollY;
+            window.scrollTo(0, y);
+        };
+    }, [enabled]);
+}
+
 export function RouletteWheel({
                                   token,
                                   onClose,
                                   onReward,
+                                  // 🔥 минимальный top-bar с балансами (если хочешь — передавай)
+                                  coins,
+                                  tickets,
+                                  stars,
                               }: {
     token: string | null;
     onClose: () => void;
     onReward?: (reward: SpinResponse) => void;
+
+    coins?: number;
+    tickets?: number;
+    stars?: number;
 }) {
+    // lock scroll пока модалка открыта
+    useBodyScrollLock(true);
+
     const sectors = useMemo(() => DEFAULT_SECTORS, []);
     const sectorAngle = 360 / sectors.length;
 
@@ -100,7 +167,7 @@ export function RouletteWheel({
 
         const targetIndex = getIndexBySectorId(payload.sectorId);
 
-        // остановка по центру сектора под стрелкой (стрелка сверху, 0deg)
+        // стоп по центру сектора под стрелкой (стрелка сверху)
         const spins = 6;
         const centerOffset = sectorAngle / 2;
         const targetAngle =
@@ -134,10 +201,12 @@ export function RouletteWheel({
     return (
         <div className="roulette-overlay" onClick={onClose}>
             <div className="roulette-modal" onClick={(e) => e.stopPropagation()}>
-                <div className="roulette-top">
-                    <div>
-                        <div className="roulette-title">🎰 Рулетка удачи</div>
-                        <div className="roulette-sub">Крути и получай бонус 🎁</div>
+                {/* TOP BAR (без лишнего хедера) */}
+                <div className="roulette-topbar">
+                    <div className="roulette-badges">
+                        <div className="roulette-badge">🪙 <b>{coins ?? '—'}</b></div>
+                        <div className="roulette-badge">🎟️ <b>{tickets ?? '—'}</b></div>
+                        <div className="roulette-badge">⭐ <b>{stars ?? '—'}</b></div>
                     </div>
 
                     <button className="roulette-close" onClick={onClose} aria-label="Close">
@@ -169,13 +238,11 @@ export function RouletteWheel({
                                         ['--rot' as any]: `${rot}deg`,
                                     }}
                                 >
-                                    {/* клин (фон сектора) */}
                                     <div
                                         className="roulette-sector-inner"
                                         style={{ transform: `skewY(${90 - sectorAngle}deg)` }}
                                     />
 
-                                    {/* контент сектора — отдельно, чтобы не клипалось skew */}
                                     <div className="roulette-sector-content">
                                         <div className="roulette-sector-icon">{s.icon}</div>
                                         <div className="roulette-sector-text">{s.title}</div>
@@ -184,10 +251,8 @@ export function RouletteWheel({
                             );
                         })}
 
-                        {/* Real casino layers */}
                         <div className="roulette-bulbs" aria-hidden="true" />
                         <div className="roulette-dome" aria-hidden="true" />
-
                         <div className="roulette-center" />
                     </div>
 
@@ -206,6 +271,9 @@ export function RouletteWheel({
                         className={`roulette-spin ${spinning ? 'is-disabled' : ''}`}
                         onClick={spin}
                         disabled={spinning}
+                        // 🔥 чтобы iOS/Telegram не скроллил к кнопке при фокусе
+                        onMouseDown={(e) => e.preventDefault()}
+                        onTouchStart={(e) => e.preventDefault()}
                     >
                         {spinning ? 'КРУТИМ...' : 'КРУТИТЬ'}
                     </button>
