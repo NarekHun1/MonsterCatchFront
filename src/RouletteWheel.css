@@ -1,3 +1,7 @@
+/* =========================================================
+   RouletteWheel.css — FULLSCREEN + NO HEADER (HUD only)
+   ========================================================= */
+
 :root{
     --gold1:#ffe59a;
     --gold3:#ff9b2f;
@@ -6,7 +10,13 @@
 html, body, #root{ height:100%; }
 
 /* анти-скролл */
-body{ overscroll-behavior: none; }
+body{
+    overscroll-behavior: none;
+}
+
+/* ─────────────────────────────
+   FULLSCREEN overlay + modal
+───────────────────────────── */
 
 .roulette-overlay{
     position: fixed;
@@ -42,61 +52,96 @@ body{ overscroll-behavior: none; }
     box-shadow:none;
     backdrop-filter: blur(12px);
 
-    /* 🔥 важно: чтобы fixed элементы точно жили поверх */
     position: relative;
 }
 
-/* TOP BAR — только балансы + закрыть */
+/* ─────────────────────────────
+   ✅ NO HEADER — hide old blocks
+───────────────────────────── */
+
+.roulette-top,
 .roulette-topbar{
-    flex: 0 0 auto;
+    display:none !important;
+}
+
+/* ─────────────────────────────
+   Floating HUD (coins/tickets/stars + close)
+───────────────────────────── */
+
+.roulette-hud{
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    top: 10px;
+    z-index: 10000;
+
     display:flex;
     align-items:center;
     justify-content:space-between;
     gap: 10px;
-    padding: 12px 12px 8px;
 
-    position: sticky;
-    top: 0;
-    z-index: 50;
-
-    background: linear-gradient(180deg, rgba(0,0,0,.42), rgba(0,0,0,0));
+    pointer-events: auto;
 }
 
-.roulette-badges{
+.roulette-hud-left{
     display:flex;
     gap: 8px;
     align-items:center;
+    flex-wrap: wrap;
 }
 
-.roulette-badge{
+/* pills */
+.roulette-pill{
     display:flex;
     align-items:center;
     gap: 6px;
 
     padding: 8px 10px;
-    border-radius: 14px;
-    background: rgba(255,255,255,.06);
-    border: 1px solid rgba(255,255,255,.10);
+    border-radius: 999px;
+
+    background: rgba(0,0,0,.36);
+    border: 1px solid rgba(255,255,255,.12);
+    backdrop-filter: blur(10px);
+
     color: rgba(255,255,255,.92);
     font-size: 12px;
-    font-weight: 800;
-    box-shadow: 0 10px 24px rgba(0,0,0,.35);
+    font-weight: 900;
+
+    box-shadow: 0 12px 30px rgba(0,0,0,.45);
 }
 
-.roulette-close{
-    width: 42px;
-    height: 42px;
+.roulette-pill b{
+    font-weight: 1000;
+}
+
+.roulette-hud-close{
+    width: 40px;
+    height: 40px;
     border-radius: 14px;
+
     border: 1px solid rgba(255,255,255,.12);
-    background: rgba(255,255,255,.06);
+    background: rgba(0,0,0,.36);
+    backdrop-filter: blur(10px);
+
     color: #fff;
     cursor: pointer;
-    box-shadow: 0 12px 30px rgba(0,0,0,.35);
+
+    box-shadow: 0 12px 30px rgba(0,0,0,.45);
+    transition: transform .15s ease, background .15s ease, border-color .15s ease;
 }
 
-/* error */
+.roulette-hud-close:hover{
+    transform: translateY(-1px);
+    background: rgba(0,0,0,.44);
+    border-color: rgba(255,255,255,.18);
+}
+
+/* ─────────────────────────────
+   error
+───────────────────────────── */
+
 .roulette-error{
-    margin: 0 12px 10px;
+    margin: 62px 12px 10px; /* 👈 чтобы не пряталось под HUD */
     padding: 10px 12px;
     border-radius: 12px;
     background: rgba(255,70,70,.12);
@@ -105,16 +150,20 @@ body{ overscroll-behavior: none; }
     font-size: 13px;
 }
 
-/* stage */
+/* ─────────────────────────────
+   stage
+───────────────────────────── */
+
 .roulette-stage{
     flex: 1 1 auto;
     display:grid;
     place-items:center;
     position: relative;
     padding: 6px 0 6px;
-    overflow: hidden; /* 🔥 чтобы ничего не толкало layout */
+    overflow: hidden;
 }
 
+/* pointer */
 .roulette-pointer{
     position:absolute;
     top: 10px;
@@ -149,7 +198,10 @@ body{ overscroll-behavior: none; }
     background: rgba(255,255,255,.85);
 }
 
-/* wheel */
+/* ─────────────────────────────
+   wheel
+───────────────────────────── */
+
 .roulette-wheel{
     position: relative;
     width: min(92vw, 420px);
@@ -164,7 +216,7 @@ body{ overscroll-behavior: none; }
             inset 0 -22px 44px rgba(0,0,0,.45),
             0 26px 85px rgba(0,0,0,.60);
 
-    will-change: transform; /* 🔥 */
+    will-change: transform;
     transform-origin: 50% 50%;
 }
 
@@ -206,7 +258,10 @@ body{ overscroll-behavior: none; }
     opacity: .55;
 }
 
-/* sectors */
+/* ─────────────────────────────
+   sectors
+───────────────────────────── */
+
 .roulette-sector{
     position:absolute;
     inset: 0;
@@ -271,7 +326,10 @@ body{ overscroll-behavior: none; }
     box-shadow: 0 22px 70px rgba(0,0,0,.72);
 }
 
-/* win */
+/* ─────────────────────────────
+   win overlay
+───────────────────────────── */
+
 .roulette-win{
     position:absolute;
     inset:0;
@@ -302,7 +360,10 @@ body{ overscroll-behavior: none; }
     border: 1px solid rgba(255,255,255,.10);
 }
 
-/* bottom panel */
+/* ─────────────────────────────
+   bottom panel
+───────────────────────────── */
+
 .roulette-actions{
     flex: 0 0 auto;
     padding: 12px 16px 18px;
@@ -324,7 +385,7 @@ body{ overscroll-behavior: none; }
     -webkit-tap-highlight-color: transparent;
 }
 
-.roulette-spin:focus{ outline: none; } /* 🔥 */
+.roulette-spin:focus{ outline: none; }
 .roulette-spin.is-disabled{ opacity:.62; cursor:not-allowed; }
 
 .roulette-result{
@@ -337,7 +398,8 @@ body{ overscroll-behavior: none; }
     color: rgba(255,255,255,.92);
 }
 
-.roulette-price, .roulette-note{
+.roulette-price,
+.roulette-note{
     margin-top: 10px;
     font-size: 12px;
     opacity: .78;
@@ -345,6 +407,13 @@ body{ overscroll-behavior: none; }
     color: rgba(255,255,255,.86);
 }
 
+/* mobile / short screens */
 @media (max-height: 700px){
-    .roulette-wheel{ width:min(92vw, 360px); height:min(92vw, 360px); }
+    .roulette-wheel{
+        width:min(92vw, 360px);
+        height:min(92vw, 360px);
+    }
+    .roulette-error{
+        margin-top: 56px;
+    }
 }
