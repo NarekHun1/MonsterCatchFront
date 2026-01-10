@@ -60,18 +60,15 @@ export function Quests({
 
     const openTelegram = (url: string) => {
         const tg = (window as any)?.Telegram?.WebApp;
-
-        // лучший способ для WebApp
         if (tg?.openTelegramLink) {
             tg.openTelegramLink(url);
             return;
         }
-
-        // fallback
         window.open(url, '_blank');
     };
 
-    const statusOf = (q: QuestItem): UserQuestStatus => q.progress?.status ?? 'PENDING';
+    const statusOf = (q: QuestItem): UserQuestStatus =>
+        q.progress?.status ?? 'PENDING';
 
     const verify = async (questId: number) => {
         setError('');
@@ -142,61 +139,98 @@ export function Quests({
 
                         return (
                             <div className="quests-card" key={q.id}>
-                                <div className="quests-card-head">
-                                    <div className="quests-card-title">{q.title}</div>
+                                {/* TOP */}
+                                <div className="quests-card-top">
+                                    <div className="quests-icon">🎯</div>
 
-                                    <div className={`quests-badge quests-badge--${st.toLowerCase()}`}>
-                                        {st === 'PENDING' && '⏳ Не выполнено'}
-                                        {st === 'COMPLETED' && '✅ Выполнено'}
-                                        {st === 'CLAIMED' && '🎉 Получено'}
+                                    <div className="quests-meta">
+                                        <div className="quests-head-row">
+                                            <div className="quests-card-title">{q.title}</div>
+
+                                            <div
+                                                className={`quests-badge quests-badge--${st.toLowerCase()}`}
+                                            >
+                                                {st === 'PENDING' && '⏳ Не выполнено'}
+                                                {st === 'COMPLETED' && '✅ Выполнено'}
+                                                {st === 'CLAIMED' && '🎉 Получено'}
+                                            </div>
+                                        </div>
+
+                                        {!!q.description && (
+                                            <div className="quests-card-desc">{q.description}</div>
+                                        )}
+
+                                        <div className="quests-reward-row">
+                                            <div className="quests-reward-pill">
+                        <span className="quests-reward-pill-label">
+                          {t('reward') || 'Награда'}
+                        </span>
+                                                <span className="quests-reward-pill-val">
+                          +{q.rewardTickets} 🎟
+                        </span>
+                                            </div>
+
+                                            {q.chatUsername && (
+                                                <div className="quests-mini">
+                                                    <span className="quests-mini-dot" />
+                                                    {q.chatUsername}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
 
-                                {!!q.description && (
-                                    <div className="quests-card-desc">{q.description}</div>
-                                )}
-
-                                <div className="quests-reward">
-                                    <span className="quests-reward-label">{t('reward') || 'Награда'}</span>
-                                    <span className="quests-reward-val">+{q.rewardTickets} 🎟</span>
-                                </div>
-
-                                <div className="quests-actions">
-                                    {/* Выполнить: открыть канал */}
+                                {/* ACTIONS */}
+                                <div className="quests-actions-wrap">
                                     <button
-                                        className="q-btn q-btn--ghost"
+                                        className="q-btn q-btn--soft"
                                         disabled={!q.openUrl || busy || st === 'CLAIMED'}
                                         onClick={() => q.openUrl && openTelegram(q.openUrl)}
                                     >
-                                        📣 {t('doTask') || 'Выполнить'}
+                                        <span className="q-btn-ico">📣</span>
+                                        <span className="q-btn-txt">{t('doTask') || 'Выполнить'}</span>
+                                        <span className="q-btn-sub">
+                      {q.openUrl ? 'Открыть канал' : 'Нет ссылки'}
+                    </span>
                                     </button>
 
-                                    {/* Проверить */}
                                     <button
                                         className="q-btn q-btn--blue"
                                         disabled={busy || st === 'CLAIMED'}
                                         onClick={() => void verify(q.id)}
                                     >
-                                        {busy ? '⏳ ...' : `🔎 ${t('check') || 'Проверить'}`}
+                                        <span className="q-btn-ico">🔎</span>
+                                        <span className="q-btn-txt">
+                      {busy ? 'Проверяю...' : t('check') || 'Проверить'}
+                    </span>
+                                        <span className="q-btn-sub">Проверить подписку</span>
                                     </button>
 
-                                    {/* Забрать */}
                                     <button
                                         className="q-btn q-btn--gold"
                                         disabled={busy || st !== 'COMPLETED'}
                                         onClick={() => void claim(q.id)}
                                     >
-                                        {st === 'COMPLETED'
-                                            ? `🎁 ${t('claim') || 'Забрать'} +${q.rewardTickets}`
-                                            : `🔒 ${t('claim') || 'Забрать'}`}
+                                        <span className="q-btn-ico">🎁</span>
+                                        <span className="q-btn-txt">
+                      {st === 'COMPLETED'
+                          ? `${t('claim') || 'Забрать'} +${q.rewardTickets}`
+                          : t('claim') || 'Забрать'}
+                    </span>
+                                        <span className="q-btn-sub">
+                      {st === 'COMPLETED' ? 'Награда готова' : 'Сначала проверь'}
+                    </span>
                                     </button>
                                 </div>
 
+                                {/* HINT */}
                                 <div className="quests-hint">
                                     {st === 'PENDING' &&
-                                        (t('taskHint1') || 'Открой канал, подпишись и нажми “Проверить”.')}
+                                        (t('taskHint1') ||
+                                            'Открой канал, подпишись и нажми “Проверить”.')}
                                     {st === 'COMPLETED' &&
-                                        (t('taskHint2') || 'Подписка подтверждена. Забери награду!')}
+                                        (t('taskHint2') ||
+                                            'Подписка подтверждена. Забери награду!')}
                                     {st === 'CLAIMED' &&
                                         (t('taskHint3') || 'Награда уже получена ✅')}
                                 </div>
