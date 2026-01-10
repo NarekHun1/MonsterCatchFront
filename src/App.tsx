@@ -16,13 +16,14 @@ import {CashCupCard} from "./CashCupCard.tsx";
 import { RouletteWheel } from './RouletteWheel';
 import { translations } from './i18n';
 import type { Lang } from './i18n';
+import {Quests} from "./Quests.tsx";
 
 
 
 
 
 
-type Page = 'menu' | 'game' | 'leaderboard' | 'invite' | 'tournament' | 'wallet' | 'cashcup'| 'roulette';
+type Page = 'menu' | 'game' | 'leaderboard' | 'invite' | 'tournament' | 'wallet' | 'cashcup'| 'roulette' | 'quests';
 
 interface MeResponse {
     id: number;
@@ -880,6 +881,16 @@ function App() {
                                             </div>
                                         </button>
 
+                                        <button
+                                            className="menu-card"
+                                            onClick={() => setCurrentPage('quests')}
+                                        >
+                                            <div className="menu-icon">✅</div>
+                                            <div className="menu-card-title">{t('tasks') || 'Задания'}</div>
+                                            <div className="menu-card-text">
+                                                {t('tasksDesc') || 'Подпишись и получи 🎟 билеты'}
+                                            </div>
+                                        </button>
 
                                         <button
                                             className="menu-card"
@@ -952,6 +963,32 @@ function App() {
                                         }}
                                     />
                                 )}
+                            {currentPage === 'quests' && token && (
+                                <Quests
+                                    token={token}
+                                    t={t}
+                                    onBack={() => setCurrentPage('menu')}
+                                    onTicketsClaimed={async () => {
+                                        // ✅ обновим счётчик билетов в шапке
+                                        try {
+                                            const ticketsRes = await apiFetch('/tickets/count', token);
+                                            const ticketsData = await ticketsRes.json().catch(() => ({}));
+                                            if (typeof ticketsData.count === 'number') {
+                                                setTickets(ticketsData.count);
+                                            }
+
+                                            // (опционально) обновить профиль
+                                            const meRes = await apiFetch('/users/me', token);
+                                            const meData = await meRes.json().catch(() => ({}));
+                                            if (meRes.ok) {
+                                                setMe((prev) => (prev ? { ...prev, ...meData } : meData));
+                                            }
+                                        } catch (e) {
+                                            console.error(e);
+                                        }
+                                    }}
+                                />
+                            )}
 
                             {currentPage === 'game' && token && (
                                 <Game
