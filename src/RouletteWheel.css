@@ -1,27 +1,33 @@
 /* =========================================================
-   RouletteWheel.css — FULLSCREEN (Telegram-safe) + HUD only
-   Works: Mobile + Desktop Telegram
+   RouletteWheel.css — Telegram-safe fullscreen + HUD only
+   Auto adapts via --tg-* vars (set from TSX)
    ========================================================= */
 
 :root{
     --gold1:#ffe59a;
     --gold3:#ff9b2f;
 
-    /* общий отступ сверху под Telegram bar + HUD */
-    --top-gap: 84px; /* Desktop/Android good default */
+    /* fallback safe areas */
+    --tg-viewport-height: 100dvh;
+    --tg-viewport-stable-height: 100dvh;
+    --tg-safe-top: 0px;
+    --tg-safe-bottom: 0px;
+    --tg-content-safe-top: 0px;
+    --tg-content-safe-bottom: 0px;
+
+    /* общий верхний зазор: HUD + немного воздуха */
+    --roulette-top-gap: 74px;
 }
 
-/* ✅ real screen height */
-html, body, #root { height: 100%; }
+html, body, #root{ height: 100%; }
 
-/* на iOS Telegram помогает */
 body{
     overscroll-behavior: none;
     -webkit-overflow-scrolling: touch;
 }
 
 /* ─────────────────────────────
-   Overlay + Modal fullscreen
+   Overlay / Modal
 ───────────────────────────── */
 
 .roulette-overlay{
@@ -29,22 +35,23 @@ body{
     inset: 0;
     z-index: 9999;
 
-    /* ✅ use dynamic viewport units */
-    height: 100dvh;
     width: 100vw;
+    height: var(--tg-viewport-stable-height);
+
+    padding: 0;
+    display:block;
 
     background:
             radial-gradient(circle at 50% 28%, rgba(255, 211, 77, .18), rgba(0,0,0,0) 60%),
             rgba(0,0,0,.86);
 
-    /* запрещаем скролл жестами внутри */
     touch-action: none;
     overscroll-behavior: none;
 }
 
 .roulette-modal{
     width: 100vw;
-    height: 100dvh;
+    height: var(--tg-viewport-stable-height);
     border-radius: 0;
     overflow: hidden;
 
@@ -64,7 +71,7 @@ body{
 }
 
 /* ─────────────────────────────
-   HUD (fixed)
+   HUD
 ───────────────────────────── */
 
 .roulette-hud{
@@ -72,10 +79,12 @@ body{
     left: 12px;
     right: 12px;
 
-    /* ✅ safe-area + tg bar gap */
-    top: calc(env(safe-area-inset-top, 0px) + 10px);
+    top: calc(
+            max(var(--tg-content-safe-top), var(--tg-safe-top)) + 10px
+    );
 
     z-index: 10000;
+
     display:flex;
     align-items:center;
     justify-content:space-between;
@@ -111,9 +120,7 @@ body{
     box-shadow: 0 12px 30px rgba(0,0,0,.45);
 }
 
-.roulette-pill b{
-    font-weight: 1000;
-}
+.roulette-pill b{ font-weight: 1000; }
 
 .roulette-hud-close{
     width: 40px;
@@ -138,11 +145,11 @@ body{
 }
 
 /* ─────────────────────────────
-   Error (below HUD)
+   error
 ───────────────────────────── */
 
 .roulette-error{
-    margin: calc(env(safe-area-inset-top, 0px) + 62px) 12px 8px;
+    margin: calc(max(var(--tg-content-safe-top), var(--tg-safe-top)) + 62px) 12px 10px;
     padding: 10px 12px;
     border-radius: 12px;
     background: rgba(255,70,70,.12);
@@ -152,7 +159,7 @@ body{
 }
 
 /* ─────────────────────────────
-   Stage (wheel area)
+   stage (wheel area)
 ───────────────────────────── */
 
 .roulette-stage{
@@ -162,18 +169,23 @@ body{
     position: relative;
     overflow: hidden;
 
-    /* ✅ главная магия: отступ сверху чтобы
-       колесо не конфликтовало с Telegram bar + HUD */
-    padding-top: calc(env(safe-area-inset-top, 0px) + var(--top-gap));
-    padding-bottom: 12px;
+    /* ✅ не лезем под Telegram bar */
+    padding-top: calc(
+            max(var(--tg-content-safe-top), var(--tg-safe-top)) + var(--roulette-top-gap)
+    );
+
+    padding-bottom: calc(
+            max(var(--tg-content-safe-bottom), var(--tg-safe-bottom)) + 12px
+    );
 }
 
 /* pointer */
 .roulette-pointer{
     position:absolute;
 
-    /* ✅ опускаем pointer под HUD */
-    top: calc(env(safe-area-inset-top, 0px) + var(--top-gap) - 18px);
+    top: calc(
+            max(var(--tg-content-safe-top), var(--tg-safe-top)) + (var(--roulette-top-gap) - 10px)
+    );
 
     width: 44px;
     height: 62px;
@@ -207,7 +219,7 @@ body{
 }
 
 /* ─────────────────────────────
-   Wheel
+   wheel
 ───────────────────────────── */
 
 .roulette-wheel{
@@ -216,10 +228,9 @@ body{
     height: min(86vw, 420px);
     border-radius: 50%;
     overflow: hidden;
-
     border: 12px solid rgba(255,255,255,.10);
-    background: #0e0e18;
 
+    background: #0e0e18;
     box-shadow:
             inset 0 0 0 2px rgba(255,255,255,.06),
             inset 0 -22px 44px rgba(0,0,0,.45),
@@ -261,16 +272,14 @@ body{
     border-radius: 50%;
     pointer-events:none;
     z-index: 13;
-
     background:
             radial-gradient(circle at 30% 22%, rgba(255,255,255,.16), rgba(255,255,255,0) 46%),
             radial-gradient(circle at 60% 75%, rgba(0,0,0,.28), rgba(0,0,0,0) 58%);
-
     opacity: .55;
 }
 
 /* ─────────────────────────────
-   Sectors
+   sectors
 ───────────────────────────── */
 
 .roulette-sector{
@@ -301,7 +310,6 @@ body{
     display:inline-flex;
     align-items:center;
     gap: 8px;
-
     padding: 7px 10px;
     border-radius: 12px;
 
@@ -314,7 +322,6 @@ body{
 .roulette-sector-icon{ font-size: 18px; }
 .roulette-sector-text{ font-weight: 1000; font-size: 12px; color: rgba(255,255,255,.94); }
 
-/* win highlight */
 .roulette-sector.is-winning .roulette-sector-inner{
     background: linear-gradient(135deg, rgba(255,220,120,.58), rgba(255,255,255,0));
     animation: sector-pulse 820ms ease-in-out infinite;
@@ -336,14 +343,13 @@ body{
     height: 82px;
     border-radius: 50%;
     z-index: 15;
-
     background: rgba(255,255,255,.08);
     border: 1px solid rgba(255,255,255,.16);
     box-shadow: 0 22px 70px rgba(0,0,0,.72);
 }
 
 /* ─────────────────────────────
-   WIN overlay
+   win overlay
 ───────────────────────────── */
 
 .roulette-win{
@@ -370,21 +376,19 @@ body{
     margin-top: 6px;
     font-size: 14px;
     font-weight: 950;
-
     padding: 9px 12px;
     border-radius: 14px;
-
     background: rgba(0,0,0,.38);
     border: 1px solid rgba(255,255,255,.10);
 }
 
 /* ─────────────────────────────
-   Bottom panel
+   bottom panel
 ───────────────────────────── */
 
 .roulette-actions{
     flex: 0 0 auto;
-    padding: 12px 16px calc(env(safe-area-inset-bottom, 0px) + 18px);
+    padding: 12px 16px calc(max(var(--tg-content-safe-bottom), var(--tg-safe-bottom)) + 18px);
     background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.45));
     border-top: 1px solid rgba(255,255,255,.08);
 }
@@ -395,11 +399,9 @@ body{
     border-radius: 18px;
     border:0;
     cursor:pointer;
-
     font-weight: 1000;
     letter-spacing: .8px;
     color: #1a1400;
-
     background: linear-gradient(90deg, var(--gold1), var(--gold3));
     outline: none;
     -webkit-tap-highlight-color: transparent;
@@ -428,21 +430,20 @@ body{
 }
 
 /* ─────────────────────────────
-   Responsive tuning
+   responsive
 ───────────────────────────── */
 
-/* короткие экраны (мобила) */
 @media (max-height: 700px){
-    :root{ --top-gap: 72px; }
+    :root{ --roulette-top-gap: 66px; }
     .roulette-wheel{
         width:min(86vw, 360px);
         height:min(86vw, 360px);
     }
 }
 
-/* Desktop Telegram: обычно сверху bar жирнее */
+/* Desktop Telegram: bar обычно выше */
 @media (min-width: 900px){
-    :root{ --top-gap: 96px; }
+    :root{ --roulette-top-gap: 90px; }
     .roulette-wheel{
         width:min(520px, 56vh);
         height:min(520px, 56vh);
