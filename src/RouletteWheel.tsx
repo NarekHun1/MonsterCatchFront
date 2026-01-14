@@ -1,4 +1,3 @@
-// src/RouletteWheel.tsx
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { apiFetch } from './api';
 import './RouletteWheel.css';
@@ -7,8 +6,8 @@ type PrizeType = 'COINS' | 'TICKETS' | 'STARS' | 'NOTHING' | 'JACKPOT';
 
 type Sector = {
     id: string;
-    title: string; // +10, JACKPOT, 0
-    icon: string;  // emoji (потом можно заменить на <img/>)
+    title: string;
+    icon: string;
 };
 
 type SpinResponse = {
@@ -16,12 +15,11 @@ type SpinResponse = {
     label?: string;
     type?: PrizeType;
     amount?: number;
-
     costCoins?: number;
     freeTodayUsed?: boolean;
 };
 
-const DEFAULT_SECTORS: Sector[] = [
+const SECTORS: Sector[] = [
     { id: 'ticket_1', title: '+1', icon: '🎟️' },
     { id: 'coins_10', title: '+10', icon: '🪙' },
     { id: 'coins_25', title: '+25', icon: '🪙' },
@@ -32,59 +30,35 @@ const DEFAULT_SECTORS: Sector[] = [
     { id: 'nothing', title: '0', icon: '❌' },
 ];
 
-function easeOutCubic(t: number) {
-    return 1 - Math.pow(1 - t, 3);
-}
+const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 
-/** Telegram WebView fix: lock page scroll while modal is open */
+/* 🔒 Lock body scroll (Telegram / iOS safe) */
 function useBodyScrollLock(enabled: boolean) {
     useEffect(() => {
         if (!enabled) return;
 
         const body = document.body;
         const html = document.documentElement;
-        const scrollY = window.scrollY || 0;
+        const scrollY = window.scrollY;
 
-        const prevBody = {
+        const prev = {
             position: body.style.position,
             top: body.style.top,
-            left: body.style.left,
-            right: body.style.right,
-            width: body.style.width,
             overflow: body.style.overflow,
-            touchAction: (body.style as any).touchAction,
-        };
-
-        const prevHtml = {
-            overflow: html.style.overflow,
-            overscrollBehavior: (html.style as any).overscrollBehavior,
+            htmlOverflow: html.style.overflow,
         };
 
         body.style.position = 'fixed';
         body.style.top = `-${scrollY}px`;
-        body.style.left = '0';
-        body.style.right = '0';
-        body.style.width = '100%';
         body.style.overflow = 'hidden';
-        (body.style as any).touchAction = 'none';
-
         html.style.overflow = 'hidden';
-        (html.style as any).overscrollBehavior = 'none';
 
         return () => {
-            body.style.position = prevBody.position;
-            body.style.top = prevBody.top;
-            body.style.left = prevBody.left;
-            body.style.right = prevBody.right;
-            body.style.width = prevBody.width;
-            body.style.overflow = prevBody.overflow;
-            (body.style as any).touchAction = prevBody.touchAction;
-
-            html.style.overflow = prevHtml.overflow;
-            (html.style as any).overscrollBehavior = prevHtml.overscrollBehavior;
-
-            const y = Math.abs(parseInt(body.style.top || '0', 10)) || scrollY;
-            window.scrollTo(0, y);
+            body.style.position = prev.position;
+            body.style.top = prev.top;
+            body.style.overflow = prev.overflow;
+            html.style.overflow = prev.htmlOverflow;
+            window.scrollTo(0, scrollY);
         };
     }, [enabled]);
 }
@@ -99,17 +73,26 @@ export function RouletteWheel({
                               }: {
     token: string | null;
     onClose: () => void;
-    onReward?: (reward: SpinResponse) => void;
-
-    /** show-only stats on HUD */
+    onReward?: (r: SpinResponse) => void;
     coins?: number;
     tickets?: number;
     stars?: number;
 }) {
-    // lock scroll while open
     useBodyScrollLock(true);
 
-    const sectors = useMemo(() => DEFAULT_SECTORS, []);
+    /* 🔥 Telegram WebApp setup */
+    useEffect(() => {
+        const tg = (window as any).Telegram?.WebApp;
+        if (!tg) return;
+
+        tg.ready?.();
+        tg.expand?.();
+        tg.setHeaderColor?.('#08080e');
+        tg.setBackgroundColor?.('#08080e');
+        tg.disableVerticalSwipes?.();
+    }, []);
+
+    const sectors = useMemo(() => SECTORS, []);
     const sectorAngle = 360 / sectors.length;
 
     const [angle, setAngle] = useState(0);
@@ -126,20 +109,14 @@ export function RouletteWheel({
         };
     }, []);
 
-    const getIndexBySectorId = (sectorId: string) => {
-        const idx = sectors.findIndex((s) => s.id === sectorId);
-        return idx >= 0 ? idx : 0;
-    };
+    const getIndex = (id: string) =>
+        Math.max(0, sectors.findIndex(s => s.id === id));
 
-    const getSectorById = (sectorId: string) =>
-        sectors.find((s) => s.id === sectorId) || sectors[0];
+    const getSector = (id: string) =>
+        sectors.find(s => s.id === id) || sectors[0];
 
     const spin = async () => {
-        if (!token) {
-            setError('Открой игру через Telegram.');
-            return;
-        }
-        if (spinning) return;
+        if (!token || spinning) return;
 
         setError('');
         setResult(null);
@@ -153,33 +130,30 @@ export function RouletteWheel({
                 method: 'POST',
                 body: JSON.stringify({}),
             });
-
-            const json = await res.json().catch(() => ({}));
-            if (!res.ok) throw new Error((json as any)?.message || 'Spin failed');
-            payload = json as SpinResponse;
+            const json = await res.json();
+            if (!res.ok) throw new Error(json?.message || 'Spin failed');
+            payload = json;
         } catch (e: any) {
+            setError(e.message || 'Ошибка');
             setSpinning(false);
-            setError(e?.message || 'Ошибка спина');
             return;
         }
 
-        const targetIndex = getIndexBySectorId(payload.sectorId);
-
-        // stop at center of sector under pointer (pointer at 0deg/top)
-        const spins = 6;
+        const index = getIndex(payload.sectorId);
         const centerOffset = sectorAngle / 2;
+        const spins = 6;
+
         const targetAngle =
-            spins * 360 + (360 - (targetIndex * sectorAngle + centerOffset));
+            spins * 360 + (360 - (index * sectorAngle + centerOffset));
 
         const start = performance.now();
         const duration = 3600;
         const startAngle = angle;
-        const delta = targetAngle;
 
         const animate = (now: number) => {
             const t = Math.min(1, (now - start) / duration);
             const eased = easeOutCubic(t);
-            setAngle(startAngle + delta * eased);
+            setAngle(startAngle + targetAngle * eased);
 
             if (t < 1) {
                 rafRef.current = requestAnimationFrame(animate);
@@ -194,22 +168,20 @@ export function RouletteWheel({
         rafRef.current = requestAnimationFrame(animate);
     };
 
-    const winSector = result ? getSectorById(result.sectorId) : null;
+    const winSector = result ? getSector(result.sectorId) : null;
 
     return (
         <div className="roulette-overlay" onClick={onClose}>
-            <div className="roulette-modal" onClick={(e) => e.stopPropagation()}>
-                {/* Floating HUD (NO header/title) */}
-                <div className="roulette-hud" onClick={(e) => e.stopPropagation()}>
+            <div className="roulette-modal" onClick={e => e.stopPropagation()}>
+
+                {/* HUD */}
+                <div className="roulette-hud">
                     <div className="roulette-hud-left">
                         <div className="roulette-pill">🪙 <b>{coins ?? '—'}</b></div>
                         <div className="roulette-pill">🎟️ <b>{tickets ?? '—'}</b></div>
                         <div className="roulette-pill">⭐ <b>{stars ?? '—'}</b></div>
                     </div>
-
-                    <button className="roulette-hud-close" onClick={onClose} aria-label="Close">
-                        ✕
-                    </button>
+                    <button className="roulette-hud-close" onClick={onClose}>✕</button>
                 </div>
 
                 {error && <div className="roulette-error">{error}</div>}
@@ -226,21 +198,18 @@ export function RouletteWheel({
                     >
                         {sectors.map((s, i) => {
                             const rot = i * sectorAngle;
-
                             return (
                                 <div
                                     key={s.id}
-                                    className={`roulette-sector ${winningId === s.id ? 'is-winning' : ''}`}
-                                    style={{
-                                        transform: `rotate(${rot}deg)`,
-                                        ['--rot' as any]: `${rot}deg`,
-                                    }}
+                                    className={`roulette-sector ${
+                                        winningId === s.id ? 'is-winning' : ''
+                                    }`}
+                                    style={{ transform: `rotate(${rot}deg)`, ['--rot' as any]: `${rot}deg` }}
                                 >
                                     <div
                                         className="roulette-sector-inner"
                                         style={{ transform: `skewY(${90 - sectorAngle}deg)` }}
                                     />
-
                                     <div className="roulette-sector-content">
                                         <div className="roulette-sector-icon">{s.icon}</div>
                                         <div className="roulette-sector-text">{s.title}</div>
@@ -249,8 +218,8 @@ export function RouletteWheel({
                             );
                         })}
 
-                        <div className="roulette-bulbs" aria-hidden="true" />
-                        <div className="roulette-dome" aria-hidden="true" />
+                        <div className="roulette-bulbs" />
+                        <div className="roulette-dome" />
                         <div className="roulette-center" />
                     </div>
 
@@ -269,32 +238,28 @@ export function RouletteWheel({
                         className={`roulette-spin ${spinning ? 'is-disabled' : ''}`}
                         onClick={spin}
                         disabled={spinning}
-                        // prevent Telegram/iOS "scroll to focused button"
-                        onMouseDown={(e) => e.preventDefault()}
-                        onTouchStart={(e) => e.preventDefault()}
+                        onMouseDown={e => e.preventDefault()}
+                        onTouchStart={e => e.preventDefault()}
                     >
-                        {spinning ? 'КРУТИМ...' : 'КРУТИТЬ'}
+                        {spinning ? 'КРУТИМ…' : 'КРУТИТЬ'}
                     </button>
 
-                    {result && (
+                    {result ? (
                         <>
                             <div className="roulette-result">
-                                🎯 Остановилось на: <b>{winSector?.icon} {winSector?.title}</b>
+                                🎯 Выпало: <b>{winSector?.icon} {winSector?.title}</b>
                             </div>
-
                             <div className="roulette-price">
                                 {result.costCoins === 0
-                                    ? '✅ Сегодняшний спин был бесплатным'
+                                    ? '✅ Бесплатный спин сегодня'
                                     : result.costCoins
-                                        ? `💸 Стоимость спина: ${result.costCoins} 🪙`
-                                        : '🎁 1 бесплатный спин в день, затем 10 🪙 за спин'}
+                                        ? `💸 Цена: ${result.costCoins} 🪙`
+                                        : '🎁 1 бесплатный спин в день'}
                             </div>
                         </>
-                    )}
-
-                    {!result && (
+                    ) : (
                         <div className="roulette-note">
-                            🎁 1 бесплатный спин в день, затем 10 🪙 за спин.
+                            🎁 1 бесплатный спин в день, затем 10 🪙
                         </div>
                     )}
                 </div>
