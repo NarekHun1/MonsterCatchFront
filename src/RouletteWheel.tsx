@@ -8,7 +8,7 @@ type Sector = {
     id: string;
     type: PrizeType;
     label: string;        // "+10", "2500", "JACKPOT", "0"
-    iconSrc: string;      // /ui/coin.png etc
+    iconSrc?: string;     // может быть пустым
     variant?: 'coin' | 'ticket' | 'star' | 'jackpot' | 'zero';
 };
 
@@ -17,8 +17,8 @@ type SpinResponse = {
     label?: string;
     type?: PrizeType;
     amount?: number;
-    costCoins?: number;       // сервер пусть отдаёт 0 или 10
-    freeTodayUsed?: boolean;  // сервер пусть отдаёт true/false
+    costCoins?: number;
+    freeTodayUsed?: boolean;
 };
 
 function easeOutCubic(t: number) {
@@ -92,15 +92,14 @@ export function RouletteWheel({
         };
     }, [onClose]);
 
-    // ✅ иконки как у тебя
     const sectors = useMemo<Sector[]>(
         () => [
             { id: 'ticket_1', type: 'TICKETS', label: '+1', iconSrc: '/ui/ticket.png', variant: 'ticket' },
-            { id: 'coins_10', type: 'COINS', label: '+10', iconSrc: '/ui/coin.png', variant: 'coin' },
-            { id: 'coins_25', type: 'COINS', label: '+25', iconSrc: '/ui/coin.png', variant: 'coin' },
-            { id: 'stars_5', type: 'STARS', label: '+5', iconSrc: '/ui/star.png', variant: 'star' },
+            { id: 'coins_10', type: 'COINS', label: '10', iconSrc: '/ui/coin.png', variant: 'coin' },
+            { id: 'coins_25', type: 'COINS', label: '25', iconSrc: '/ui/coin.png', variant: 'coin' },
+            { id: 'stars_5', type: 'STARS', label: '5', iconSrc: '/ui/star.png', variant: 'star' },
             { id: 'ticket_3', type: 'TICKETS', label: '+3', iconSrc: '/ui/ticket.png', variant: 'ticket' },
-            { id: 'stars_10', type: 'STARS', label: '+10', iconSrc: '/ui/star.png', variant: 'star' },
+            { id: 'stars_10', type: 'STARS', label: '10', iconSrc: '/ui/star.png', variant: 'star' },
             { id: 'jackpot', type: 'JACKPOT', label: 'JACKPOT', iconSrc: '/ui/jackpot.png', variant: 'jackpot' },
             { id: 'nothing', type: 'NOTHING', label: '0', iconSrc: '/ui/zero.png', variant: 'zero' },
         ],
@@ -115,7 +114,6 @@ export function RouletteWheel({
     const [result, setResult] = useState<SpinResponse | null>(null);
     const [winningId, setWinningId] = useState<string | null>(null);
 
-    // ✅ UI логика цены: 1 раз бесплатно, потом 10 coins
     const [freeAvailable, setFreeAvailable] = useState(true);
     const spinCost = freeAvailable ? 0 : 10;
 
@@ -164,13 +162,8 @@ export function RouletteWheel({
             return;
         }
 
-        // если сервер сказал, что бесплатный уже использован — выключаем free UI
-        if (payload.freeTodayUsed === true || payload.costCoins === 10) {
-            setFreeAvailable(false);
-        }
-        if (payload.costCoins === 0) {
-            setFreeAvailable(false); // после бесплатного — дальше платно
-        }
+        if (payload.freeTodayUsed === true || payload.costCoins === 10) setFreeAvailable(false);
+        if (payload.costCoins === 0) setFreeAvailable(false);
 
         const targetIndex = getIndexBySectorId(payload.sectorId);
 
@@ -206,7 +199,6 @@ export function RouletteWheel({
     return (
         <div className="rw2-overlay" onClick={onClose}>
             <div className="rw2-sheet" onClick={(e) => e.stopPropagation()}>
-                {/* top row: balance + close */}
                 <div className="rw2-top">
                     <div className="rw2-balance">
                         <img className="rw2-balance-icon" src="/ui/coin.png" alt="" />
@@ -220,12 +212,10 @@ export function RouletteWheel({
 
                 {!!error && <div className="rw2-error">{error}</div>}
 
-                {/* arc */}
                 <div className="rw2-arc">
                     <div className="rw2-pointer" />
 
                     <div className="rw2-clip">
-                        {/* ✅ translate отдельно, rotate отдельно */}
                         <div className="rw2-wheel-pos">
                             <div
                                 className="rw2-wheel"
@@ -247,8 +237,13 @@ export function RouletteWheel({
                                                 style={{ transform: `skewY(${90 - sectorAngle}deg)` }}
                                             />
 
+                                            {/* ✅ как на фото: иконка + цифра по центру сектора */}
                                             <div className="rw2-sector-content">
-                                                <img className="rw2-sector-icon" src={s.iconSrc} alt="" />
+                                                {s.iconSrc ? (
+                                                    <img className="rw2-sector-icon" src={s.iconSrc} alt="" />
+                                                ) : (
+                                                    <div className="rw2-sector-icon rw2-sector-icon--ph" />
+                                                )}
                                                 <div className="rw2-sector-label">{s.label}</div>
                                             </div>
                                         </div>
@@ -263,7 +258,6 @@ export function RouletteWheel({
                     </div>
                 </div>
 
-                {/* main button like photo */}
                 <button
                     className={`rw2-spin ${spinning ? 'is-disabled' : ''}`}
                     onClick={spin}
@@ -285,7 +279,6 @@ export function RouletteWheel({
                     </div>
                 </button>
 
-                {/* bottom hint/result */}
                 {result ? (
                     <div className="rw2-result">
                         🎯 Выпало: <b>{winSector?.label}</b>

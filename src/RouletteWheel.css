@@ -2,13 +2,9 @@
     --sheet-bg: rgba(14, 16, 24, 0.96);
     --sheet-border: rgba(255,255,255,0.08);
     --txt: rgba(255,255,255,0.92);
-    --muted: rgba(255,255,255,0.68);
 
     --gold1:#ffd36a;
     --gold2:#ffb300;
-
-    --dark1:#1b2232;
-    --dark2:#0b0f18;
 }
 
 html, body, #root{ height:100%; }
@@ -127,23 +123,22 @@ html, body, #root{ height:100%; }
     width: 10px;
     height: 10px;
     border-radius: 999px;
-    background: rgba(255,255,255,.9);
+    background: rgba(255,255,255,.92);
 }
 
 /* показываем только дугу */
 .rw2-clip{
-    height: 220px;
+    height: 250px;              /* чуть больше — как на фото */
     overflow: hidden;
     border-radius: 22px;
     position: relative;
 }
 
-/* ✅ отдельно смещение вниз */
+/* ✅ колесо опускаем вниз */
 .rw2-wheel-pos{
-    transform: translateY(68px);
+    transform: translateY(92px);
 }
 
-/* колесо (только rotate меняется из React) */
 .rw2-wheel{
     position: relative;
     width: min(92vw, 560px);
@@ -176,7 +171,7 @@ html, body, #root{ height:100%; }
 
     background: repeating-conic-gradient(
             from 0deg,
-            rgba(255,255,255,.40) 0deg 6deg,
+            rgba(255,255,255,.36) 0deg 6deg,
             rgba(255,255,255,0) 6deg 12deg
     );
 
@@ -200,8 +195,8 @@ html, body, #root{ height:100%; }
     left:50%;
     top:50%;
     transform: translate(-50%,-50%);
-    width: 88px;
-    height: 88px;
+    width: 92px;
+    height: 92px;
     border-radius: 50%;
     z-index: 15;
     background: rgba(255,255,255,.06);
@@ -221,61 +216,79 @@ html, body, #root{ height:100%; }
 .rw2-sector-inner{
     position:absolute;
     inset: 0;
-    border-left: 1px solid rgba(255,255,255,.10);
+    border-left: 1px solid rgba(255,255,255,.11); /* разделители */
     background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,0));
 }
 
-/* красивые цвета */
+/* цвета (чуть ярче, как реф) */
 .rw2-sector.coin .rw2-sector-inner{
-    background: linear-gradient(135deg, rgba(255, 196, 0, .28), rgba(255,255,255,0));
+    background: linear-gradient(160deg, rgba(255, 195, 0, .42), rgba(255,255,255,0));
 }
 .rw2-sector.ticket .rw2-sector-inner{
-    background: linear-gradient(135deg, rgba(42, 167, 255, .24), rgba(255,255,255,0));
+    background: linear-gradient(160deg, rgba(42, 167, 255, .38), rgba(255,255,255,0));
 }
 .rw2-sector.star .rw2-sector-inner{
-    background: linear-gradient(135deg, rgba(179, 107, 255, .24), rgba(255,255,255,0));
+    background: linear-gradient(160deg, rgba(179, 107, 255, .38), rgba(255,255,255,0));
 }
 .rw2-sector.jackpot .rw2-sector-inner{
-    background: linear-gradient(135deg, rgba(106, 210, 74, .26), rgba(255,255,255,0));
+    background: linear-gradient(160deg, rgba(106, 210, 74, .40), rgba(255,255,255,0));
 }
 .rw2-sector.zero .rw2-sector-inner{
-    background: linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,0));
+    background: linear-gradient(160deg, rgba(255,255,255,.16), rgba(255,255,255,0));
 }
 
-/* контент сектора */
+/* ✅ ВОТ ГЛАВНОЕ: контент как на фото (иконка + цифра ровно) */
 .rw2-sector-content{
     position:absolute;
-    left: 72%;
+    left: 50%;
     top: 50%;
-    transform: translate(-50%, -50%) rotate(calc(-1 * var(--rot)));
+
+    /* выносим контент ближе к краю сектора */
+    transform:
+            translate(-50%, -50%)
+            rotate(calc(-1 * var(--rot)))
+            translateX(170px);
+
+    width: 110px;
     display:flex;
+    flex-direction: column;
     align-items:center;
-    gap: 10px;
-    padding: 10px 12px;
-    border-radius: 16px;
-    background: rgba(0,0,0,.34);
-    border: 1px solid rgba(255,255,255,.10);
+    justify-content:center;
+    gap: 8px;
+
     z-index: 6;
-    white-space: nowrap;
+    pointer-events:none;
 }
 
 .rw2-sector-icon{
-    width: 34px;
-    height: 34px;
+    width: 54px;
+    height: 54px;
     object-fit: contain;
     filter: drop-shadow(0 10px 16px rgba(0,0,0,.35));
 }
 
+/* placeholder если картинка пустая */
+.rw2-sector-icon--ph{
+    border-radius: 16px;
+    background:
+            radial-gradient(circle at 30% 30%, rgba(255,255,255,.25), rgba(255,255,255,0) 55%),
+            rgba(0,0,0,.25);
+    border: 1px solid rgba(255,255,255,.14);
+    box-shadow: 0 10px 22px rgba(0,0,0,.35);
+}
+
 .rw2-sector-label{
     font-weight: 1000;
-    font-size: 22px;
-    color: rgba(255,255,255,.95);
+    font-size: 26px;
+    line-height: 1;
+    color: rgba(255,255,255,.96);
+    text-shadow: 0 10px 18px rgba(0,0,0,.55);
     letter-spacing: .2px;
 }
 
 /* подсветка выигрыша */
 .rw2-sector.is-winning .rw2-sector-inner{
-    background: linear-gradient(135deg, rgba(255,211,106,.45), rgba(255,255,255,0));
+    background: linear-gradient(160deg, rgba(255,211,106,.55), rgba(255,255,255,0));
     animation: rw2Pulse 820ms ease-in-out infinite;
 }
 @keyframes rw2Pulse{
@@ -288,7 +301,7 @@ html, body, #root{ height:100%; }
 .rw2-spin{
     width: 100%;
     border: none;
-    margin-top: 10px;
+    margin-top: 12px;
     border-radius: 24px;
     padding: 16px 14px;
     cursor: pointer;
@@ -334,7 +347,6 @@ html, body, #root{ height:100%; }
     font-weight: 1100;
 }
 
-/* note/result */
 .rw2-note, .rw2-result{
     margin-top: 10px;
     text-align: center;
@@ -343,8 +355,17 @@ html, body, #root{ height:100%; }
 }
 .rw2-result b{ color: rgba(255,255,255,.95); }
 
-@media (max-width: 380px){
-    .rw2-clip{ height: 200px; }
-    .rw2-sector-label{ font-size: 20px; }
-    .rw2-sector-icon{ width: 30px; height: 30px; }
+/* адаптив — чтоб не налезало */
+@media (max-width: 390px){
+    .rw2-clip{ height: 235px; }
+    .rw2-wheel-pos{ transform: translateY(88px); }
+    .rw2-sector-content{
+        transform:
+                translate(-50%, -50%)
+                rotate(calc(-1 * var(--rot)))
+                translateX(150px);
+        width: 100px;
+    }
+    .rw2-sector-icon{ width: 48px; height: 48px; }
+    .rw2-sector-label{ font-size: 24px; }
 }
