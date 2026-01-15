@@ -10,7 +10,7 @@ type Sector = {
 };
 
 type RouletteWheelProps = {
-    token: string | null;
+    token: string | null;      // у тебя token может быть null — это ок
     onClose: () => void;
     onReward: () => void;
 };
@@ -23,10 +23,7 @@ const SECTORS: Sector[] = [
     { id: 'ticket1', label: '1', icon: '🎟️' },
 ];
 
-export  function RouletteWheel({
-                                          onClose,
-                                          onReward,
-                                      }: RouletteWheelProps) {
+export function RouletteWheel({ token: _token, onClose, onReward }: RouletteWheelProps) {
     const wheelRef = useRef<HTMLDivElement>(null);
     const [spinning, setSpinning] = useState(false);
 
@@ -34,23 +31,24 @@ export  function RouletteWheel({
         if (spinning) return;
         setSpinning(true);
 
-        // 🔹 позже тут будет ответ сервера
+        // 🔧 сейчас демо-рандом
+        // потом заменишь на запрос к серверу через apiFetch используя token
         const randomIndex = Math.floor(Math.random() * SECTORS.length);
+
+        // угол, чтобы остановиться на нужном секторе под стрелкой сверху
         const sectorAngle = 360 / SECTORS.length;
-        const deg =
-            360 * 6 +
-            (SECTORS.length - randomIndex) * sectorAngle -
-            sectorAngle / 2;
+        const targetDeg =
+            360 * 6 + (SECTORS.length - randomIndex) * sectorAngle - sectorAngle / 2;
 
         if (wheelRef.current) {
             wheelRef.current.style.transition =
                 'transform 4s cubic-bezier(.1,.7,.1,1)';
-            wheelRef.current.style.transform = `rotate(${deg}deg)`;
+            wheelRef.current.style.transform = `rotate(${targetDeg}deg)`;
         }
 
         setTimeout(() => {
             setSpinning(false);
-            onReward(); // 🔔 награда получена
+            onReward();
         }, 4000);
     };
 
@@ -69,9 +67,7 @@ export  function RouletteWheel({
                             <div
                                 key={s.id}
                                 className="sector"
-                                style={{
-                                    transform: `rotate(${(360 / SECTORS.length) * i}deg)`,
-                                }}
+                                style={{ transform: `rotate(${(360 / SECTORS.length) * i}deg)` }}
                             >
                                 <div className="sector-content">
                                     <div className="icon">{s.icon}</div>
@@ -85,7 +81,13 @@ export  function RouletteWheel({
                 <button className="spin-btn" onClick={spin} disabled={spinning}>
                     {spinning ? 'КРУТИТСЯ...' : 'ВРАЩАТЬ ⭐ 100'}
                 </button>
+
+                {/* token сейчас не используем, но он совместим и готов для backend */}
+                {/* <div style={{ opacity: 0.5, fontSize: 12 }}>token: {String(!!token)}</div> */}
             </div>
         </div>
     );
 }
+
+// ✅ на всякий случай: если где-то в проекте есть default import — тоже будет работать
+export default RouletteWheel;
