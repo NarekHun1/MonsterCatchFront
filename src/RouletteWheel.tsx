@@ -15,7 +15,6 @@ type SpinResponse = {
     label?: string;
     type?: PrizeType;
     amount?: number;
-
     costCoins?: number;
     freeTodayUsed?: boolean;
 };
@@ -35,7 +34,7 @@ function easeOutCubic(t: number) {
     return 1 - Math.pow(1 - t, 3);
 }
 
-/** lock body scroll (same vibe as your overlays) */
+/** Telegram WebView fix: lock page scroll while modal is open */
 function useBodyScrollLock(enabled: boolean) {
     useEffect(() => {
         if (!enabled) return;
@@ -88,6 +87,40 @@ function useBodyScrollLock(enabled: boolean) {
     }, [enabled]);
 }
 
+/** ✅ Apply Telegram viewport/safe-area vars to CSS */
+function useTelegramViewportVars() {
+    useEffect(() => {
+        const tg = (window as any).Telegram?.WebApp;
+        const root = document.documentElement;
+
+        const apply = () => {
+            // Telegram gives real available viewport
+            const vh = tg?.viewportHeight ?? window.innerHeight;
+            const vhs = tg?.viewportStableHeight ?? vh;
+
+            root.style.setProperty('--tg-viewport-height', `${vh}px`);
+            root.style.setProperty('--tg-viewport-stable-height', `${vhs}px`);
+
+            // safe areas (new clients)
+            const sat = tg?.safeAreaInset?.top ?? 0;
+            const sab = tg?.safeAreaInset?.bottom ?? 0;
+            root.style.setProperty('--tg-safe-top', `${sat}px`);
+            root.style.setProperty('--tg-safe-bottom', `${sab}px`);
+
+            // content safe area (even better)
+            const csat = tg?.contentSafeAreaInset?.top ?? 0;
+            const csab = tg?.contentSafeAreaInset?.bottom ?? 0;
+            root.style.setProperty('--tg-content-safe-top', `${csat}px`);
+            root.style.setProperty('--tg-content-safe-bottom', `${csab}px`);
+        };
+
+        apply();
+        tg?.onEvent?.('viewportChanged', apply);
+
+        return () => tg?.offEvent?.('viewportChanged', apply);
+    }, []);
+}
+
 export function RouletteWheel({
                                   token,
                                   onClose,
@@ -99,27 +132,24 @@ export function RouletteWheel({
     token: string | null;
     onClose: () => void;
     onReward?: (reward: SpinResponse) => void;
-
     coins?: number;
     tickets?: number;
     stars?: number;
 }) {
     useBodyScrollLock(true);
+    useTelegramViewportVars();
 
-    // Telegram native back button -> close roulette
+    // Telegram WebApp setup
     useEffect(() => {
         const tg = (window as any).Telegram?.WebApp;
         if (!tg) return;
 
         tg.ready?.();
-        tg.BackButton?.show();
-        tg.BackButton?.onClick(onClose);
-
-        return () => {
-            tg.BackButton?.offClick(onClose);
-            tg.BackButton?.hide();
-        };
-    }, [onClose]);
+        tg.expand?.();
+        tg.setHeaderColor?.('#08080e');
+        tg.setBackgroundColor?.('#08080e');
+        tg.disableVerticalSwipes?.();
+    }, []);
 
     const sectors = useMemo(() => DEFAULT_SECTORS, []);
     const sectorAngle = 360 / sectors.length;
@@ -177,13 +207,14 @@ export function RouletteWheel({
 
         const targetIndex = getIndexBySectorId(payload.sectorId);
 
-        // pointer at top (0deg), stop in center of target sector
+        // stop at center of sector under pointer (pointer at 0deg/top)
         const spins = 6;
         const centerOffset = sectorAngle / 2;
-        const targetAngle = spins * 360 + (360 - (targetIndex * sectorAngle + centerOffset));
+        const targetAngle =
+            spins * 360 + (360 - (targetIndex * sectorAngle + centerOffset));
 
         const start = performance.now();
-        const duration = 3200; // чуть быстрее, чем fullscreen
+        const duration = 3600;
         const startAngle = angle;
         const delta = targetAngle;
 
@@ -208,23 +239,23 @@ export function RouletteWheel({
     const winSector = result ? getSectorById(result.sectorId) : null;
 
     return (
-        <div className="roulette-shell">
-            {/* topbar like your Game */}
-            <div className="roulette-topbar">
-                <button className="roulette-back-btn" onClick={onClose} aria-label="Back">
-                    ← Назад
-                </button>
+        <div className="roulette-overlay" onClick={onClose}>
+            <div className="roulette-modal" onClick={(e) => e.stopPropagation()}>
+                {/* HUD */}
+                <div className="roulette-hud" onClick={(e) => e.stopPropagation()}>
+                    <div className="roulette-hud-left">
+                        <div className="roulette-pill">🪙 <b>{coins ?? '—'}</b></div>
+                        <div className="roulette-pill">🎟️ <b>{tickets ?? '—'}</b></div>
+                        <div className="roulette-pill">⭐ <b>{stars ?? '—'}</b></div>
+                    </div>
 
-                <div className="roulette-hud">
-                    <div className="roulette-pill">🪙 <b>{coins ?? '—'}</b></div>
-                    <div className="roulette-pill">🎟️ <b>{tickets ?? '—'}</b></div>
-                    <div className="roulette-pill">⭐ <b>{stars ?? '—'}</b></div>
+                    <button className="roulette-hud-close" onClick={onClose} aria-label="Close">
+                        ✕
+                    </button>
                 </div>
-            </div>
 
-            {error && <div className="roulette-error">Ошибка: {error}</div>}
+                {error && <div className="roulette-error">{error}</div>}
 
-            <div className="roulette-card">
                 <div className="roulette-stage">
                     <div className="roulette-pointer" />
 
@@ -286,10 +317,10 @@ export function RouletteWheel({
                         {spinning ? 'КРУТИМ...' : 'КРУТИТЬ'}
                     </button>
 
-                    {result ? (
+                    {result && (
                         <>
                             <div className="roulette-result">
-                                🎯 Выпало: <b>{winSector?.icon} {winSector?.title}</b>
+                                🎯 Остановилось на: <b>{winSector?.icon} {winSector?.title}</b>
                             </div>
 
                             <div className="roulette-price">
@@ -300,7 +331,9 @@ export function RouletteWheel({
                                         : '🎁 1 бесплатный спин в день, затем 10 🪙 за спин'}
                             </div>
                         </>
-                    ) : (
+                    )}
+
+                    {!result && (
                         <div className="roulette-note">
                             🎁 1 бесплатный спин в день, затем 10 🪙 за спин.
                         </div>
