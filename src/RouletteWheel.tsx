@@ -92,7 +92,7 @@ export function RouletteWheel({
         };
     }, [onClose]);
 
-    // ✅ твои “правильные” иконки (как на фото)
+    // ✅ иконки как у тебя
     const sectors = useMemo<Sector[]>(
         () => [
             { id: 'ticket_1', type: 'TICKETS', label: '+1', iconSrc: '/ui/ticket.png', variant: 'ticket' },
@@ -116,7 +116,7 @@ export function RouletteWheel({
     const [winningId, setWinningId] = useState<string | null>(null);
 
     // ✅ UI логика цены: 1 раз бесплатно, потом 10 coins
-    const [freeAvailable, setFreeAvailable] = useState(true); // по умолчанию показываем “FREE”
+    const [freeAvailable, setFreeAvailable] = useState(true);
     const spinCost = freeAvailable ? 0 : 10;
 
     const rafRef = useRef<number | null>(null);
@@ -225,7 +225,7 @@ export function RouletteWheel({
                     <div className="rw2-pointer" />
 
                     <div className="rw2-clip">
-                        {/* ✅ ВАЖНО: translate отдельно, rotate отдельно */}
+                        {/* ✅ translate отдельно, rotate отдельно */}
                         <div className="rw2-wheel-pos">
                             <div
                                 className="rw2-wheel"
@@ -242,7 +242,10 @@ export function RouletteWheel({
                                             className={`rw2-sector ${s.variant ?? ''} ${winningId === s.id ? 'is-winning' : ''}`}
                                             style={{ transform: `rotate(${rot}deg)`, ['--rot' as any]: `${rot}deg` }}
                                         >
-                                            <div className="rw2-sector-inner" style={{ transform: `skewY(${90 - sectorAngle}deg)` }} />
+                                            <div
+                                                className="rw2-sector-inner"
+                                                style={{ transform: `skewY(${90 - sectorAngle}deg)` }}
+                                            />
 
                                             <div className="rw2-sector-content">
                                                 <img className="rw2-sector-icon" src={s.iconSrc} alt="" />

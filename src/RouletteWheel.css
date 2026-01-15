@@ -7,15 +7,6 @@
     --gold1:#ffd36a;
     --gold2:#ffb300;
 
-    --blue1:#2aa7ff;
-    --blue2:#156bff;
-
-    --green1:#6ad24a;
-    --green2:#2ea85a;
-
-    --pink1:#b36bff;
-    --pink2:#7c3aed;
-
     --dark1:#1b2232;
     --dark2:#0b0f18;
 }
@@ -141,7 +132,7 @@ html, body, #root{ height:100%; }
 
 /* показываем только дугу */
 .rw2-clip{
-    height: 220px;           /* дуга как на фото */
+    height: 220px;
     overflow: hidden;
     border-radius: 22px;
     position: relative;
@@ -234,7 +225,7 @@ html, body, #root{ height:100%; }
     background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,0));
 }
 
-/* красивые цвета как в рефе */
+/* красивые цвета */
 .rw2-sector.coin .rw2-sector-inner{
     background: linear-gradient(135deg, rgba(255, 196, 0, .28), rgba(255,255,255,0));
 }
@@ -251,7 +242,7 @@ html, body, #root{ height:100%; }
     background: linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,0));
 }
 
-/* контент сектора: ИКОНКА + БОЛЬШОЙ ТЕКСТ (как на фото) */
+/* контент сектора */
 .rw2-sector-content{
     position:absolute;
     left: 72%;
