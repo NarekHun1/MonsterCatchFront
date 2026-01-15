@@ -15,7 +15,7 @@ const SECTORS: Sector[] = [
     { id: 'ticket', label: '1', icon: '🎟️' },
 ];
 
-export default function RouletteWheel() {
+export  function RouletteWheel() {
     const wheelRef = useRef<HTMLDivElement>(null);
     const [spinning, setSpinning] = useState(false);
 
