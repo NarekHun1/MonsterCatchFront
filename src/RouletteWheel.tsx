@@ -6,9 +6,10 @@ type PrizeType = 'COINS' | 'TICKETS' | 'STARS' | 'NOTHING' | 'JACKPOT';
 
 type Sector = {
     id: string;
-    title: string;      // 10 / 2500 / UNCOMMON ...
-    subtitle?: string;  // "УТКА" или "x10" и т.п.
-    icon: string;       // emoji или можно потом сделать <img/>
+    type: PrizeType;
+    label: string;        // "+10", "2500", "JACKPOT", "0"
+    iconSrc: string;      // /ui/coin.png etc
+    variant?: 'coin' | 'ticket' | 'star' | 'jackpot' | 'zero';
 };
 
 type SpinResponse = {
@@ -16,26 +17,14 @@ type SpinResponse = {
     label?: string;
     type?: PrizeType;
     amount?: number;
-    costCoins?: number;
-    freeTodayUsed?: boolean;
+    costCoins?: number;       // сервер пусть отдаёт 0 или 10
+    freeTodayUsed?: boolean;  // сервер пусть отдаёт true/false
 };
-
-const DEFAULT_SECTORS: Sector[] = [
-    { id: 'duck', title: 'UNCOMMON', subtitle: 'УТКА', icon: '🦆' },
-    { id: 'blue_10', title: '10', icon: '🌀' },
-    { id: 'coins_2500', title: '2500', icon: '🟩' },
-    { id: 'blue_100', title: '100', icon: '🌀' },
-    { id: 'x1', title: '1', icon: '🟣' },
-    { id: 'x5', title: '5', icon: '🟪' },
-    { id: 'coins_100', title: '100', icon: '🟡' },
-    { id: 'nothing', title: '0', icon: '❌' },
-];
 
 function easeOutCubic(t: number) {
     return 1 - Math.pow(1 - t, 3);
 }
 
-/** lock scroll behind modal (Telegram/iOS safe) */
 function useBodyScrollLock(enabled: boolean) {
     useEffect(() => {
         if (!enabled) return;
@@ -45,12 +34,12 @@ function useBodyScrollLock(enabled: boolean) {
         const scrollY = window.scrollY || 0;
 
         const prev = {
-            bodyPos: body.style.position,
-            bodyTop: body.style.top,
-            bodyLeft: body.style.left,
-            bodyRight: body.style.right,
-            bodyWidth: body.style.width,
-            bodyOverflow: body.style.overflow,
+            pos: body.style.position,
+            top: body.style.top,
+            left: body.style.left,
+            right: body.style.right,
+            width: body.style.width,
+            overflow: body.style.overflow,
             htmlOverflow: html.style.overflow,
         };
 
@@ -63,12 +52,12 @@ function useBodyScrollLock(enabled: boolean) {
         html.style.overflow = 'hidden';
 
         return () => {
-            body.style.position = prev.bodyPos;
-            body.style.top = prev.bodyTop;
-            body.style.left = prev.bodyLeft;
-            body.style.right = prev.bodyRight;
-            body.style.width = prev.bodyWidth;
-            body.style.overflow = prev.bodyOverflow;
+            body.style.position = prev.pos;
+            body.style.top = prev.top;
+            body.style.left = prev.left;
+            body.style.right = prev.right;
+            body.style.width = prev.width;
+            body.style.overflow = prev.overflow;
             html.style.overflow = prev.htmlOverflow;
             window.scrollTo(0, scrollY);
         };
@@ -80,23 +69,15 @@ export function RouletteWheel({
                                   onClose,
                                   onReward,
                                   coins,
-                                  spinCost = 100,           // как на скрине “100”
-                                  dailyFreeText = '1 раз в день',
                               }: {
     token: string | null;
     onClose: () => void;
     onReward?: (reward: SpinResponse) => void;
-
     coins?: number;
-    tickets?: number;
-    stars?: number;
-
-    spinCost?: number;
-    dailyFreeText?: string;
 }) {
     useBodyScrollLock(true);
 
-    // Telegram back button closes sheet
+    // Telegram BackButton -> close
     useEffect(() => {
         const tg = (window as any).Telegram?.WebApp;
         if (!tg) return;
@@ -111,7 +92,21 @@ export function RouletteWheel({
         };
     }, [onClose]);
 
-    const sectors = useMemo(() => DEFAULT_SECTORS, []);
+    // ✅ твои “правильные” иконки (как на фото)
+    const sectors = useMemo<Sector[]>(
+        () => [
+            { id: 'ticket_1', type: 'TICKETS', label: '+1', iconSrc: '/ui/ticket.png', variant: 'ticket' },
+            { id: 'coins_10', type: 'COINS', label: '+10', iconSrc: '/ui/coin.png', variant: 'coin' },
+            { id: 'coins_25', type: 'COINS', label: '+25', iconSrc: '/ui/coin.png', variant: 'coin' },
+            { id: 'stars_5', type: 'STARS', label: '+5', iconSrc: '/ui/star.png', variant: 'star' },
+            { id: 'ticket_3', type: 'TICKETS', label: '+3', iconSrc: '/ui/ticket.png', variant: 'ticket' },
+            { id: 'stars_10', type: 'STARS', label: '+10', iconSrc: '/ui/star.png', variant: 'star' },
+            { id: 'jackpot', type: 'JACKPOT', label: 'JACKPOT', iconSrc: '/ui/jackpot.png', variant: 'jackpot' },
+            { id: 'nothing', type: 'NOTHING', label: '0', iconSrc: '/ui/zero.png', variant: 'zero' },
+        ],
+        [],
+    );
+
     const sectorAngle = 360 / sectors.length;
 
     const [angle, setAngle] = useState(0);
@@ -119,6 +114,10 @@ export function RouletteWheel({
     const [error, setError] = useState('');
     const [result, setResult] = useState<SpinResponse | null>(null);
     const [winningId, setWinningId] = useState<string | null>(null);
+
+    // ✅ UI логика цены: 1 раз бесплатно, потом 10 coins
+    const [freeAvailable, setFreeAvailable] = useState(true); // по умолчанию показываем “FREE”
+    const spinCost = freeAvailable ? 0 : 10;
 
     const rafRef = useRef<number | null>(null);
 
@@ -165,15 +164,22 @@ export function RouletteWheel({
             return;
         }
 
+        // если сервер сказал, что бесплатный уже использован — выключаем free UI
+        if (payload.freeTodayUsed === true || payload.costCoins === 10) {
+            setFreeAvailable(false);
+        }
+        if (payload.costCoins === 0) {
+            setFreeAvailable(false); // после бесплатного — дальше платно
+        }
+
         const targetIndex = getIndexBySectorId(payload.sectorId);
 
-        // pointer at top (0deg), stop in center of sector
         const spins = 6;
         const centerOffset = sectorAngle / 2;
         const targetAngle = spins * 360 + (360 - (targetIndex * sectorAngle + centerOffset));
 
         const start = performance.now();
-        const duration = 3200;
+        const duration = 3300;
         const startAngle = angle;
         const delta = targetAngle;
 
@@ -198,104 +204,92 @@ export function RouletteWheel({
     const winSector = result ? getSectorById(result.sectorId) : null;
 
     return (
-        <div className="rw-overlay" onClick={onClose}>
-            <div className="rw-sheet" onClick={(e) => e.stopPropagation()}>
-                {/* top row (balance + close) */}
-                <div className="rw-sheet-top">
-                    <div className="rw-balance">
-                        <span className="rw-balance-coin">🪙</span>
+        <div className="rw2-overlay" onClick={onClose}>
+            <div className="rw2-sheet" onClick={(e) => e.stopPropagation()}>
+                {/* top row: balance + close */}
+                <div className="rw2-top">
+                    <div className="rw2-balance">
+                        <img className="rw2-balance-icon" src="/ui/coin.png" alt="" />
                         <b>{coins ?? '—'}</b>
                     </div>
 
-                    <button className="rw-close" onClick={onClose} aria-label="Close">
+                    <button className="rw2-close" onClick={onClose} aria-label="Close">
                         ✕
                     </button>
                 </div>
 
-                {!!error && <div className="rw-error">{error}</div>}
+                {!!error && <div className="rw2-error">{error}</div>}
 
-                {/* arc wheel area */}
-                <div className="rw-arc">
-                    <div className="rw-pointer" aria-hidden="true" />
+                {/* arc */}
+                <div className="rw2-arc">
+                    <div className="rw2-pointer" />
 
-                    <div className="rw-wheel-clip">
-                        <div
-                            className="rw-wheel"
-                            style={{
-                                transform: `rotate(${angle}deg)`,
-                                ['--sa' as any]: `${sectorAngle}deg`,
-                            }}
-                        >
-                            {sectors.map((s, i) => {
-                                const rot = i * sectorAngle;
-                                return (
-                                    <div
-                                        key={s.id}
-                                        className={`rw-sector ${winningId === s.id ? 'is-winning' : ''}`}
-                                        style={{
-                                            transform: `rotate(${rot}deg)`,
-                                            ['--rot' as any]: `${rot}deg`,
-                                        }}
-                                    >
+                    <div className="rw2-clip">
+                        {/* ✅ ВАЖНО: translate отдельно, rotate отдельно */}
+                        <div className="rw2-wheel-pos">
+                            <div
+                                className="rw2-wheel"
+                                style={{
+                                    transform: `rotate(${angle}deg)`,
+                                    ['--sa' as any]: `${sectorAngle}deg`,
+                                }}
+                            >
+                                {sectors.map((s, i) => {
+                                    const rot = i * sectorAngle;
+                                    return (
                                         <div
-                                            className="rw-sector-inner"
-                                            style={{ transform: `skewY(${90 - sectorAngle}deg)` }}
-                                        />
+                                            key={s.id}
+                                            className={`rw2-sector ${s.variant ?? ''} ${winningId === s.id ? 'is-winning' : ''}`}
+                                            style={{ transform: `rotate(${rot}deg)`, ['--rot' as any]: `${rot}deg` }}
+                                        >
+                                            <div className="rw2-sector-inner" style={{ transform: `skewY(${90 - sectorAngle}deg)` }} />
 
-                                        <div className="rw-sector-content">
-                                            <div className="rw-sector-icon">{s.icon}</div>
-                                            <div className="rw-sector-text">
-                                                <div className="rw-sector-title">{s.title}</div>
-                                                {s.subtitle && <div className="rw-sector-sub">{s.subtitle}</div>}
+                                            <div className="rw2-sector-content">
+                                                <img className="rw2-sector-icon" src={s.iconSrc} alt="" />
+                                                <div className="rw2-sector-label">{s.label}</div>
                                             </div>
                                         </div>
-                                    </div>
-                                );
-                            })}
+                                    );
+                                })}
 
-                            <div className="rw-bulbs" aria-hidden="true" />
-                            <div className="rw-dome" aria-hidden="true" />
-                            <div className="rw-center" />
+                                <div className="rw2-bulbs" />
+                                <div className="rw2-dome" />
+                                <div className="rw2-center" />
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* main spin button */}
+                {/* main button like photo */}
                 <button
-                    className={`rw-spin ${spinning ? 'is-disabled' : ''}`}
+                    className={`rw2-spin ${spinning ? 'is-disabled' : ''}`}
                     onClick={spin}
                     disabled={spinning}
                     onMouseDown={(e) => e.preventDefault()}
                     onTouchStart={(e) => e.preventDefault()}
                 >
-                    <div className="rw-spin-title">{spinning ? 'ВРАЩАЕМ...' : 'ВРАЩАТЬ'}</div>
-                    <div className="rw-spin-sub">
-                        <span className="rw-spin-coin">🪙</span> {spinCost}
+                    <div className="rw2-spin-title">{spinning ? 'КРУТИМ...' : 'ВРАЩАТЬ'}</div>
+
+                    <div className="rw2-spin-sub">
+                        {spinCost === 0 ? (
+                            <span className="rw2-free">БЕСПЛАТНО</span>
+                        ) : (
+                            <>
+                                <img className="rw2-spin-coin" src="/ui/coin.png" alt="" />
+                                <span>{spinCost}</span>
+                            </>
+                        )}
                     </div>
                 </button>
 
-                {/* bottom cards like on screenshot */}
-                <div className="rw-cards">
-                    <button className="rw-card" onClick={spin} disabled={spinning}>
-                        <div className="rw-card-title">БАРАБАН</div>
-                        <div className="rw-card-sub"><span>🪙</span> {spinCost}</div>
-                    </button>
-
-                    <button className="rw-card rw-card--pink" onClick={spin} disabled={spinning}>
-                        <div className="rw-card-title">{dailyFreeText}</div>
-                        <div className="rw-card-big">MEGA X10</div>
-                        <div className="rw-card-sub"><span>⭐</span> {spinCost}</div>
-                    </button>
-                </div>
-
-                {/* result hint */}
+                {/* bottom hint/result */}
                 {result ? (
-                    <div className="rw-result">
-                        🎯 Выпало: <b>{winSector?.icon} {winSector?.title}</b>
+                    <div className="rw2-result">
+                        🎯 Выпало: <b>{winSector?.label}</b>
                     </div>
                 ) : (
-                    <div className="rw-note">
-                        🎁 1 бесплатный спин в день, затем {spinCost} 🪙
+                    <div className="rw2-note">
+                        🎁 1 бесплатный спин в день, затем 10 🪙 за спин
                     </div>
                 )}
             </div>
