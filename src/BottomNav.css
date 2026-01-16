@@ -38,7 +38,7 @@
     pointer-events: auto;
     position: relative;
 
-    height: 84px;
+    height: 76px;
     border-radius: 26px;
 
     display: grid;
@@ -57,7 +57,7 @@
 }
 
 .bn-item{
-    height: 64px;
+    height: 56px;
     border-radius: 18px;
     border: 1px solid transparent;
     background: transparent;
@@ -77,13 +77,13 @@
 
 .bn-ico{
     position: relative;
-    font-size: 22px;
+    font-size: 15px;
     line-height: 1;
     opacity: 0.92;
 }
 
 .bn-txt{
-    font-size: 11px;
+    font-size: 10px;
     letter-spacing: 0.08em;
     font-weight: 900;
 }
@@ -117,7 +117,7 @@
 
 /* Центр — как “герой/демон” */
 .bn-center{
-    height: 70px;
+    height: 62px;
     border-radius: 22px;
     border: 1px solid rgba(255,255,255,0.14);
 
@@ -140,8 +140,8 @@
 .bn-center:active{ transform: scale(0.985); }
 
 .bn-center-ico{
-    width: 42px;
-    height: 42px;
+    width: 36px;
+    height: 36px;
     border-radius: 16px;
     display:flex;
     align-items:center;
