@@ -149,7 +149,7 @@
     transform:
             translate(-50%, -50%)
             rotate(calc((360deg / var(--count)) * var(--i)))
-            translateY(-50px)        /* 🔥 ЭТО РАДИУС */
+            translateY(-35px)        /* 🔥 ЭТО РАДИУС */
             rotate(calc(-1 * (360deg / var(--count)) * var(--i)));
 
     font-size: 42px;
