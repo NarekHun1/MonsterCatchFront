@@ -186,7 +186,11 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
                             <div
                                 key={s.id}
                                 className={`sector sector--${s.variant || 'coin'}`}
-                                style={{ transform: `rotate(${sectorAngle * i}deg)` }}
+                                style={{
+                                    transform: `rotate(${sectorAngle * i}deg)`,
+                                    ['--i' as any]: i,
+                                    ['--count' as any]: SECTORS.length,
+                                }}
                             >
                                 <div className="sector-content">
                                     <div className="sector-icon">{s.icon}</div>
@@ -194,6 +198,7 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
                                 </div>
                             </div>
                         ))}
+
                         <div className="wheel-center">
                             <div className="wc-ring" />
                             <div className="wc-dot" />
