@@ -112,8 +112,8 @@
     overflow:hidden;
 }
 
-.sector{
-    position:absolute;
+.sector {
+    position: absolute;
     width: 50%;
     height: 50%;
     top: 0;
@@ -144,7 +144,7 @@
 /* ИКОНКА — сверху по центру */
 .sector-icon{
     position: absolute;
-    top: 14px;               /* ↑ регулируй: 10-22 */
+    top: 20px;               /* ↑ регулируй: 10-22 */
     left: 50%;
     transform: translateX(-50%);
     font-size: 30px;
