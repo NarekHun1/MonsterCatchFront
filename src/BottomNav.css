@@ -1,0 +1,130 @@
+.bottomnav{
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    z-index: 9999;
+    pointer-events: none; /* чтобы клики были только по inner */
+}
+
+.bottomnav-inner{
+    pointer-events: auto;
+    height: 86px;
+    border-radius: 22px;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.2fr 1fr 1fr;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 10px;
+
+    background:
+            radial-gradient(circle at 50% 20%, rgba(255,255,255,0.08), rgba(0,0,0,0) 55%),
+            rgba(12, 12, 18, 0.92);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 18px 45px rgba(0,0,0,0.55);
+    backdrop-filter: blur(12px);
+}
+
+.bn-item{
+    height: 66px;
+    border-radius: 16px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: rgba(255,255,255,0.55);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    cursor: pointer;
+    transition: transform .12s ease, background .2s ease, color .2s ease, border-color .2s ease;
+}
+
+.bn-item:active{ transform: scale(0.98); }
+
+.bn-ico{
+    position: relative;
+    font-size: 22px;
+    line-height: 1;
+    opacity: 0.85;
+}
+
+.bn-txt{
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    font-weight: 800;
+}
+
+.bn-badge{
+    position: absolute;
+    top: -10px;
+    right: -12px;
+    min-width: 22px;
+    height: 18px;
+    padding: 0 6px;
+    border-radius: 999px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #ff3b30;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 900;
+    box-shadow: 0 8px 20px rgba(255, 59, 48, 0.35);
+}
+
+.bn-item.is-active{
+    color: #fff;
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.10);
+}
+
+/* Центр */
+.bn-center{
+    height: 72px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.12);
+
+    background:
+            radial-gradient(circle at 50% 0%, rgba(255, 204, 77, 0.22), rgba(255,255,255,0) 55%),
+            rgba(255,255,255,0.06);
+
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    cursor: pointer;
+    box-shadow: 0 14px 35px rgba(0,0,0,0.55);
+    transition: transform .12s ease, filter .2s ease;
+}
+
+.bn-center:active{ transform: scale(0.985); }
+
+.bn-center-ico{
+    width: 40px;
+    height: 40px;
+    border-radius: 14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background: rgba(0,0,0,0.18);
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
+    font-size: 22px;
+}
+
+.bn-center-txt{
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    font-weight: 900;
+    opacity: 0.95;
+}

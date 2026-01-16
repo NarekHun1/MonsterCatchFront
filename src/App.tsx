@@ -17,6 +17,7 @@
     import { translations } from './i18n';
     import type { Lang } from './i18n';
     import {Quests} from "./Quests.tsx";
+    import { BottomNav } from './BottomNav';
 
 
 
@@ -1157,6 +1158,27 @@
                                 </div>
                             )}
                         </>
+                    )}
+                    {/* FIXED BOTTOM NAV */}
+                    {!error && (
+                        <BottomNav
+                            active={
+                                currentPage === 'tournament' ? 'tournaments'
+                                    : currentPage === 'invite' ? 'friends'
+                                        : currentPage === 'quests' ? 'quests'
+                                            : currentPage === 'menu' ? 'shop'
+                                                : 'shop'
+                            }
+                            eggsBadge={0} // поставь число если хочешь бейдж
+                            onShop={() => setCurrentPage('menu')}
+                            onQuests={() => setCurrentPage('quests')}
+                            onDemon={() => {
+                                setCurrentPage('menu');
+                                setShowHero(true); // откроет твоего HeroViewer демона
+                            }}
+                            onFriends={() => setCurrentPage('invite')}
+                            onTournaments={() => setCurrentPage('tournament')}
+                        />
                     )}
 
                 </main>
