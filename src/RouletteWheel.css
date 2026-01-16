@@ -143,13 +143,13 @@
 
     /* 1️⃣ стартуем из центра круга */
     left: 50%;
-    top: 40%;
+    top: 50%;
 
     /* 2️⃣ смещаем ПО РАДИУСУ (а не X/Y экрана) */
     transform:
             translate(-50%, -50%)
             rotate(calc((360deg / var(--count)) * var(--i)))
-            translateY(-69px)        /* 🔥 ЭТО РАДИУС */
+            translateY(-65px)        /* 🔥 ЭТО РАДИУС */
             rotate(calc(-1 * (360deg / var(--count)) * var(--i)));
 
     font-size: 42px;
