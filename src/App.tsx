@@ -1026,32 +1026,43 @@
                                         />
                                     )}
                                 {currentPage === 'quests' && token && (
-                                    <Quests
-                                        token={token}
-                                        t={t}
-                                        onBack={() => setCurrentPage('menu')}
-                                        onTicketsClaimed={async () => {
-                                            try {
-                                                const ticketsRes = await apiFetch('/tickets/count', token);
-                                                const ticketsData = await ticketsRes.json().catch(() => ({}));
-                                                if (typeof ticketsData.count === 'number') {
-                                                    setTickets(ticketsData.count);
-                                                }
+                                    <div className="panel panel-menu">
+                                        {/* 🔥 ЕЖЕДНЕВНЫЕ ЗАДАНИЯ */}
+                                        <DailyQuests
+                                            token={token}
+                                            onStarsChange={handleStarsChange}
+                                            t={t}
+                                        />
 
-                                                const meRes = await apiFetch('/users/me', token);
-                                                const meData = await meRes.json().catch(() => ({}));
-                                                if (meRes.ok) {
-                                                    setMe((prev) => (prev ? { ...prev, ...meData } : meData));
-                                                }
+                                        {/* 🔽 ТВОИ ОСТАЛЬНЫЕ ЗАДАНИЯ */}
+                                        <Quests
+                                            token={token}
+                                            t={t}
+                                            onBack={() => setCurrentPage('menu')}
+                                            onTicketsClaimed={async () => {
+                                                try {
+                                                    const ticketsRes = await apiFetch('/tickets/count', token);
+                                                    const ticketsData = await ticketsRes.json().catch(() => ({}));
+                                                    if (typeof ticketsData.count === 'number') {
+                                                        setTickets(ticketsData.count);
+                                                    }
 
-                                                // ✅ только если всё прошло — гасим точку
-                                                await refreshQuestsDot();
-                                            } catch (e) {
-                                                console.error(e);
-                                            }
-                                        }}
-                                    />
+                                                    const meRes = await apiFetch('/users/me', token);
+                                                    const meData = await meRes.json().catch(() => ({}));
+                                                    if (meRes.ok) {
+                                                        setMe((prev) => (prev ? { ...prev, ...meData } : meData));
+                                                    }
+
+                                                    // ✅ после сбора пересчитать точку
+                                                    await refreshQuestsDot();
+                                                } catch (e) {
+                                                    console.error(e);
+                                                }
+                                            }}
+                                        />
+                                    </div>
                                 )}
+
 
                                 {currentPage === 'game' && token && (
                                     <Game
