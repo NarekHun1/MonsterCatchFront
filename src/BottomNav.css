@@ -1,4 +1,10 @@
-/* Bar is OVER content (no bottom gap) */
+/* ============================
+   FIXED GAME BOTTOM NAV (100% width)
+   - no bottom gap
+   - safe-area friendly
+   - compact labels (fits "ТУРНИРЫ")
+   ============================ */
+
 .bottomnav{
     position: fixed;
     left: 0;
@@ -8,15 +14,16 @@
     z-index: 9999;
     pointer-events: none;
 
-    /* ВАЖНО: safe-area снизу — но визуально без “отступа” */
+    /* 100% width, no side gaps.
+       Safe-area is handled INSIDE padding-bottom. */
     padding:
             10px
-            12px
-            calc(10px + env(safe-area-inset-bottom))
-            12px;
+            0
+            env(safe-area-inset-bottom)
+            0;
 }
 
-/* Нижний glass/fade чтобы под баром было красиво */
+/* soft fade behind the bar (so content under looks nice) */
 .bottomnav::before{
     content:"";
     position: absolute;
@@ -25,75 +32,102 @@
     bottom: 0;
     height: 140px;
     pointer-events: none;
-
-    background:
-            linear-gradient(to top,
-            rgba(0,0,0,0.72),
-            rgba(0,0,0,0.35) 45%,
-            rgba(0,0,0,0.0)
-            );
+    background: linear-gradient(
+            to top,
+            rgba(0,0,0,0.78),
+            rgba(0,0,0,0.38) 46%,
+            rgba(0,0,0,0.00)
+    );
 }
 
+/* inner container = actual bar */
 .bottomnav-inner{
     pointer-events: auto;
     position: relative;
 
-    height: 76px;
-    border-radius: 26px;
+    /* FULL width bar */
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+
+    /* compact height */
+    height: 68px;
+    border-radius: 0; /* full width like in your screenshot */
+    padding: 6px 10px;
 
     display: grid;
-    grid-template-columns: 1fr 1fr 1.25fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1.18fr 1fr 1fr;
     align-items: center;
-    gap: 8px;
-    padding: 10px 10px;
+    gap: 6px;
 
     background:
-            radial-gradient(circle at 50% 15%, rgba(255,255,255,0.10), rgba(0,0,0,0) 55%),
-            rgba(12, 12, 18, 0.88);
+            radial-gradient(circle at 50% 10%, rgba(255,255,255,0.10), rgba(0,0,0,0) 58%),
+            rgba(12, 12, 18, 0.92);
 
-    border: 1px solid rgba(255,255,255,0.10);
-    box-shadow: 0 18px 50px rgba(0,0,0,0.60);
+    border-top: 1px solid rgba(255,255,255,0.10);
+    box-shadow: 0 -14px 44px rgba(0,0,0,0.58);
     backdrop-filter: blur(14px);
 }
 
+/* ============================
+   ITEMS
+   ============================ */
+
 .bn-item{
-    height: 56px;
-    border-radius: 18px;
+    height: 52px;
+    border-radius: 14px;
     border: 1px solid transparent;
     background: transparent;
-    color: rgba(255,255,255,0.50);
+
+    color: rgba(255,255,255,0.55);
 
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 3px;
 
     cursor: pointer;
-    transition: transform .12s ease, background .2s ease, color .2s ease, border-color .2s ease, filter .2s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+
+    transition:
+            transform .12s ease,
+            background .18s ease,
+            color .18s ease,
+            border-color .18s ease,
+            filter .18s ease;
 }
 
-.bn-item:active{ transform: scale(0.98); }
+.bn-item:active{ transform: scale(0.985); }
 
 .bn-ico{
     position: relative;
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1;
     opacity: 0.92;
 }
 
 .bn-txt{
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    font-weight: 900;
+    font-size: 9px;
+    letter-spacing: 0.02em;
+    font-weight: 800;
+    line-height: 1;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
 }
 
+/* badge */
 .bn-badge{
     position: absolute;
-    top: -10px;
+    top: -9px;
     right: -12px;
-    min-width: 22px;
-    height: 18px;
+
+    min-width: 20px;
+    height: 16px;
     padding: 0 6px;
     border-radius: 999px;
 
@@ -103,46 +137,56 @@
 
     background: #ff3b30;
     color: #fff;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 900;
-    box-shadow: 0 10px 24px rgba(255, 59, 48, 0.35);
+
+    box-shadow: 0 10px 22px rgba(255, 59, 48, 0.35);
 }
 
+/* active */
 .bn-item.is-active{
     color: #fff;
     background: rgba(255,255,255,0.08);
     border-color: rgba(255,255,255,0.14);
-    filter: drop-shadow(0 10px 22px rgba(0,0,0,0.35));
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.35));
 }
 
-/* Центр — как “герой/демон” */
+/* ============================
+   CENTER BUTTON (DEMON)
+   ============================ */
+
 .bn-center{
-    height: 62px;
-    border-radius: 22px;
+    height: 56px;
+    border-radius: 18px;
     border: 1px solid rgba(255,255,255,0.14);
 
     background:
-            radial-gradient(circle at 50% 0%, rgba(255, 204, 77, 0.28), rgba(255,255,255,0) 60%),
+            radial-gradient(circle at 50% 0%, rgba(255, 204, 77, 0.26), rgba(255,255,255,0) 60%),
             rgba(255,255,255,0.08);
 
     color: #fff;
+
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 3px;
 
     cursor: pointer;
-    box-shadow: 0 18px 44px rgba(0,0,0,0.55);
-    transition: transform .12s ease, filter .2s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+
+    box-shadow: 0 16px 38px rgba(0,0,0,0.55);
+    transition: transform .12s ease, filter .18s ease;
 }
 
 .bn-center:active{ transform: scale(0.985); }
 
 .bn-center-ico{
-    width: 36px;
-    height: 36px;
-    border-radius: 16px;
+    width: 32px;
+    height: 32px;
+    border-radius: 14px;
+
     display:flex;
     align-items:center;
     justify-content:center;
@@ -150,12 +194,55 @@
     background: rgba(0,0,0,0.20);
     border: 1px solid rgba(255,255,255,0.14);
     box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
-    font-size: 22px;
+
+    font-size: 20px;
+    line-height: 1;
 }
 
 .bn-center-txt{
-    font-size: 12px;
-    letter-spacing: 0.08em;
-    font-weight: 950;
-    opacity: 0.95;
+    font-size: 9px;
+    letter-spacing: 0.02em;
+    font-weight: 900;
+    line-height: 1;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+/* ============================
+   EXTRA: very small screens
+   ============================ */
+@media (max-width: 360px){
+    .bottomnav-inner{
+        height: 66px;
+        padding: 6px 8px;
+        gap: 4px;
+        grid-template-columns: 1fr 1fr 1.12fr 1fr 1fr;
+    }
+
+    .bn-item{
+        height: 50px;
+        border-radius: 13px;
+        gap: 2px;
+    }
+
+    .bn-ico{ font-size: 15px; }
+    .bn-txt{ font-size: 8px; }
+
+    .bn-center{
+        height: 54px;
+        border-radius: 17px;
+        gap: 2px;
+    }
+
+    .bn-center-ico{
+        width: 30px;
+        height: 30px;
+        border-radius: 13px;
+        font-size: 18px;
+    }
+
+    .bn-center-txt{ font-size: 8px; }
 }
