@@ -1,3 +1,7 @@
+/* ─────────────────────────────────────────
+   Roulette overlay / modal (Premium glass)
+   ───────────────────────────────────────── */
+
 .roulette-overlay{
     position: fixed;
     inset: 0;
@@ -22,20 +26,37 @@
     box-shadow: 0 24px 70px rgba(0,0,0,0.55);
     padding: 16px 16px 18px;
     position: relative;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .roulette-close{
     position:absolute;
     top: 10px;
     right: 10px;
-    width: 36px;
-    height: 36px;
+    width: 38px;
+    height: 38px;
     border-radius: 12px;
     border: 1px solid rgba(255,255,255,0.12);
     background: rgba(255,255,255,0.06);
     color: #fff;
     cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight: 900;
+    box-shadow: 0 10px 20px rgba(0,0,0,.35);
+    transition: transform .15s ease, background .15s ease;
 }
+
+.roulette-close:active{
+    transform: scale(.96);
+    background: rgba(255,255,255,0.10);
+}
+
+/* ─────────────────────────────────────────
+   Title
+   ───────────────────────────────────────── */
 
 .roulette-title{
     padding: 6px 6px 10px;
@@ -47,7 +68,7 @@
     padding: 6px 10px;
     border-radius: 999px;
     font-size: 12px;
-    letter-spacing: .08em;
+    letter-spacing: .10em;
     color: rgba(255,255,255,0.85);
     border: 1px solid rgba(255,255,255,0.10);
     background: rgba(255,255,255,0.05);
@@ -56,8 +77,9 @@
 .rt-main{
     margin-top: 8px;
     font-size: 22px;
-    font-weight: 900;
+    font-weight: 950;
     color:#fff;
+    text-shadow: 0 14px 26px rgba(0,0,0,.55);
 }
 
 .rt-sub{
@@ -66,6 +88,10 @@
     opacity: .85;
     color:#cfd3ff;
 }
+
+/* ─────────────────────────────────────────
+   Error
+   ───────────────────────────────────────── */
 
 .roulette-error{
     margin: 8px 6px 10px;
@@ -77,6 +103,10 @@
     font-size: 13px;
 }
 
+/* ─────────────────────────────────────────
+   Stage / pointer / wheel
+   ───────────────────────────────────────── */
+
 .roulette-stage{
     position: relative;
     width: 320px;
@@ -84,6 +114,7 @@
     margin: 10px auto 14px;
 }
 
+/* pointer */
 .pointer{
     position:absolute;
     top: -6px;
@@ -98,6 +129,7 @@
     z-index: 5;
 }
 
+/* wheel base */
 .wheel{
     width: 100%;
     height: 100%;
@@ -108,11 +140,40 @@
             radial-gradient(circle at 50% 60%, rgba(255,211,77,.10), rgba(0,0,0,0) 55%),
             #0b0f18;
     border: 1px solid rgba(255,255,255,0.10);
-    box-shadow: inset 0 0 0 6px rgba(255,255,255,0.03), 0 18px 50px rgba(0,0,0,0.55);
     overflow:hidden;
+
+    box-shadow:
+            inset 0 0 0 2px rgba(255,255,255,0.07),
+            inset 0 0 0 10px rgba(255,255,255,0.03),
+            inset 0 0 0 18px rgba(0,0,0,0.35),
+            0 20px 60px rgba(0,0,0,0.65);
 }
 
-.sector {
+/* outer ring */
+.wheel::before{
+    content:"";
+    position:absolute;
+    inset: 8px;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,0.07);
+    pointer-events:none;
+}
+
+/* highlight */
+.wheel::after{
+    content:"";
+    position:absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 20%, rgba(255,255,255,.16), rgba(255,255,255,0) 55%);
+    pointer-events:none;
+}
+
+/* ─────────────────────────────────────────
+   Sectors
+   ───────────────────────────────────────── */
+
+.sector{
     position: absolute;
     width: 50%;
     height: 50%;
@@ -121,42 +182,64 @@
     transform-origin: left bottom;
 }
 
+/* soft glass */
 .sector::before{
     content:"";
     position:absolute;
     inset: 0;
     background: linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,0));
-    opacity: .22;
+    opacity: .18;
 }
-/* контейнер внутри сектора */
+
+/* alternating intensity for readability */
+.sector:nth-child(even)::before{
+    opacity: .26;
+}
+.sector:nth-child(odd)::before{
+    opacity: .12;
+}
+
+/* thin separator line */
+.sector::after{
+    content:"";
+    position:absolute;
+    left: -2px;
+    bottom: -2px;
+    width: 120%;
+    height: 2px;
+    background: rgba(255,255,255,0.10);
+    transform-origin: left bottom;
+}
+
+/* content stays upright per sector */
 .sector-content{
     position: absolute;
     inset: 0;
 
-    /* ✅ компенсируем ПОВОРОТ сектора: для каждого сектора свой угол */
+    /* ✅ compensate sector rotation, so labels are not sideways */
     transform: rotate(calc(-1 * (360deg / var(--count)) * var(--i)));
 }
 
-/* ИКОНКА — сверху по центру */
+/* icon top-middle */
 .sector-icon{
     position: absolute;
     left: 50%;
-    top: 18%;
+    top: 22%;
     transform: translate(-50%, -50%);
-    font-size: 34px;
+    font-size: 36px;
     line-height: 1;
     filter: drop-shadow(0 10px 18px rgba(0,0,0,.55));
     pointer-events: none;
 }
 
-/* ЦИФРА/ТЕКСТ — снизу по центру */
+/* label bottom-middle */
 .sector-label{
     position: absolute;
     left: 50%;
-    top: 70%;
+    top: 74%;
     transform: translate(-50%, -50%);
-    font-weight: 1000;
-    font-size: 15px;
+    font-weight: 950;
+    font-size: 16px;
     letter-spacing: 0.02em;
     color: rgba(255,255,255,0.95);
     text-shadow: 0 10px 20px rgba(0,0,0,.65);
@@ -164,6 +247,29 @@
     pointer-events: none;
 }
 
+/* variants */
+.sector--jackpot .sector-label{
+    font-size: 18px;
+    letter-spacing: .10em;
+    color: #ffd34d;
+    text-shadow:
+            0 12px 28px rgba(255,211,77,.20),
+            0 10px 20px rgba(0,0,0,.65);
+}
+.sector--jackpot .sector-icon{
+    filter: drop-shadow(0 14px 26px rgba(255,211,77,.25));
+}
+
+.sector--zero .sector-label{
+    opacity: .70;
+}
+.sector--zero .sector-icon{
+    opacity: .82;
+}
+
+/* ─────────────────────────────────────────
+   Center cap
+   ───────────────────────────────────────── */
 
 .wheel-center{
     position:absolute;
@@ -175,12 +281,14 @@
 }
 
 .wc-ring{
-    width: 82px;
-    height: 82px;
+    width: 90px;
+    height: 90px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.10);
-    box-shadow: 0 10px 28px rgba(0,0,0,.45);
+    background:
+            radial-gradient(circle at 30% 25%, rgba(255,255,255,.12), rgba(255,255,255,0) 55%),
+            rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 12px 30px rgba(0,0,0,.55);
 }
 
 .wc-dot{
@@ -189,21 +297,46 @@
     height: 12px;
     border-radius: 50%;
     background: #ffd34d;
-    box-shadow: 0 0 0 6px rgba(255,211,77,.18);
+    box-shadow: 0 0 0 7px rgba(255,211,77,.18);
 }
+
+/* ─────────────────────────────────────────
+   Spin button
+   ───────────────────────────────────────── */
 
 .spin-btn{
     width: 100%;
     padding: 14px 14px;
-    border-radius: 16px;
+    border-radius: 18px;
     border: none;
     cursor:pointer;
-    font-weight: 900;
+    font-weight: 950;
     font-size: 16px;
     color:#0b0f18;
+    text-transform: uppercase;
+    letter-spacing: .10em;
+
     background: linear-gradient(135deg, #ffd34d, #ff9f1c);
-    box-shadow: 0 14px 34px rgba(255,159,28,.20);
+    box-shadow:
+            0 14px 34px rgba(255,159,28,.22),
+            inset 0 0 0 1px rgba(255,255,255,0.25);
     position: relative;
+    transition: transform .12s ease, filter .12s ease, opacity .12s ease;
+}
+
+.spin-btn::after{
+    content:"";
+    position:absolute;
+    inset: 0;
+    border-radius: 18px;
+    background: radial-gradient(circle at 30% 20%, rgba(255,255,255,.35), rgba(255,255,255,0) 55%);
+    opacity: .35;
+    pointer-events:none;
+}
+
+.spin-btn:active{
+    transform: translateY(1px) scale(.99);
+    filter: brightness(0.98);
 }
 
 .spin-btn:disabled{
@@ -214,18 +347,23 @@
 .spin-cost{
     margin-left: 10px;
     font-size: 12px;
-    font-weight: 800;
-    opacity: .75;
+    font-weight: 900;
+    opacity: .80;
 }
+
+/* ─────────────────────────────────────────
+   Result card
+   ───────────────────────────────────────── */
 
 .roulette-result{
     margin-top: 14px;
 }
 
 .rr-title{
-    font-weight: 900;
+    font-weight: 950;
     color:#fff;
     margin: 0 2px 8px;
+    text-shadow: 0 10px 20px rgba(0,0,0,.55);
 }
 
 .rr-card{
@@ -233,6 +371,7 @@
     border-radius: 16px;
     background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,255,255,0.10);
+    box-shadow: 0 12px 26px rgba(0,0,0,.35);
 }
 
 .rr-line{
@@ -251,7 +390,7 @@
 .rr-small{
     margin-top: 10px;
     font-size: 12px;
-    opacity: .8;
+    opacity: .85;
     color:#cfd3ff;
 }
 
@@ -259,10 +398,17 @@
     margin-top: 10px;
     width: 100%;
     padding: 12px;
-    border-radius: 14px;
+    border-radius: 16px;
     border: 1px solid rgba(255,255,255,0.12);
     background: rgba(255,255,255,0.06);
     color:#fff;
-    font-weight: 900;
+    font-weight: 950;
     cursor:pointer;
+    box-shadow: 0 12px 24px rgba(0,0,0,.25);
+    transition: transform .12s ease, background .12s ease;
+}
+
+.rr-ok:active{
+    transform: scale(.99);
+    background: rgba(255,255,255,0.10);
 }
