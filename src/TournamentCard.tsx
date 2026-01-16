@@ -82,22 +82,20 @@ export function TournamentCard({
     // ─────────────────────────────────────────────
     // JOIN
     // ─────────────────────────────────────────────
-    const handleJoin = async () => {
+    const handleJoin = async (payWith: 'tickets' | 'coins') => {
         try {
             setJoining(true);
             setError('');
 
             const res = await apiFetch('/tournament/join', token, {
                 method: 'POST',
-                body: JSON.stringify({ type }),
+                body: JSON.stringify({ type, payWith }),
             });
 
             const json = await res.json();
-            if (!res.ok) {
-                throw new Error(json.message || 'Ошибка входа');
-            }
+            if (!res.ok) throw new Error(json.message || 'Ошибка входа');
 
-            await load(); // 🔄 обновляем турнир
+            await load();
         } catch (e: any) {
             setError(e.message);
         } finally {
@@ -183,7 +181,7 @@ export function TournamentCard({
                                     setTimeout(() => setHint(null), 2500);
                                     return;
                                 }
-                                handleJoin();
+                                handleJoin('tickets');
                             }}
                         >
                             <div className="entry-glow" />
@@ -207,7 +205,7 @@ export function TournamentCard({
                                     setTimeout(() => setHint(null), 2500);
                                     return;
                                 }
-                                handleJoin();
+                                handleJoin('coins');
                             }}
                         >
                             <div className="entry-glow" />
