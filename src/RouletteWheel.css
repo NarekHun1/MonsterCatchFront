@@ -180,6 +180,7 @@
     top: 0;
     left: 50%;
     transform-origin: left bottom;
+    overflow: hidden;
 }
 
 /* soft glass */
@@ -215,7 +216,7 @@
 .sector-content{
     position: absolute;
     inset: 0;
-
+    overflow: visible;
     /* ✅ compensate sector rotation, so labels are not sideways */
     transform: rotate(calc(-1 * (360deg / var(--count)) * var(--i)));
 }
@@ -224,20 +225,27 @@
 .sector-icon{
     position: absolute;
     left: 50%;
-    top: 22%;
-    transform: translate(-50%, -50%);
-    font-size: 36px;
+    top: 50%;
+
+    /* X по центру, Y уводим к ободу (минус = вверх) */
+    transform: translate(-50%, -50%) translateY(-92px);
+
+    font-size: 34px;
     line-height: 1;
     filter: drop-shadow(0 10px 18px rgba(0,0,0,.55));
     pointer-events: none;
 }
 
+
 /* label bottom-middle */
 .sector-label{
     position: absolute;
     left: 50%;
-    top: 74%;
-    transform: translate(-50%, -50%);
+    top: 50%;
+
+    /* Y уводим вниз (плюс = вниз) */
+    transform: translate(-50%, -50%) translateY(72px);
+
     font-weight: 950;
     font-size: 16px;
     letter-spacing: 0.02em;
@@ -246,7 +254,6 @@
     white-space: nowrap;
     pointer-events: none;
 }
-
 /* variants */
 .sector--jackpot .sector-label{
     font-size: 18px;
