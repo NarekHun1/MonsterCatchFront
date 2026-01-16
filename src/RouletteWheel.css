@@ -140,10 +140,19 @@
 /* ИКОНКА — сверху по центру */
 .sector-icon{
     position: absolute;
+
+    /* 1️⃣ стартуем из центра круга */
     left: 50%;
     top: 50%;
-    transform: translate(-50%, -50%) translateY(-10px) translateX(-10px);
-    font-size: 44px;                 /* можешь 40–52 */
+
+    /* 2️⃣ смещаем ПО РАДИУСУ (а не X/Y экрана) */
+    transform:
+            translate(-50%, -50%)
+            rotate(calc((360deg / var(--count)) * var(--i)))
+            translateY(-78px)        /* 🔥 ЭТО РАДИУС */
+            rotate(calc(-1 * (360deg / var(--count)) * var(--i)));
+
+    font-size: 42px;
     line-height: 1;
     filter: drop-shadow(0 12px 22px rgba(0,0,0,.55));
     pointer-events: none;
