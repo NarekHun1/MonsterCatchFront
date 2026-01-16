@@ -1,5 +1,5 @@
     // src/App.tsx
-    import { useEffect, useState } from 'react';
+    import {useCallback, useEffect, useState} from 'react';
     import { Game } from './Game';
     import './App.css';
     import { InviteFriends } from './InviteFriends';
@@ -404,25 +404,26 @@
 
         const t = (key: string) => translations[lang][key] || key;
 
-        useEffect(() => {
-            if (!token) return;
-            let cancelled = false;
+        // useEffect(() => {
+        //     if (!token) return;
+        //     let cancelled = false;
+        //
+        //     (async () => {
+        //         try {
+        //             const res = await apiFetch('/game/daily-quests', token);
+        //             const data = await res.json().catch(() => ({}));
+        //             if (!res.ok) return;
+        //
+        //             const hasClaimable = !!(data.quests ?? []).some((q: any) => q.claimable);
+        //             if (!cancelled) setQuestsDot(hasClaimable);
+        //         } catch (e) {
+        //             console.error(e);
+        //         }
+        //     })();
+        //
+        //     return () => { cancelled = true; };
+        // }, [token]);
 
-            (async () => {
-                try {
-                    const res = await apiFetch('/game/daily-quests', token);
-                    const data = await res.json().catch(() => ({}));
-                    if (!res.ok) return;
-
-                    const hasClaimable = !!(data.quests ?? []).some((q: any) => q.claimable);
-                    if (!cancelled) setQuestsDot(hasClaimable);
-                } catch (e) {
-                    console.error(e);
-                }
-            })();
-
-            return () => { cancelled = true; };
-        }, [token]);
 
         useEffect(() => {
             const tgLang =
@@ -523,6 +524,25 @@
             };
         }, [token]);
 
+        const refreshQuestsDot = useCallback(async () => {
+            if (!token) return;
+
+            try {
+                const res = await apiFetch('/game/daily-quests', token);
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) return;
+
+                const hasClaimable = !!(data.quests ?? []).some((q: any) => q.claimable);
+                setQuestsDot(hasClaimable);
+            } catch (e) {
+                console.error(e);
+            }
+        }, [token]);
+
+        useEffect(() => {
+            if (!token) return;
+            refreshQuestsDot();
+        }, [token, refreshQuestsDot]);
 
         // кнопка "Купить монеты" в меню
         const buyCoinsMenu = () => {
@@ -563,9 +583,6 @@
                 tg.showAlert?.(e.message || 'Ошибка создания платежа');
             }
         };
-
-
-
         useEffect(() => {
             (async () => {
                 const t = await initAuth();
@@ -1028,7 +1045,7 @@
                                                 }
 
                                                 // ✅ только если всё прошло — гасим точку
-                                                setQuestsDot(false);
+                                                await refreshQuestsDot();
                                             } catch (e) {
                                                 console.error(e);
                                             }
@@ -1194,7 +1211,10 @@
                             questsDot={questsDot}
                             eggsBadge={0} // поставь число если хочешь бейдж
                             onShop={() => setCurrentPage('menu')}
-                            onQuests={() => setCurrentPage('quests')}
+                            onQuests={async () => {
+                                await refreshQuestsDot(); // обновляем статус
+                                setCurrentPage('quests'); // потом заходим
+                            }}
                             onDemon={() => {
                                 setCurrentPage('menu');
                                 setShowHero(true); // откроет твоего HeroViewer демона
