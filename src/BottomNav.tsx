@@ -35,7 +35,7 @@ export function BottomNav({
                     onClick={onQuests}
                 >
                     <div className="bn-ico bn-ico--eggs">
-                        🥚
+                        🎯
                         {!!eggsBadge && <span className="bn-badge">{eggsBadge}</span>}
                     </div>
                     <div className="bn-txt">ЗАДАНИЯ</div>
