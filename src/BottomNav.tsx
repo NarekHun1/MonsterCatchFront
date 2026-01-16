@@ -37,7 +37,7 @@ export function BottomNav({
                     onClick={onQuests}
                 >
                     <div className="bn-ico bn-ico--eggs">
-                        🎯
+                        📝
                         {questsDot && <span className="bn-dot" />}
                         {!!eggsBadge && <span className="bn-badge">{eggsBadge}</span>}
                     </div>
@@ -65,7 +65,7 @@ export function BottomNav({
                     className={`bn-item ${active === 'tournaments' ? 'is-active' : ''}`}
                     onClick={onTournaments}
                 >
-                    <div className="bn-ico">🏆</div>
+                    <div className="bn-ico">🎯</div>
                     <div className="bn-txt">ТУРНИРЫ</div>
                 </button>
             </div>
