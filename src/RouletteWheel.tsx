@@ -194,7 +194,7 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
                             >
                                 <div className="sector-content">
                                     <div className="sector-icon">{s.icon}</div>
-                                    <div className="sector-label">{s.label}</div>
+                                    {/*<div className="sector-label">{s.label}</div>*/}
                                 </div>
                             </div>
                         ))}
