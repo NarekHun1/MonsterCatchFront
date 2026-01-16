@@ -1,37 +1,67 @@
+/* Bar is OVER content (no bottom gap) */
 .bottomnav{
     position: fixed;
-    left: 12px;
-    right: 12px;
-    bottom: calc(12px + env(safe-area-inset-bottom));
+    left: 0;
+    right: 0;
+    bottom: 0;
+
     z-index: 9999;
-    pointer-events: none; /* чтобы клики были только по inner */
+    pointer-events: none;
+
+    /* ВАЖНО: safe-area снизу — но визуально без “отступа” */
+    padding:
+            10px
+            12px
+            calc(10px + env(safe-area-inset-bottom))
+            12px;
+}
+
+/* Нижний glass/fade чтобы под баром было красиво */
+.bottomnav::before{
+    content:"";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 140px;
+    pointer-events: none;
+
+    background:
+            linear-gradient(to top,
+            rgba(0,0,0,0.72),
+            rgba(0,0,0,0.35) 45%,
+            rgba(0,0,0,0.0)
+            );
 }
 
 .bottomnav-inner{
     pointer-events: auto;
-    height: 86px;
-    border-radius: 22px;
+    position: relative;
+
+    height: 84px;
+    border-radius: 26px;
 
     display: grid;
-    grid-template-columns: 1fr 1fr 1.2fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1.25fr 1fr 1fr;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     padding: 10px 10px;
 
     background:
-            radial-gradient(circle at 50% 20%, rgba(255,255,255,0.08), rgba(0,0,0,0) 55%),
-            rgba(12, 12, 18, 0.92);
-    border: 1px solid rgba(255,255,255,0.08);
-    box-shadow: 0 18px 45px rgba(0,0,0,0.55);
-    backdrop-filter: blur(12px);
+            radial-gradient(circle at 50% 15%, rgba(255,255,255,0.10), rgba(0,0,0,0) 55%),
+            rgba(12, 12, 18, 0.88);
+
+    border: 1px solid rgba(255,255,255,0.10);
+    box-shadow: 0 18px 50px rgba(0,0,0,0.60);
+    backdrop-filter: blur(14px);
 }
 
 .bn-item{
-    height: 66px;
-    border-radius: 16px;
+    height: 64px;
+    border-radius: 18px;
     border: 1px solid transparent;
     background: transparent;
-    color: rgba(255,255,255,0.55);
+    color: rgba(255,255,255,0.50);
 
     display: flex;
     flex-direction: column;
@@ -40,7 +70,7 @@
     gap: 6px;
 
     cursor: pointer;
-    transition: transform .12s ease, background .2s ease, color .2s ease, border-color .2s ease;
+    transition: transform .12s ease, background .2s ease, color .2s ease, border-color .2s ease, filter .2s ease;
 }
 
 .bn-item:active{ transform: scale(0.98); }
@@ -49,13 +79,13 @@
     position: relative;
     font-size: 22px;
     line-height: 1;
-    opacity: 0.85;
+    opacity: 0.92;
 }
 
 .bn-txt{
     font-size: 11px;
-    letter-spacing: 0.06em;
-    font-weight: 800;
+    letter-spacing: 0.08em;
+    font-weight: 900;
 }
 
 .bn-badge{
@@ -75,24 +105,25 @@
     color: #fff;
     font-size: 11px;
     font-weight: 900;
-    box-shadow: 0 8px 20px rgba(255, 59, 48, 0.35);
+    box-shadow: 0 10px 24px rgba(255, 59, 48, 0.35);
 }
 
 .bn-item.is-active{
     color: #fff;
-    background: rgba(255,255,255,0.06);
-    border-color: rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.14);
+    filter: drop-shadow(0 10px 22px rgba(0,0,0,0.35));
 }
 
-/* Центр */
+/* Центр — как “герой/демон” */
 .bn-center{
-    height: 72px;
-    border-radius: 20px;
-    border: 1px solid rgba(255,255,255,0.12);
+    height: 70px;
+    border-radius: 22px;
+    border: 1px solid rgba(255,255,255,0.14);
 
     background:
-            radial-gradient(circle at 50% 0%, rgba(255, 204, 77, 0.22), rgba(255,255,255,0) 55%),
-            rgba(255,255,255,0.06);
+            radial-gradient(circle at 50% 0%, rgba(255, 204, 77, 0.28), rgba(255,255,255,0) 60%),
+            rgba(255,255,255,0.08);
 
     color: #fff;
     display: flex;
@@ -102,29 +133,29 @@
     gap: 6px;
 
     cursor: pointer;
-    box-shadow: 0 14px 35px rgba(0,0,0,0.55);
+    box-shadow: 0 18px 44px rgba(0,0,0,0.55);
     transition: transform .12s ease, filter .2s ease;
 }
 
 .bn-center:active{ transform: scale(0.985); }
 
 .bn-center-ico{
-    width: 40px;
-    height: 40px;
-    border-radius: 14px;
+    width: 42px;
+    height: 42px;
+    border-radius: 16px;
     display:flex;
     align-items:center;
     justify-content:center;
 
-    background: rgba(0,0,0,0.18);
-    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(0,0,0,0.20);
+    border: 1px solid rgba(255,255,255,0.14);
     box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
     font-size: 22px;
 }
 
 .bn-center-txt{
     font-size: 12px;
-    letter-spacing: 0.06em;
-    font-weight: 900;
+    letter-spacing: 0.08em;
+    font-weight: 950;
     opacity: 0.95;
 }

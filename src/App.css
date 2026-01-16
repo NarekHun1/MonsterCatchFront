@@ -1602,6 +1602,3 @@ button {
     padding: 6px;
     z-index: 1000;
 }
-.app-shell{
-    padding-bottom: calc(110px + env(safe-area-inset-bottom));
-}
