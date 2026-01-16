@@ -265,3 +265,11 @@
     font-weight: 900;
     cursor:pointer;
 }
+.reward-fly{
+    position: fixed;
+    z-index: 100000;
+    font-size: 34px;
+    line-height: 1;
+    filter: drop-shadow(0 12px 18px rgba(0,0,0,.55));
+    pointer-events: none;
+}

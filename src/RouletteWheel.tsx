@@ -16,8 +16,7 @@ type SpinResponse = {
 export type RouletteWheelProps = {
     token: string | null;
     onClose: () => void;
-    onReward: () => void;
-};
+    onReward: (r: SpinResponse) => void;};
 
 type Sector = {
     id: string;      // ⚠️ ДОЛЖЕН совпадать с ROULETTE_SECTORS.id на backend
@@ -136,7 +135,8 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
                 // если не нашли — не ломаемся, просто покажем результат
                 setError(`Сектор "${data.sectorId}" не найден на фронте. Проверь SECTORS ids.`);
                 setResult(data);
-                onReward();
+                flyToHeader(data.type);
+                onReward(data);
                 setSpinning(false);
                 return;
             }
@@ -148,7 +148,8 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
             // 4) когда барабан остановился — показать результат + дернуть onReward()
             window.setTimeout(() => {
                 setResult(data);
-                onReward();
+                onReward(data);
+                flyToHeader(data.type);
                 setSpinning(false);
             }, 4300);
         } catch (e: any) {
@@ -251,6 +252,52 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
             </div>
         </div>
     );
+    function flyToHeader(type: PrizeType) {
+        const icon =
+            type === 'COINS' || type === 'JACKPOT' ? '🪙' :
+                type === 'STARS' ? '⭐' :
+                    type === 'TICKETS' ? '🎟' :
+                        '🎁';
+
+        const target =
+            type === 'COINS' || type === 'JACKPOT'
+                ? document.querySelector('.user-pill--coins')
+                : type === 'STARS'
+                    ? document.querySelector('.user-pill--stars')
+                    : document.querySelector('.user-pill--tickets');
+
+        if (!target) return;
+
+        const startEl = document.querySelector('.roulette-stage');
+        if (!startEl) return;
+
+        const start = startEl.getBoundingClientRect();
+        const end = (target as HTMLElement).getBoundingClientRect();
+
+        const el = document.createElement('div');
+        el.className = 'reward-fly';
+        el.textContent = icon;
+        document.body.appendChild(el);
+
+        const x1 = start.left + start.width / 2;
+        const y1 = start.top + start.height / 2;
+        const x2 = end.left + end.width / 2;
+        const y2 = end.top + end.height / 2;
+
+        el.style.left = `${x1}px`;
+        el.style.top = `${y1}px`;
+
+        el.animate(
+            [
+                { transform: 'translate(-50%,-50%) scale(1)', opacity: 1 },
+                { transform: `translate(${x2 - x1}px, ${y2 - y1}px) scale(0.35)`, opacity: 0.95 }
+            ],
+            { duration: 700, easing: 'cubic-bezier(.2,.9,.2,1)' }
+        ).onfinish = () => {
+            el.remove();
+        };
+    }
+
 }
 
 export default RouletteWheel;
