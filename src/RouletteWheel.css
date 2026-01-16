@@ -155,14 +155,19 @@
 /* ЦИФРА/ТЕКСТ — снизу по центру */
 .sector-label{
     position: absolute;
-    bottom: 18px;            /* ↑ регулируй: 10-26 */
+
+    /* ⬇️ центр нижней части сектора */
+    top: 62%;                /* 🔧 58–66 подбирай */
+
     left: 50%;
-    transform: translateX(-50%);
+    transform: translate(-50%, -50%);
+
     font-weight: 900;
     font-size: 14px;
     color: #fff;
     text-shadow: 0 6px 16px rgba(0,0,0,.55);
     white-space: nowrap;
+    pointer-events: none;
 }
 
 
