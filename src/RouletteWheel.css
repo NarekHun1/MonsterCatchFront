@@ -142,7 +142,7 @@
     position: absolute;
     left: 50%;
     top: 50%;
-    /*transform: translate(-50%, -50%) translateY(-22px) translateX(-10px);*/
+    transform: translate(-50%, -50%) translateY(-10px) translateX(-10px);
     font-size: 44px;                 /* можешь 40–52 */
     line-height: 1;
     filter: drop-shadow(0 12px 22px rgba(0,0,0,.55));
