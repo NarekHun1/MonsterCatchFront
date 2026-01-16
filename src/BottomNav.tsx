@@ -10,6 +10,7 @@ export function BottomNav({
                               onDemon,
                               onFriends,
                               onTournaments,
+                              questsDot,
                           }: {
     active: NavKey;
     eggsBadge?: number; // если хочешь бейдж, например 25
@@ -18,6 +19,7 @@ export function BottomNav({
     onDemon: () => void;
     onFriends: () => void;
     onTournaments: () => void;
+    questsDot?: boolean;
 }) {
     return (
         <nav className="bottomnav" role="navigation" aria-label="Bottom navigation">
@@ -36,6 +38,7 @@ export function BottomNav({
                 >
                     <div className="bn-ico bn-ico--eggs">
                         🎯
+                        {questsDot && <span className="bn-dot" />}
                         {!!eggsBadge && <span className="bn-badge">{eggsBadge}</span>}
                     </div>
                     <div className="bn-txt">ЗАДАНИЯ</div>

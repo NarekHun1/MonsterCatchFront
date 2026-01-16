@@ -399,9 +399,30 @@
         const [tickets, setTickets] = useState<number>(0);
         const [lang, setLang] = useState<Lang>('ru');
         const [showLangMenu, setShowLangMenu] = useState(false);
+        const [questsDot, setQuestsDot] = useState(false);
 
 
         const t = (key: string) => translations[lang][key] || key;
+
+        useEffect(() => {
+            if (!token) return;
+            let cancelled = false;
+
+            (async () => {
+                try {
+                    const res = await apiFetch('/game/daily-quests', token);
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok) return;
+
+                    const hasClaimable = !!(data.quests ?? []).some((q: any) => q.claimable);
+                    if (!cancelled) setQuestsDot(hasClaimable);
+                } catch (e) {
+                    console.error(e);
+                }
+            })();
+
+            return () => { cancelled = true; };
+        }, [token]);
 
         useEffect(() => {
             const tgLang =
@@ -993,7 +1014,6 @@
                                         t={t}
                                         onBack={() => setCurrentPage('menu')}
                                         onTicketsClaimed={async () => {
-                                            // ✅ обновим счётчик билетов в шапке
                                             try {
                                                 const ticketsRes = await apiFetch('/tickets/count', token);
                                                 const ticketsData = await ticketsRes.json().catch(() => ({}));
@@ -1001,12 +1021,14 @@
                                                     setTickets(ticketsData.count);
                                                 }
 
-                                                // (опционально) обновить профиль
                                                 const meRes = await apiFetch('/users/me', token);
                                                 const meData = await meRes.json().catch(() => ({}));
                                                 if (meRes.ok) {
                                                     setMe((prev) => (prev ? { ...prev, ...meData } : meData));
                                                 }
+
+                                                // ✅ только если всё прошло — гасим точку
+                                                setQuestsDot(false);
                                             } catch (e) {
                                                 console.error(e);
                                             }
@@ -1169,6 +1191,7 @@
                                             : currentPage === 'menu' ? 'shop'
                                                 : 'shop'
                             }
+                            questsDot={questsDot}
                             eggsBadge={0} // поставь число если хочешь бейдж
                             onShop={() => setCurrentPage('menu')}
                             onQuests={() => setCurrentPage('quests')}
