@@ -1123,6 +1123,16 @@
                                             }}
                                         />
 
+                                        <CashCupCard
+                                            token={token}
+                                            t={t}
+                                            onStartGame={(tournamentId) => {
+                                                setTournamentGameId(tournamentId);
+                                                setTournamentType(null); // или 'CASH_CUP' если хочешь
+                                                setCurrentPage('game');
+                                            }}
+                                        />
+
                                     </div>
                                 )}
 
