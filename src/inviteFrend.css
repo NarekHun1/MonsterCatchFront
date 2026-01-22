@@ -1,206 +1,256 @@
-/* ─────────────────────────────
-   Base panel
-───────────────────────────── */
+/* =========================================================
+   INVITE FRIEND — FULL CSS (NO JSX CHANGES)
+   Fixes:
+   - overflow / too wide layout
+   - hidden text on small screens
+   - long referral link breaking UI
+   - Telegram WebApp quirks
+========================================================= */
 
-.panel{
+/* ─────────────────────────────
+   Global safety
+───────────────────────────── */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* ─────────────────────────────
+   Panel
+───────────────────────────── */
+.panel {
+    width: 100%;
     padding: 16px;
 }
 
-.panel-menu{
+.panel-menu {
+    width: 100%;
     max-width: 520px;
     margin: 0 auto;
 }
 
-.panel-title{
+.panel-title {
     font-size: 22px;
     font-weight: 900;
     margin-bottom: 10px;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
-.panel-muted{
+.panel-muted {
     opacity: 0.75;
     font-size: 14px;
     line-height: 1.4;
     margin-bottom: 10px;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 /* ─────────────────────────────
-   Referral preview (FIXED IMAGE)
+   Referral preview
 ───────────────────────────── */
+.referral-preview {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 
-.referral-preview{
-    display:flex;
-    gap:12px;
-    padding:12px;
-    border-radius:16px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.08);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    padding: 12px;
     margin: 12px 0 14px;
-    align-items:center;
+
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+
+    min-width: 0; /* 🔥 критично для flex */
 }
 
-/* 🔒 защита от глобальных img стилей */
-.referral-preview img{
-    display:block;
-    max-width:100%;
+/* защита от глобальных img */
+.referral-preview img {
+    display: block;
+    max-width: 100%;
 }
 
-/* ✅ КРИТИЧЕСКИЙ ФИКС — картинка НЕ растягивается */
-.referral-preview-img{
+/* картинка */
+.referral-preview-img {
     width: 72px !important;
     height: 72px !important;
     min-width: 72px;
     min-height: 72px;
 
-    border-radius:14px;
-    object-fit:cover;
-    flex_toggle: 0 0 72px;
+    border-radius: 14px;
+    object-fit: cover;
+    flex: 0 0 72px;
 
-    box-shadow: 0 10px 20px rgba(0,0,0,0.35);
-    border: 1px solid rgba(255,255,255,0.10);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.35);
 }
 
-.referral-preview-info{
+/* текст справа */
+.referral-preview-info {
     min-width: 0;
 }
 
-.referral-preview-title{
-    font-weight:900;
-    font-size:14px;
-    margin-bottom:2px;
+.referral-preview-title {
+    font-weight: 900;
+    font-size: 14px;
+    margin-bottom: 2px;
 }
 
-.referral-preview-sub{
-    opacity:0.9;
-    font-size:13px;
-    line-height:1.25;
+.referral-preview-sub {
+    font-size: 13px;
+    line-height: 1.25;
+    opacity: 0.9;
+
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 /* ─────────────────────────────
-   Referral link box
+   Referral link box (NO JSX CHANGE)
 ───────────────────────────── */
+.referral-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
 
-.referral-box{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:10px;
-
-    padding:12px 14px;
+    padding: 12px 14px;
     margin: 10px 0;
 
-    border-radius:14px;
-    cursor:pointer;
+    border-radius: 14px;
+    cursor: pointer;
 
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.10);
-    box-shadow: 0 10px 26px rgba(0,0,0,0.35);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
 
-    transition: background .15s ease, transform .15s ease;
+    min-width: 0; /* 🔥 */
 }
 
-.referral-box:hover{
-    background: rgba(255,255,255,0.08);
+/* ссылка */
+.referral-link {
+    font-size: 12px;
+    opacity: 0.85;
+
+    min-width: 0;
+    max-width: 100%;
+
+    white-space: normal;       /* ❌ nowrap убрали */
+    overflow-wrap: anywhere;   /* 🔥 перенос длинных URL */
+    word-break: break-word;
+}
+
+/* кнопка копирования */
+.referral-copy {
+    font-size: 13px;
+    font-weight: 800;
+    white-space: nowrap;
+
+    flex-shrink: 0; /* 🔥 не раздувает контейнер */
+}
+
+/* hover / active */
+.referral-box:hover {
+    background: rgba(255, 255, 255, 0.08);
     transform: translateY(-1px);
 }
 
-.referral-link{
-    font-size:12px;
-    opacity:0.85;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-}
-
-.referral-copy{
-    font-size:13px;
-    font-weight:700;
-    white-space:nowrap;
+.referral-box:active {
+    transform: translateY(0) scale(0.99);
 }
 
 /* ─────────────────────────────
    Buttons
 ───────────────────────────── */
+.menu-btn {
+    width: 100%;
+    margin-top: 10px;
+    padding: 14px;
 
-.menu-btn{
-    width:100%;
-    padding:14px 14px;
-    margin-top:10px;
+    border-radius: 14px;
+    border: none;
+    cursor: pointer;
 
-    border-radius:14px;
-    border:none;
-    cursor:pointer;
+    font-weight: 900;
+    font-size: 15px;
+    letter-spacing: 0.3px;
 
-    font-weight:900;
-    font-size:15px;
-    letter-spacing:.3px;
-
-    color:#1a1400;
+    color: #1a1400;
     background: linear-gradient(90deg, #ffe07a, #ff9b2f);
 
     box-shadow:
-            0 18px 46px rgba(255,170,50,.25),
-            inset 0 0 0 1px rgba(255,255,255,.25);
+            0 18px 46px rgba(255, 170, 50, 0.25),
+            inset 0 0 0 1px rgba(255, 255, 255, 0.25);
 
-    transition: transform .15s ease, filter .15s ease;
+    transition: transform 0.15s ease, filter 0.15s ease;
 }
 
-.menu-btn:hover{
+.menu-btn:hover {
     transform: translateY(-1px);
     filter: brightness(1.03);
 }
 
-.menu-btn:active{
-    transform: translateY(0) scale(.99);
+.menu-btn:active {
+    transform: scale(0.99);
 }
 
-.menu-btn--secondary{
-    background: rgba(255,255,255,0.08);
-    color:#fff;
+.menu-btn--secondary {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+
     box-shadow:
-            0 10px 26px rgba(0,0,0,.35),
-            inset 0 0 0 1px rgba(255,255,255,.10);
+            0 10px 26px rgba(0, 0, 0, 0.35),
+            inset 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
-/* Back button */
-.menu-card{
-    margin-top:14px;
-    padding:12px 14px;
-    width:100%;
+/* back */
+.menu-card {
+    width: 100%;
+    margin-top: 14px;
+    padding: 12px 14px;
 
-    border-radius:14px;
-    cursor:pointer;
+    border-radius: 14px;
+    cursor: pointer;
 
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.10);
-    box-shadow: 0 10px 26px rgba(0,0,0,.35);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
 
-    font-size:14px;
-    font-weight:700;
-    color:#fff;
+    font-size: 14px;
+    font-weight: 800;
+    color: #fff;
 
-    transition: background .15s ease, transform .15s ease;
+    transition: background 0.15s ease, transform 0.15s ease;
 }
 
-.menu-card:hover{
-    background: rgba(255,255,255,0.08);
+.menu-card:hover {
+    background: rgba(255, 255, 255, 0.08);
     transform: translateY(-1px);
 }
 
 /* ─────────────────────────────
-   Mobile tweaks
+   Mobile
 ───────────────────────────── */
-
-@media (max-width: 420px){
-    .panel{
+@media (max-width: 420px) {
+    .panel {
         padding: 14px;
     }
 
-    .referral-preview-img{
-        width:64px !important;
-        height:64px !important;
-        min-width:64px;
-        min-height:64px;
+    .referral-preview-img {
+        width: 64px !important;
+        height: 64px !important;
+        min-width: 64px;
+        min-height: 64px;
+        flex: 0 0 64px;
     }
 }
