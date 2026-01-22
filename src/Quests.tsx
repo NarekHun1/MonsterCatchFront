@@ -1,8 +1,12 @@
+// src/Quests.tsx
 import { useEffect, useMemo, useState } from 'react';
 import './Quests.css';
 import { apiFetch } from './api';
 
 type UserQuestStatus = 'PENDING' | 'COMPLETED' | 'CLAIMED';
+
+// ✅ ВАЖНО: у тебя в Prisma сейчас SUBSCRIBE, а не TELEGRAM_CHANNEL
+type QuestType = 'SUBSCRIBE' | 'INSTAGRAM_FOLLOW' | string;
 
 type QuestItem = {
     id: number;
@@ -11,6 +15,7 @@ type QuestItem = {
     rewardTickets: number;
     openUrl: string | null;
     chatUsername?: string | null;
+    type?: QuestType;
 
     progress?: {
         questId: number;
@@ -36,7 +41,65 @@ export function Quests({
     const [busyId, setBusyId] = useState<number | null>(null);
     const [error, setError] = useState('');
 
-    const count = useMemo(() => items.length, [items]);
+    const statusOf = (q: QuestItem): UserQuestStatus => q.progress?.status ?? 'PENDING';
+
+    const prettifyError = (msg?: string) => {
+        const m = (msg || '').trim();
+
+        if (!m) return 'Ошибка. Попробуй позже.';
+
+        // Instagram flow
+        if (m === 'OPEN_INSTAGRAM_FIRST')
+            return 'Сначала нажми “Выполнить” и открой Instagram, потом возвращайся и нажми “Проверить”.';
+        if (m === 'WAIT_A_BIT')
+            return 'Подожди 10 секунд и нажми “Проверить” ещё раз.';
+
+        // Telegram flow
+        if (m === 'NOT_SUBSCRIBED')
+            return 'Подписка не найдена. Подпишись на канал и попробуй снова.';
+        if (m === 'SUBSCRIPTION_CHECK_FAILED')
+            return 'Не удалось проверить подписку. Проверь, что бот админ в канале (или канал приватный).';
+        if (m === 'QUEST_CHAT_NOT_SET')
+            return 'У задания не настроен канал. Напиши администратору.';
+        if (m === 'QUEST_NOT_FOUND')
+            return 'Задание не найдено или отключено.';
+
+        // Claim flow
+        if (m === 'QUEST_NOT_COMPLETED')
+            return 'Сначала нажми “Проверить”, потом можно забрать награду.';
+        if (m === 'ALREADY_CLAIMED') return 'Награда уже получена ✅';
+
+        return m;
+    };
+
+    const isTelegramLink = (url: string) =>
+        /^https?:\/\/t\.me\//i.test(url) || /^tg:\/\//i.test(url);
+
+    const isInstagramQuest = (q: QuestItem) => {
+        if (q.type === 'INSTAGRAM_FOLLOW') return true;
+        if (!q.openUrl) return false;
+        return /instagram\.com/i.test(q.openUrl);
+    };
+
+    const openAnyLink = (url: string) => {
+        const tg = (window as any)?.Telegram?.WebApp;
+
+        // Telegram deep links
+        if (isTelegramLink(url) && tg?.openTelegramLink) {
+            tg.openTelegramLink(url);
+            tg?.HapticFeedback?.impactOccurred?.('light');
+            return;
+        }
+
+        // Normal links (instagram / site)
+        if (tg?.openLink) {
+            tg.openLink(url);
+            tg?.HapticFeedback?.impactOccurred?.('light');
+            return;
+        }
+
+        window.open(url, '_blank');
+    };
 
     const load = async () => {
         setError('');
@@ -44,10 +107,16 @@ export function Quests({
         try {
             const res = await apiFetch('/quests', token);
             const data = await res.json().catch(() => []);
-            if (!res.ok) throw new Error(data?.message || 'Failed to load quests');
-            setItems(Array.isArray(data) ? data : []);
+            if (!res.ok) throw new Error(prettifyError(data?.message || 'Failed to load quests'));
+
+            const arr: QuestItem[] = Array.isArray(data) ? data : [];
+
+            // ✅ задание исчезает после получения
+            const visible = arr.filter((q) => statusOf(q) !== 'CLAIMED');
+
+            setItems(visible);
         } catch (e: any) {
-            setError(e?.message || 'Failed to load quests');
+            setError(prettifyError(e?.message || 'Failed to load quests'));
         } finally {
             setLoading(false);
         }
@@ -58,30 +127,30 @@ export function Quests({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const openTelegram = (url: string) => {
-        const tg = (window as any)?.Telegram?.WebApp;
-        if (tg?.openTelegramLink) {
-            tg.openTelegramLink(url);
-            return;
-        }
-        window.open(url, '_blank');
-    };
+    // ✅ "Выполнить": фиксируем open на бэке и открываем ссылку
+    const openTask = async (quest: QuestItem) => {
+        if (!quest.openUrl) return;
 
-    const statusOf = (q: QuestItem): UserQuestStatus =>
-        q.progress?.status ?? 'PENDING';
+        setError('');
+        setBusyId(quest.id);
+        try {
+            await apiFetch(`/quests/${quest.id}/open`, token, { method: 'POST' }).catch(() => {});
+            openAnyLink(quest.openUrl);
+        } finally {
+            setBusyId(null);
+        }
+    };
 
     const verify = async (questId: number) => {
         setError('');
         setBusyId(questId);
         try {
-            const res = await apiFetch(`/quests/${questId}/verify`, token, {
-                method: 'POST',
-            });
+            const res = await apiFetch(`/quests/${questId}/verify`, token, { method: 'POST' });
             const data = await res.json().catch(() => ({}));
-            if (!res.ok) throw new Error(data?.message || 'Verify failed');
+            if (!res.ok) throw new Error(prettifyError(data?.message || 'Verify failed'));
             await load();
         } catch (e: any) {
-            setError(e?.message || 'Verify failed');
+            setError(prettifyError(e?.message || 'Verify failed'));
         } finally {
             setBusyId(null);
         }
@@ -91,20 +160,22 @@ export function Quests({
         setError('');
         setBusyId(questId);
         try {
-            const res = await apiFetch(`/quests/${questId}/claim`, token, {
-                method: 'POST',
-            });
+            const res = await apiFetch(`/quests/${questId}/claim`, token, { method: 'POST' });
             const data = await res.json().catch(() => ({}));
-            if (!res.ok) throw new Error(data?.message || 'Claim failed');
+            if (!res.ok) throw new Error(prettifyError(data?.message || 'Claim failed'));
 
-            await load();
+            // ✅ моментально убираем карточку
+            setItems((prev) => prev.filter((q) => q.id !== questId));
+
             onTicketsClaimed?.();
         } catch (e: any) {
-            setError(e?.message || 'Claim failed');
+            setError(prettifyError(e?.message || 'Claim failed'));
         } finally {
             setBusyId(null);
         }
     };
+
+    const count = useMemo(() => items.length, [items]);
 
     return (
         <div className="quests-page">
@@ -131,15 +202,30 @@ export function Quests({
                         <div className="quests-card quests-card--skeleton" key={i} />
                     ))}
                 </div>
+            ) : items.length === 0 ? (
+                <div className="quests-empty">
+                    ✅ {t('noTasks') || 'Пока нет доступных заданий. Возвращайся позже!'}
+                </div>
             ) : (
                 <div className="quests-list">
                     {items.map((q) => {
                         const st = statusOf(q);
                         const busy = busyId === q.id;
+                        const insta = isInstagramQuest(q);
+
+                        const doIcon = insta ? '📸' : '📣';
+                        const doSub = q.openUrl
+                            ? insta
+                                ? 'Открыть Instagram'
+                                : 'Открыть канал'
+                            : 'Нет ссылки';
+
+                        const hintPending = insta
+                            ? 'Открой Instagram, подпишись и нажми “Проверить”.'
+                            : 'Открой канал, подпишись и нажми “Проверить”.';
 
                         return (
                             <div className="quests-card" key={q.id}>
-                                {/* TOP */}
                                 <div className="quests-card-top">
                                     <div className="quests-icon">🎯</div>
 
@@ -147,9 +233,7 @@ export function Quests({
                                         <div className="quests-head-row">
                                             <div className="quests-card-title">{q.title}</div>
 
-                                            <div
-                                                className={`quests-badge quests-badge--${st.toLowerCase()}`}
-                                            >
+                                            <div className={`quests-badge quests-badge--${st.toLowerCase()}`}>
                                                 {st === 'PENDING' && '⏳ Не выполнено'}
                                                 {st === 'COMPLETED' && '✅ Выполнено'}
                                                 {st === 'CLAIMED' && '🎉 Получено'}
@@ -170,7 +254,7 @@ export function Quests({
                         </span>
                                             </div>
 
-                                            {q.chatUsername && (
+                                            {q.chatUsername && !insta && (
                                                 <div className="quests-mini">
                                                     <span className="quests-mini-dot" />
                                                     {q.chatUsername}
@@ -180,18 +264,15 @@ export function Quests({
                                     </div>
                                 </div>
 
-                                {/* ACTIONS */}
                                 <div className="quests-actions-wrap">
                                     <button
                                         className="q-btn q-btn--soft"
                                         disabled={!q.openUrl || busy || st === 'CLAIMED'}
-                                        onClick={() => q.openUrl && openTelegram(q.openUrl)}
+                                        onClick={() => void openTask(q)}
                                     >
-                                        <span className="q-btn-ico">📣</span>
+                                        <span className="q-btn-ico">{doIcon}</span>
                                         <span className="q-btn-txt">{t('doTask') || 'Выполнить'}</span>
-                                        <span className="q-btn-sub">
-                      {q.openUrl ? 'Открыть канал' : 'Нет ссылки'}
-                    </span>
+                                        <span className="q-btn-sub">{doSub}</span>
                                     </button>
 
                                     <button
@@ -203,7 +284,9 @@ export function Quests({
                                         <span className="q-btn-txt">
                       {busy ? 'Проверяю...' : t('check') || 'Проверить'}
                     </span>
-                                        <span className="q-btn-sub">Проверить подписку</span>
+                                        <span className="q-btn-sub">
+                      {insta ? 'Подтвердить подписку' : 'Проверить подписку'}
+                    </span>
                                     </button>
 
                                     <button
@@ -223,16 +306,11 @@ export function Quests({
                                     </button>
                                 </div>
 
-                                {/* HINT */}
                                 <div className="quests-hint">
-                                    {st === 'PENDING' &&
-                                        (t('taskHint1') ||
-                                            'Открой канал, подпишись и нажми “Проверить”.')}
+                                    {st === 'PENDING' && (t('taskHint1') || hintPending)}
                                     {st === 'COMPLETED' &&
-                                        (t('taskHint2') ||
-                                            'Подписка подтверждена. Забери награду!')}
-                                    {st === 'CLAIMED' &&
-                                        (t('taskHint3') || 'Награда уже получена ✅')}
+                                        (t('taskHint2') || 'Подписка подтверждена. Забери награду!')}
+                                    {st === 'CLAIMED' && (t('taskHint3') || 'Награда уже получена ✅')}
                                 </div>
                             </div>
                         );
