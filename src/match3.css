@@ -170,6 +170,54 @@
 .match3-board--busy .match3-tile {
     cursor: default;
 }
+.match3-board--shake {
+    animation: match3-shake 220ms ease-in-out;
+}
+
+@keyframes match3-shake {
+    0% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+    100% { transform: translateX(0); }
+}
+.level-node {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 0;
+}
+
+.level-num {
+    line-height: 1;
+}
+
+.level-stars {
+    display: flex;
+    gap: 2px;
+    font-size: 12px;
+    line-height: 1;
+    opacity: 0.75;
+}
+
+.level-stars span {
+    color: rgba(255,255,255,0.35);
+}
+
+.level-node.open .level-stars span {
+    color: rgba(0,0,0,0.25);
+}
+
+.level-stars span.on {
+    color: #ffd54a;
+    opacity: 1;
+}
+
+.level-node.open .level-stars span.on {
+    color: #b04d00;
+}
 
 /* адаптив */
 @media (max-width: 380px) {

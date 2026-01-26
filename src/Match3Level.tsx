@@ -8,21 +8,8 @@ function randomTile() {
     return TYPES[Math.floor(Math.random() * TYPES.length)];
 }
 
-function genBoard(size: number) {
-    // генерируем без стартовых матчей
-    let b = Array.from({ length: size }, () =>
-        Array.from({ length: size }, () => randomTile())
-    );
-
-    // немного почистим, чтобы старт не был с матчами
-    for (let i = 0; i < 4; i++) {
-        const m = findMatches(b);
-        if (m.size === 0) break;
-        b = clearMatches(b, m);
-        b = collapse(b);
-        b = refill(b);
-    }
-    return b;
+function keyOf(x: number, y: number) {
+    return `${x}:${y}`;
 }
 
 type Pos = { x: number; y: number };
@@ -41,10 +28,6 @@ function swapInBoard(board: Board, a: Pos, b: Pos): Board {
     next[a.y][a.x] = next[b.y][b.x];
     next[b.y][b.x] = tmp;
     return next;
-}
-
-function keyOf(x: number, y: number) {
-    return `${x}:${y}`;
 }
 
 /** Находит все клетки, которые входят в линии 3+ */
@@ -131,6 +114,22 @@ function refill(board: Board): Board {
     return next;
 }
 
+function genBoard(size: number) {
+    // генерируем без стартовых матчей
+    let b: Board = Array.from({ length: size }, () =>
+        Array.from({ length: size }, () => randomTile())
+    );
+
+    for (let i = 0; i < 4; i++) {
+        const m = findMatches(b);
+        if (m.size === 0) break;
+        b = clearMatches(b, m);
+        b = collapse(b);
+        b = refill(b);
+    }
+    return b;
+}
+
 function getUiForSize(size: number) {
     if (size <= 6) return { tile: 52, gap: 10, font: 26 };
     if (size === 7) return { tile: 44, gap: 8, font: 24 };
@@ -151,23 +150,45 @@ export default function Match3Level({
     const size = level <= 2 ? 6 : level <= 5 ? 7 : 8;
     const movesInit = Math.max(10, 22 - level);
 
+    // 🎯 цель: собрать 💎
+    const targetGem = Math.min(20, 8 + level * 2);
+
     const { tile, gap, font } = getUiForSize(size);
 
     const initial = useMemo(() => genBoard(size), [size]);
     const [board, setBoard] = useState<Board>(initial);
     const [moves, setMoves] = useState<number>(movesInit);
     const [score, setScore] = useState<number>(0);
+    const [gems, setGems] = useState<number>(0);
 
+    const [shake, setShake] = useState(false);
     const [selected, setSelected] = useState<Pos | null>(null);
 
-    // чтобы не кликали во время анимаций
     const [busy, setBusy] = useState(false);
-
-    // подсветка удаления
     const [clearing, setClearing] = useState<Set<string>>(new Set());
 
-    // чтобы async-цепочки не ломались при быстрых перерендерах
     const opId = useRef(0);
+
+    const won = gems >= targetGem;
+
+    const unlockNextAndBack = () => {
+        // ⭐️ считаем звёзды по оставшимся ходам
+        const ratio = moves / movesInit; // 0..1
+        const stars = ratio >= 0.55 ? 3 : ratio >= 0.25 ? 2 : 1;
+
+        // сохранить звёзды (не ухудшаем, только улучшаем)
+        const key = `mc_match3_stars_L${level}`;
+        const prev = Number(localStorage.getItem(key) || '0');
+        if (stars > prev) localStorage.setItem(key, String(stars));
+
+        // открыть следующий уровень
+        const cur = Number(localStorage.getItem('mc_match3_unlocked') || '1');
+        const next = Math.max(cur, level + 1);
+        localStorage.setItem('mc_match3_unlocked', String(next));
+
+        onBack();
+    };
+
 
     const runCascade = async (startBoard: Board) => {
         opId.current += 1;
@@ -186,6 +207,14 @@ export default function Match3Level({
             setClearing(new Set(matches));
             await sleep(140);
             if (opId.current !== my) return;
+
+            // 💎 считаем ДО очистки
+            let gemHits = 0;
+            for (const k of matches) {
+                const [sx, sy] = k.split(':').map(Number);
+                if (cur[sy]?.[sx] === '💎') gemHits++;
+            }
+            if (gemHits > 0) setGems((v) => v + gemHits);
 
             // очистка + очки
             cur = clearMatches(cur, matches);
@@ -211,7 +240,7 @@ export default function Match3Level({
     };
 
     const onTileClick = async (x: number, y: number) => {
-        if (busy || moves <= 0) return;
+        if (busy || moves <= 0 || won) return;
 
         const cur: Pos = { x, y };
 
@@ -225,13 +254,11 @@ export default function Match3Level({
             return;
         }
 
-        // если не сосед — просто выбрать новую
         if (!isNeighbor(selected, cur)) {
             setSelected(cur);
             return;
         }
 
-        // сосед — пробуем swap
         setBusy(true);
 
         const before = board;
@@ -239,21 +266,22 @@ export default function Match3Level({
         setBoard(swapped);
         setSelected(null);
 
-        // нашли матчи?
         const matches = findMatches(swapped);
 
         if (matches.size === 0) {
-            // нет матчей → вернуть назад
             await sleep(140);
             setBoard(before);
+
+            setShake(true);
+            setTimeout(() => setShake(false), 220);
+
             setBusy(false);
             return;
         }
 
-        // есть матч → -ход
+        // ✅ списываем ход только если был матч
         setMoves((m) => Math.max(0, m - 1));
 
-        // запускаем каскад
         await runCascade(swapped);
 
         setBusy(false);
@@ -269,13 +297,15 @@ export default function Match3Level({
                 <div className="match3-title">🍬 Monster Crush · Level {level}</div>
 
                 <div className="match3-moves">
-                    Ходы: {moves} · Очки: {score}
+                    Ходы: {moves} · Очки: {score} · 💎 {gems}/{targetGem}
                 </div>
             </div>
 
             <div className="match3-stage">
                 <div
-                    className={`match3-board ${busy ? 'match3-board--busy' : ''}`}
+                    className={`match3-board ${busy ? 'match3-board--busy' : ''} ${
+                        shake ? 'match3-board--shake' : ''
+                    }`}
                     style={{
                         gridTemplateColumns: `repeat(${size}, ${tile}px)`,
                         gap: `${gap}px`,
@@ -296,7 +326,7 @@ export default function Match3Level({
                                     ].join(' ')}
                                     style={{ width: tile, height: tile, fontSize: font }}
                                     onClick={() => onTileClick(xx, yy)}
-                                    disabled={busy}
+                                    disabled={busy || won}
                                 >
                                     {cell}
                                 </button>
@@ -306,7 +336,24 @@ export default function Match3Level({
                 </div>
             </div>
 
-            {moves <= 0 && !busy && (
+            {/* ✅ Победа */}
+            {won && (
+                <div className="match3-over">
+                    <div className="match3-over-card">
+                        <div className="match3-over-title">Победа! 🎉</div>
+                        <div style={{ opacity: 0.9, marginBottom: 10 }}>
+                            Ты собрал 💎 {gems}/{targetGem}
+                        </div>
+
+                        <button className="match3-back" onClick={unlockNextAndBack}>
+                            ✅ Забрать и открыть следующий
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* ❌ Проигрыш */}
+            {moves <= 0 && !busy && !won && (
                 <div className="match3-over">
                     <div className="match3-over-card">
                         <div className="match3-over-title">Ходы закончились 😅</div>
