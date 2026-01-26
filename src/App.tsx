@@ -18,13 +18,15 @@
     import type { Lang } from './i18n';
     import {Quests} from "./Quests.tsx";
     import { BottomNav } from './BottomNav';
+    import LevelsMap from './pages/LevelsMap.tsx';
+    import Match3Level from './pages/Match3Level.tsx';
 
 
 
 
 
 
-    type Page = 'menu' | 'game' | 'leaderboard' | 'invite' | 'tournament' | 'wallet' | 'cashcup'| 'roulette' | 'quests';
+    type Page = 'menu' | 'game' | 'leaderboard' | 'invite' | 'tournament' | 'wallet' | 'cashcup'| 'roulette' | 'quests'| 'match3';
 
     interface MeResponse {
         id: number;
@@ -400,29 +402,10 @@
         const [lang, setLang] = useState<Lang>('ru');
         const [showLangMenu, setShowLangMenu] = useState(false);
         const [questsDot, setQuestsDot] = useState(false);
+        const [match3Level, setMatch3Level] = useState<number | null>(null);
 
 
         const t = (key: string) => translations[lang][key] || key;
-
-        // useEffect(() => {
-        //     if (!token) return;
-        //     let cancelled = false;
-        //
-        //     (async () => {
-        //         try {
-        //             const res = await apiFetch('/game/daily-quests', token);
-        //             const data = await res.json().catch(() => ({}));
-        //             if (!res.ok) return;
-        //
-        //             const hasClaimable = !!(data.quests ?? []).some((q: any) => q.claimable);
-        //             if (!cancelled) setQuestsDot(hasClaimable);
-        //         } catch (e) {
-        //             console.error(e);
-        //         }
-        //     })();
-        //
-        //     return () => { cancelled = true; };
-        // }, [token]);
 
 
         useEffect(() => {
@@ -941,6 +924,20 @@
                                                 </div>
                                             </button>
                                             <button
+                                                className="menu-card"
+                                                onClick={() => {
+                                                    setMatch3Level(null);
+                                                    setCurrentPage('match3');
+                                                }}
+                                            >
+                                                <div className="menu-icon">🍬</div>
+                                                <div className="menu-card-title">Monster Crush</div>
+                                                <div className="menu-card-text">
+                                                    Match-3 · уровни · награды
+                                                </div>
+                                            </button>
+
+                                            <button
                                                 className="menu-btn menu-btn--secondary"
                                                 onClick={() => setCurrentPage('invite')}
                                             >
@@ -1061,8 +1058,35 @@
                                             }}
                                         />
                                     </div>
-                                )}
 
+                                )}
+                                {currentPage === 'match3' && (
+                                    <div className="panel panel-menu">
+                                        {!match3Level ? (
+                                            <>
+                                                <h2 className="panel-title">🍬 Monster Crush</h2>
+
+                                                <LevelsMap
+                                                    onSelect={(lvl: number) => {
+                                                        setMatch3Level(lvl);
+                                                    }}
+                                                />
+
+                                                <button
+                                                    className="menu-btn menu-btn--secondary"
+                                                    onClick={() => setCurrentPage('menu')}
+                                                >
+                                                    ⬅ Назад
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <Match3Level
+                                                level={match3Level}
+                                                onBack={() => setMatch3Level(null)}
+                                            />
+                                        )}
+                                    </div>
+                                )}
 
                                 {currentPage === 'game' && token && (
                                     <Game
