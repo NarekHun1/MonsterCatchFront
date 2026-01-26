@@ -161,6 +161,15 @@
     font-weight: 900;
     margin-bottom: 10px;
 }
+.match3-tile--clearing {
+    transform: scale(0.92);
+    opacity: 0.2;
+    filter: blur(0.2px);
+}
+
+.match3-board--busy .match3-tile {
+    cursor: default;
+}
 
 /* адаптив */
 @media (max-width: 380px) {
