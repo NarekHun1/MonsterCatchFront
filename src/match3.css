@@ -173,6 +173,17 @@
 .match3-board--shake {
     animation: match3-shake 220ms ease-in-out;
 }
+.app-bg-glow {
+    display: none;
+}
+
+.app-root {
+    background: linear-gradient(
+            180deg,
+            #0f172a 0%,
+            #020617 100%
+    );
+}
 
 @keyframes match3-shake {
     0% { transform: translateX(0); }
