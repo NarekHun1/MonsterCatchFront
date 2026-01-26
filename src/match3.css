@@ -224,3 +224,67 @@
     .level-node { width: 54px; height: 54px; font-size: 18px; }
     .level-link { width: 44px; }
 }
+.match3-boosters {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 10px 0 12px;
+    align-items: center;
+}
+
+.match3-booster-btn {
+    border: 0;
+    border-radius: 14px;
+    padding: 10px 14px;
+    font-weight: 800;
+    cursor: pointer;
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+}
+
+.match3-booster-btn.active {
+    background: linear-gradient(135deg, rgba(255, 194, 0, 0.35), rgba(255, 0, 120, 0.22));
+    box-shadow: 0 0 0 6px rgba(255, 194, 0, 0.12);
+}
+
+.match3-legend {
+    font-size: 12px;
+    opacity: 0.75;
+    text-align: center;
+}
+
+.match3-tile {
+    position: relative;
+}
+
+.match3-tile--blocked {
+    filter: saturate(0.95);
+}
+
+.match3-tile--ice {
+    box-shadow: inset 0 0 0 2px rgba(120, 220, 255, 0.35);
+}
+
+.match3-tile--stone {
+    background: rgba(255,255,255,0.05);
+}
+
+.match3-tile--honey {
+    box-shadow: inset 0 0 0 2px rgba(255, 196, 0, 0.28);
+}
+
+.match3-ice-overlay,
+.match3-honey-overlay {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    font-size: 14px;
+    opacity: 0.95;
+    pointer-events: none;
+}
+
+.match3-ice-overlay {
+    left: 6px;
+    right: auto;
+}
