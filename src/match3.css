@@ -109,6 +109,32 @@
     padding: 14px;
     padding-bottom: 120px; /* место под BottomNav */
 }
+.match3-tile {
+    border: 0;
+    cursor: pointer;
+}
+
+.match3-tile--selected {
+    outline: 3px solid rgba(0, 255, 200, 0.9);
+    box-shadow: 0 0 0 6px rgba(0, 255, 200, 0.12);
+    transform: scale(1.03);
+}
+
+.match3-over {
+    margin-top: 14px;
+    display: flex;
+    justify-content: center;
+}
+
+.match3-over-card {
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.08);
+}
+.match3-over-title {
+    font-weight: 800;
+    margin-bottom: 10px;
+}
 
 /* чуть адаптивнее на маленьких экранах */
 @media (max-width: 380px) {
