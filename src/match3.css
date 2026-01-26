@@ -18,7 +18,6 @@
     gap: 12px;
 }
 
-/* зигзаг: 1 ряд слева, 2 ряд справа */
 .level-row.left { justify-content: flex-start; }
 .level-row.right { justify-content: flex-end; }
 
@@ -26,21 +25,23 @@
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background: #333;
+    background: rgba(255,255,255,0.06);
     color: #fff;
-    font-weight: 800;
+    font-weight: 900;
     font-size: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     user-select: none;
     position: relative;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
 }
 
 .level-node.open {
-    background: linear-gradient(135deg, #3cff00, #0fa);
+    background: linear-gradient(135deg, #3cff00, #00ffd5);
+    color: #07110c;
     cursor: pointer;
-    box-shadow: 0 8px 18px rgba(0, 255, 180, 0.18);
+    box-shadow: 0 10px 22px rgba(0, 255, 180, 0.18);
 }
 
 .level-node.locked {
@@ -48,11 +49,10 @@
     filter: grayscale(0.2);
 }
 
-/* маленькая линия между кружками */
 .level-link {
     height: 6px;
     width: 56px;
-    border-radius: 99px;
+    border-radius: 999px;
     background: rgba(255, 255, 255, 0.12);
 }
 
@@ -60,66 +60,91 @@
    MATCH3 LEVEL
    ========================= */
 
-.game-screen {
-    text-align: center;
-    padding-bottom: 120px; /* чтобы низ не уходил под BottomNav */
-}
-
-.board {
-    display: grid;
-    gap: 6px;
-    justify-content: center;
-    margin: 16px auto 0;
-    width: fit-content;
-}
-
-/* клетка */
-.tile {
-    width: 46px;
-    height: 46px;
-    background: rgba(255,255,255,0.08);
-    border-radius: 12px;
-    font-size: 26px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    user-select: none;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
-}
-.match3-board {
-    display: grid;
-    gap: 6px;
-
-    width: min(92vw, 420px);   /* чтобы влезало на телефоне */
-    margin: 0 auto;
-}
-
-.match3-tile {
-    aspect-ratio: 1;           /* 🔥 делает квадрат */
-    border-radius: 12px;
-    background: rgba(255,255,255,0.08);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 26px;
-    user-select: none;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
-}
 .match3-wrap {
     padding: 14px;
     padding-bottom: 120px; /* место под BottomNav */
 }
+
+.match3-topbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.match3-title {
+    flex: 1;
+    text-align: center;
+    font-weight: 900;
+    font-size: 16px;
+    opacity: 0.95;
+}
+
+.match3-moves {
+    font-weight: 900;
+    opacity: 0.85;
+}
+
+.match3-back {
+    border: 0;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+/* контейнер панели с бордом */
+.match3-stage {
+    display: flex;
+    justify-content: center;
+    margin-top: 8px;
+}
+
+/* сама панель */
+.match3-board {
+    display: grid;
+    justify-content: center;
+    padding: 14px;
+    border-radius: 18px;
+
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(10px);
+
+    max-width: 92vw; /* чтобы всегда влезало */
+}
+
+/* клетка */
 .match3-tile {
     border: 0;
     cursor: pointer;
+
+    border-radius: 16px;
+    background: radial-gradient(circle at 30% 25%, rgba(255,255,255,0.14), rgba(255,255,255,0.06));
+    box-shadow:
+            inset 0 0 0 1px rgba(255,255,255,0.08),
+            0 8px 18px rgba(0,0,0,0.25);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    user-select: none;
+    transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.match3-tile:active {
+    transform: scale(0.97);
 }
 
 .match3-tile--selected {
-    outline: 3px solid rgba(0, 255, 200, 0.9);
-    box-shadow: 0 0 0 6px rgba(0, 255, 200, 0.12);
+    box-shadow:
+            inset 0 0 0 2px rgba(0,255,200,0.95),
+            0 16px 26px rgba(0,255,200,0.12);
     transform: scale(1.03);
 }
 
+/* popup окончания ходов */
 .match3-over {
     margin-top: 14px;
     display: flex;
@@ -131,14 +156,14 @@
     border-radius: 14px;
     background: rgba(255,255,255,0.08);
 }
+
 .match3-over-title {
-    font-weight: 800;
+    font-weight: 900;
     margin-bottom: 10px;
 }
 
-/* чуть адаптивнее на маленьких экранах */
+/* адаптив */
 @media (max-width: 380px) {
-    .tile { width: 42px; height: 42px; font-size: 24px; }
     .level-node { width: 54px; height: 54px; font-size: 18px; }
     .level-link { width: 44px; }
 }

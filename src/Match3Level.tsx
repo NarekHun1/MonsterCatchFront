@@ -21,6 +21,13 @@ function isNeighbor(a: Pos, b: Pos) {
     return (dx === 1 && dy === 0) || (dx === 0 && dy === 1);
 }
 
+function getUiForSize(size: number) {
+    // Подобрано под мобилку + телеграм
+    if (size <= 6) return { tile: 52, gap: 10, font: 26 };
+    if (size === 7) return { tile: 44, gap: 8, font: 24 };
+    return { tile: 38, gap: 7, font: 22 }; // size 8+
+}
+
 export default function Match3Level({
                                         level,
                                         onBack,
@@ -30,6 +37,8 @@ export default function Match3Level({
 }) {
     const size = level <= 2 ? 6 : level <= 5 ? 7 : 8;
     const movesInit = Math.max(10, 22 - level);
+
+    const { tile, gap, font } = getUiForSize(size);
 
     const initial = useMemo(() => genBoard(size), [size]);
     const [board, setBoard] = useState<string[][]>(initial);
@@ -49,7 +58,7 @@ export default function Match3Level({
     const onTileClick = (x: number, y: number) => {
         if (moves <= 0) return;
 
-        const cur = { x, y };
+        const cur: Pos = { x, y };
 
         if (!selected) {
             setSelected(cur);
@@ -62,7 +71,7 @@ export default function Match3Level({
             return;
         }
 
-        // если сосед — меняем местами и списываем ход
+        // если сосед — swap и -ход
         if (isNeighbor(selected, cur)) {
             swap(selected, cur);
             setSelected(null);
@@ -70,7 +79,7 @@ export default function Match3Level({
             return;
         }
 
-        // если не сосед — просто выбрать новую клетку
+        // если не сосед — выбрать другую
         setSelected(cur);
     };
 
@@ -80,28 +89,39 @@ export default function Match3Level({
                 <button className="match3-back" onClick={onBack}>
                     ⬅ Уровни
                 </button>
-                <div className="match3-title">🍬 Monster Crush · Level {level}</div>
+
+                <div className="match3-title">
+                    🍬 Monster Crush · Level {level}
+                </div>
+
                 <div className="match3-moves">Ходы: {moves}</div>
             </div>
 
-            <div
-                className="match3-board"
-                style={{ gridTemplateColumns: `repeat(${size}, 1fr)` }}
-            >
-                {board.flatMap((row, yy) =>
-                    row.map((cell, xx) => {
-                        const active = selected?.x === xx && selected?.y === yy;
-                        return (
-                            <button
-                                key={`${xx}-${yy}`}
-                                className={`match3-tile ${active ? 'match3-tile--selected' : ''}`}
-                                onClick={() => onTileClick(xx, yy)}
-                            >
-                                {cell}
-                            </button>
-                        );
-                    })
-                )}
+            <div className="match3-stage">
+                <div
+                    className="match3-board"
+                    style={{
+                        gridTemplateColumns: `repeat(${size}, ${tile}px)`,
+                        gap: `${gap}px`,
+                    }}
+                >
+                    {board.flatMap((row, yy) =>
+                        row.map((cell, xx) => {
+                            const active = selected?.x === xx && selected?.y === yy;
+
+                            return (
+                                <button
+                                    key={`${xx}-${yy}`}
+                                    className={`match3-tile ${active ? 'match3-tile--selected' : ''}`}
+                                    style={{ width: tile, height: tile, fontSize: font }}
+                                    onClick={() => onTileClick(xx, yy)}
+                                >
+                                    {cell}
+                                </button>
+                            );
+                        })
+                    )}
+                </div>
             </div>
 
             {moves <= 0 && (
