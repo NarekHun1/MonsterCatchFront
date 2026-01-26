@@ -18,8 +18,8 @@
     import type { Lang } from './i18n';
     import {Quests} from "./Quests.tsx";
     import { BottomNav } from './BottomNav';
-    import LevelsMap from './pages/LevelsMap.tsx';
-    import Match3Level from './pages/Match3Level.tsx';
+    import LevelsMap from './LevelsMap.tsx';
+    import Match3Level from './Match3Level.tsx';
 
 
 
