@@ -1,43 +1,12 @@
-/* =========================================================
-   Monster Crush (Match-3) — FULL CSS (Candy-ish clean style)
-   Paste as: src/match3.css
-   ========================================================= */
-
-/* ---------- GLOBAL HARD RESET for background (kills glow/circles) ---------- */
-html, body, #root {
-    height: 100%;
-    background: #050814 !important;
-}
-
-.app-root,
-.app-shell,
-.app-content,
-.panel,
-.panel-menu {
-    background: transparent !important;
-    box-shadow: none !important;
-    backdrop-filter: none !important;
-}
-
-.app-bg-glow { display: none !important; }
-
-/* if any pseudo-glows exist */
-.app-root::before, .app-root::after,
-.app-shell::before, .app-shell::after,
-.panel::before, .panel::after {
-    content: none !important;
-    display: none !important;
-}
-
-/* =========================================================
+/* =========================
    LEVELS MAP (Candy path)
-   ========================================================= */
+   ========================= */
 
 .levels-map {
     width: 100%;
     max-width: 420px;
-    margin: 18px auto 0;
-    padding: 12px 12px 120px; /* space for BottomNav */
+    margin: 20px auto 0;
+    padding: 12px 12px 120px; /* чтобы BottomNav не перекрывал */
     display: flex;
     flex-direction: column;
     gap: 14px;
@@ -48,92 +17,59 @@ html, body, #root {
     align-items: center;
     gap: 12px;
 }
-.level-row.left  { justify-content: flex-start; }
+
+.level-row.left { justify-content: flex-start; }
 .level-row.right { justify-content: flex-end; }
+
+.level-node {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+    font-weight: 900;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    position: relative;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+}
+
+.level-node.open {
+    background: linear-gradient(135deg, #3cff00, #00ffd5);
+    color: #07110c;
+    cursor: pointer;
+    box-shadow: 0 10px 22px rgba(0, 255, 180, 0.18);
+}
+
+.level-node.locked {
+    opacity: 0.35;
+    filter: grayscale(0.2);
+}
 
 .level-link {
     height: 6px;
     width: 56px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.10);
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
+    background: rgba(255, 255, 255, 0.12);
 }
 
-.level-node {
-    width: 62px;
-    height: 62px;
-    border-radius: 999px;
-
-    background: rgba(255,255,255,0.06);
-    color: #fff;
-
-    font-weight: 900;
-    font-size: 20px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    user-select: none;
-    position: relative;
-
-    box-shadow:
-            inset 0 0 0 1px rgba(255,255,255,0.08),
-            0 12px 24px rgba(0,0,0,0.35);
-}
-
-.level-node.open {
-    background: linear-gradient(135deg, #38ff7a, #00ffd5);
-    color: #05110b;
-    cursor: pointer;
-    box-shadow:
-            0 16px 30px rgba(0, 255, 180, 0.18),
-            inset 0 0 0 1px rgba(255,255,255,0.20);
-}
-
-.level-node.locked {
-    opacity: 0.34;
-    filter: grayscale(0.25);
-}
-
-.level-node:active {
-    transform: scale(0.97);
-}
-
-/* optional stars inside node (if you render them) */
-.level-node {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: 0;
-}
-.level-num { line-height: 1; }
-.level-stars {
-    display: flex;
-    gap: 2px;
-    font-size: 12px;
-    line-height: 1;
-    opacity: 0.80;
-}
-.level-stars span { color: rgba(255,255,255,0.30); }
-.level-stars span.on { color: #ffd54a; opacity: 1; }
-.level-node.open .level-stars span { color: rgba(0,0,0,0.25); }
-.level-node.open .level-stars span.on { color: #8a3c00; }
-
-/* =========================================================
+/* =========================
    MATCH3 LEVEL
-   ========================================================= */
+   ========================= */
 
 .match3-wrap {
     padding: 14px;
-    padding-bottom: 120px; /* space for BottomNav */
+    padding-bottom: 120px; /* место под BottomNav */
 }
 
 .match3-topbar {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .match3-title {
@@ -141,17 +77,12 @@ html, body, #root {
     text-align: center;
     font-weight: 900;
     font-size: 16px;
-    letter-spacing: 0.2px;
     opacity: 0.95;
-    color: rgba(255,255,255,0.95);
 }
 
 .match3-moves {
     font-weight: 900;
     opacity: 0.85;
-    color: rgba(255,255,255,0.88);
-    font-size: 12px;
-    white-space: nowrap;
 }
 
 .match3-back {
@@ -159,176 +90,151 @@ html, body, #root {
     padding: 10px 12px;
     border-radius: 14px;
     background: rgba(255, 255, 255, 0.08);
-    color: rgba(255,255,255,0.95);
-    font-weight: 900;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
-    cursor: pointer;
+    color: #fff;
 }
-.match3-back:active { transform: scale(0.98); }
 
+/* контейнер панели с бордом */
 .match3-stage {
     display: flex;
     justify-content: center;
-    margin-top: 10px;
+    margin-top: 8px;
 }
 
-/* Board panel (like Candy board) */
+/* сама панель */
 .match3-board {
     display: grid;
     justify-content: center;
     padding: 14px;
-    border-radius: 26px;
+    border-radius: 18px;
 
-    background: linear-gradient(180deg, #17243a, #0a1224);
-    box-shadow:
-            0 26px 70px rgba(0,0,0,0.60),
-            inset 0 0 0 2px rgba(255,255,255,0.05);
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(10px);
 
-    max-width: 92vw;
+    max-width: 92vw; /* чтобы всегда влезало */
 }
 
-/* Board disabled/busy */
-.match3-board--busy .match3-tile { cursor: default; }
-
-/* Shake animation */
-.match3-board--shake { animation: match3-shake 220ms ease-in-out; }
-@keyframes match3-shake {
-    0%   { transform: translateX(0); }
-    20%  { transform: translateX(-6px); }
-    40%  { transform: translateX(6px); }
-    60%  { transform: translateX(-4px); }
-    80%  { transform: translateX(4px); }
-    100% { transform: translateX(0); }
-}
-
-/* =========================================================
-   TILE — candy look (no “circle background next to emoji”)
-   ========================================================= */
-
+/* клетка */
 .match3-tile {
     border: 0;
     cursor: pointer;
-    position: relative;
 
-    border-radius: 18px;
+    border-radius: 16px;
+    background: radial-gradient(circle at 30% 25%, rgba(255,255,255,0.14), rgba(255,255,255,0.06));
+    box-shadow:
+            inset 0 0 0 1px rgba(255,255,255,0.08),
+            0 8px 18px rgba(0,0,0,0.25);
 
     display: flex;
     align-items: center;
     justify-content: center;
 
     user-select: none;
-    line-height: 1;
-
-    background: radial-gradient(
-            circle at 30% 25%,
-            rgba(255,255,255,0.30),
-            rgba(255,255,255,0.08) 60%,
-            rgba(0,0,0,0.18) 100%
-    );
-
-    box-shadow:
-            inset 0 3px 4px rgba(255,255,255,0.22),
-            inset 0 -6px 10px rgba(0,0,0,0.35),
-            0 10px 18px rgba(0,0,0,0.45);
-
-    transition:
-            transform 120ms ease,
-            filter 120ms ease,
-            box-shadow 120ms ease,
-            opacity 120ms ease;
-}
-
-/* glossy highlight */
-.match3-tile::after {
-    content: "";
-    position: absolute;
-    inset: 10%;
-    border-radius: 16px;
-    background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.18), transparent 58%);
-    pointer-events: none;
+    transition: transform 120ms ease, box-shadow 120ms ease;
 }
 
 .match3-tile:active {
-    transform: scale(0.96);
-    filter: brightness(1.05);
+    transform: scale(0.97);
 }
 
 .match3-tile--selected {
-    transform: scale(1.08);
     box-shadow:
-            0 0 0 4px rgba(255,255,255,0.18),
-            0 0 20px rgba(0,255,200,0.45),
-            inset 0 3px 4px rgba(255,255,255,0.22),
-            inset 0 -6px 10px rgba(0,0,0,0.35);
+            inset 0 0 0 2px rgba(0,255,200,0.95),
+            0 16px 26px rgba(0,255,200,0.12);
+    transform: scale(1.03);
 }
 
-/* clearing animation */
+/* popup окончания ходов */
+.match3-over {
+    margin-top: 14px;
+    display: flex;
+    justify-content: center;
+}
+
+.match3-over-card {
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.08);
+}
+
+.match3-over-title {
+    font-weight: 900;
+    margin-bottom: 10px;
+}
 .match3-tile--clearing {
-    transform: scale(0.90);
-    opacity: 0.20;
+    transform: scale(0.92);
+    opacity: 0.2;
     filter: blur(0.2px);
 }
 
-/* =========================================================
-   OBSTACLES / OVERLAYS
-   add these classes from TSX when needed:
-   - match3-tile--ice
-   - match3-tile--stone
-   - match3-tile--honey
-   - match3-tile--blocked
-   plus overlay spans with:
-   - match3-ice-overlay
-   - match3-honey-overlay
-   ========================================================= */
-
-.match3-tile--blocked { filter: saturate(0.95); }
-
-/* Ice looks like glass */
-.match3-tile--ice {
-    box-shadow:
-            inset 0 0 0 2px rgba(120, 220, 255, 0.40),
-            inset 0 3px 4px rgba(255,255,255,0.22),
-            inset 0 -6px 10px rgba(0,0,0,0.35),
-            0 10px 18px rgba(0,0,0,0.45);
+.match3-board--busy .match3-tile {
+    cursor: default;
+}
+.match3-board--shake {
+    animation: match3-shake 220ms ease-in-out;
+}
+.app-bg-glow {
+    display: none;
 }
 
-/* Stone looks heavy */
-.match3-tile--stone {
-    background: radial-gradient(circle at 30% 25%, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
-    box-shadow:
-            inset 0 0 0 2px rgba(180, 180, 180, 0.12),
-            inset 0 -6px 10px rgba(0,0,0,0.38),
-            0 10px 18px rgba(0,0,0,0.45);
+.app-root {
+    background: linear-gradient(
+            180deg,
+            #0f172a 0%,
+            #020617 100%
+    );
 }
 
-/* Honey looks sticky */
-.match3-tile--honey {
-    box-shadow:
-            inset 0 0 0 2px rgba(255, 196, 0, 0.30),
-            inset 0 3px 4px rgba(255,255,255,0.22),
-            inset 0 -6px 10px rgba(0,0,0,0.35),
-            0 10px 18px rgba(0,0,0,0.45);
+@keyframes match3-shake {
+    0% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+    100% { transform: translateX(0); }
+}
+.level-node {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 0;
 }
 
-.match3-ice-overlay,
-.match3-honey-overlay {
-    position: absolute;
-    right: 6px;
-    bottom: 6px;
-    font-size: 14px;
-    opacity: 0.95;
-    pointer-events: none;
-    filter: drop-shadow(0 6px 10px rgba(0,0,0,0.45));
-}
-.match3-ice-overlay {
-    left: 6px;
-    right: auto;
+.level-num {
+    line-height: 1;
 }
 
-/* =========================================================
-   BOOSTERS UI (if you use it)
-   ========================================================= */
+.level-stars {
+    display: flex;
+    gap: 2px;
+    font-size: 12px;
+    line-height: 1;
+    opacity: 0.75;
+}
 
+.level-stars span {
+    color: rgba(255,255,255,0.35);
+}
+
+.level-node.open .level-stars span {
+    color: rgba(0,0,0,0.25);
+}
+
+.level-stars span.on {
+    color: #ffd54a;
+    opacity: 1;
+}
+
+.level-node.open .level-stars span.on {
+    color: #b04d00;
+}
+
+/* адаптив */
+@media (max-width: 380px) {
+    .level-node { width: 54px; height: 54px; font-size: 18px; }
+    .level-link { width: 44px; }
+}
 .match3-boosters {
     display: flex;
     flex-direction: column;
@@ -341,60 +247,55 @@ html, body, #root {
     border: 0;
     border-radius: 14px;
     padding: 10px 14px;
-    font-weight: 900;
+    font-weight: 800;
     cursor: pointer;
-
     background: rgba(255,255,255,0.08);
-    color: rgba(255,255,255,0.95);
+    color: #fff;
     box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
 }
-.match3-booster-btn:active { transform: scale(0.98); }
 
 .match3-booster-btn.active {
-    background: linear-gradient(135deg, rgba(255, 194, 0, 0.38), rgba(255, 0, 120, 0.22));
-    box-shadow:
-            0 0 0 6px rgba(255, 194, 0, 0.12),
-            inset 0 0 0 1px rgba(255,255,255,0.12);
+    background: linear-gradient(135deg, rgba(255, 194, 0, 0.35), rgba(255, 0, 120, 0.22));
+    box-shadow: 0 0 0 6px rgba(255, 194, 0, 0.12);
 }
 
 .match3-legend {
     font-size: 12px;
-    opacity: 0.78;
+    opacity: 0.75;
     text-align: center;
-    color: rgba(255,255,255,0.85);
 }
 
-/* =========================================================
-   END/RESULT POPUP
-   ========================================================= */
-
-.match3-over {
-    margin-top: 14px;
-    display: flex;
-    justify-content: center;
+.match3-tile {
+    position: relative;
 }
 
-.match3-over-card {
-    padding: 14px 16px;
-    border-radius: 16px;
-    background: rgba(255,255,255,0.08);
-    box-shadow:
-            0 18px 44px rgba(0,0,0,0.45),
-            inset 0 0 0 1px rgba(255,255,255,0.08);
+.match3-tile--blocked {
+    filter: saturate(0.95);
 }
 
-.match3-over-title {
-    font-weight: 900;
-    margin-bottom: 10px;
-    color: rgba(255,255,255,0.96);
+.match3-tile--ice {
+    box-shadow: inset 0 0 0 2px rgba(120, 220, 255, 0.35);
 }
 
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
-@media (max-width: 380px) {
-    .level-node { width: 54px; height: 54px; font-size: 18px; }
-    .level-link { width: 44px; }
-    .match3-title { font-size: 15px; }
-    .match3-moves { font-size: 11px; }
+.match3-tile--stone {
+    background: rgba(255,255,255,0.05);
+}
+
+.match3-tile--honey {
+    box-shadow: inset 0 0 0 2px rgba(255, 196, 0, 0.28);
+}
+
+.match3-ice-overlay,
+.match3-honey-overlay {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    font-size: 14px;
+    opacity: 0.95;
+    pointer-events: none;
+}
+
+.match3-ice-overlay {
+    left: 6px;
+    right: auto;
 }
