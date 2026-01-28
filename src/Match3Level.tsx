@@ -651,24 +651,26 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
                                     {hasStone ? (
                                         '🪨'
                                     ) : cell ? (
-                                        imgBroken[k] ? (
-                                            <span className="tile-fallback" style={{ fontSize: font }}>
-                        {TILE_FALLBACK[cell]}
-                      </span>
-                                        ) : (
-                                            <img
-                                                src={TILE_ICON[cell]}
-                                                className={`tile-icon ${cell === 'GEM' ? 'breathe' : ''}`}
-                                                draggable={false}
-                                                alt={cell}
-                                                onError={() => {
-                                                    // eslint-disable-next-line no-console
-                                                    console.error('IMG 404:', TILE_ICON[cell]);
-                                                    setImgBroken((prev) => ({ ...prev, [k]: true }));
-                                                }}
-                                            />
-                                        )
-                                    ) : null}
+                                            <>
+                                                {/* IMG (может не загрузиться) */}
+                                                {!imgBroken[k] && (
+                                                    <img
+                                                        src={TILE_ICON[cell]}
+                                                        className={`tile-icon ${cell === 'GEM' ? 'breathe' : ''}`}
+                                                        draggable={false}
+                                                        alt={cell}
+                                                        onError={() => setImgBroken((prev) => ({ ...prev, [k]: true }))}
+                                                    />
+                                                )}
+
+                                                {/* FALLBACK overlay (виден всегда, если img сломан) */}
+                                                {imgBroken[k] && (
+                                                    <span className="tile-fallback">
+        {TILE_FALLBACK[cell]}
+      </span>
+                                                )}
+                                            </>
+                                        ) : null}
 
                                     {/* ICE overlay */}
                                     {hasIce && <span className="match3-ice-overlay">{ice[yy][xx] === 2 ? '🧊' : '❄️'}</span>}
