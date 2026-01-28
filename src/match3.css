@@ -475,3 +475,53 @@
     50%  { opacity: 0.35; }
     100% { transform: translateX(220%) rotate(18deg); opacity: 0.0; }
 }
+/* =========================
+   HARD FIX (Telegram / global reset)
+   ========================= */
+
+/* 1) Принудительно возвращаем размер шрифта и цвет кнопке */
+.match3-board .match3-tile{
+    font-size: 22px !important;
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* 2) Если где-то глобально сделали button * { opacity:0 } — ломаем это */
+.match3-board .match3-tile *{
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* 3) Часто глобально ломают img */
+.match3-board .match3-tile img{
+    display: block !important;
+    width: 72% !important;
+    height: 72% !important;
+    max-width: none !important;
+    max-height: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* 4) Overlay fallback (НЕ зависит от color у button) */
+.match3-tile .tile-fallback{
+    position: absolute;
+    inset: 0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size: 22px !important;
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+
+    pointer-events: none;
+    user-select: none;
+    z-index: 3;
+}
+
+/* 5) Чтобы overlays льда/мёда/камня не перекрывали иконку */
+.match3-tile .tile-icon{ z-index: 2; }
+.match3-ice-overlay, .match3-honey-overlay{ z-index: 4; }
