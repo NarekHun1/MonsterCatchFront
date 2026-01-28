@@ -2,12 +2,6 @@
 import './match3.css';
 import { useMemo, useRef, useState } from 'react';
 
-// ✅ PNG (обычные символы)
-import demonPng from '../public/monster-2.png';
-import coinPng from '../public/cute.png';
-import gemPng from '../public/monster-3.png';
-import firePng from '../public/monster-4.png';
-import cloverPng from '../public/monster.png';
 
 const EMPTY: '' = '';
 
@@ -21,11 +15,11 @@ type Pos = { x: number; y: number };
 type Booster = 'BOMB' | null;
 
 const TILE_ICON: Record<TileType, string> = {
-    DEMON: demonPng,
-    COIN: coinPng,
-    GEM: gemPng,
-    FIRE: firePng,
-    CLOVER: cloverPng,
+    DEMON: '/tiles/monster-2.png',
+    COIN: '/tiles/cute.png',
+    GEM: '/tiles/monster-3.png',
+    FIRE: '/tiles/monster-4.png',
+    CLOVER: '/tiles/monster.png',
 };
 
 function randomTile(): TileType {
