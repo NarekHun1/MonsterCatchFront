@@ -597,3 +597,9 @@
 .match3-honey-overlay{
     z-index: 3;
 }
+.levels-caption{
+    text-align:center;
+    font-size: 12px;
+    opacity: 0.75;
+    margin-bottom: 10px;
+}
