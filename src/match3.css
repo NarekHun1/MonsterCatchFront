@@ -8,6 +8,29 @@
     padding: 14px;
     padding-bottom: 120px; /* место под BottomNav */
 }
+
+/* ✅ Telegram/global reset fix: чтобы emoji/текст внутри button не пропадали */
+.match3-tile{
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+    font-size: inherit;
+    line-height: 1;
+}
+
+.tile-fallback{
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+    font-family: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;
+    text-shadow: 0 10px 18px rgba(0,0,0,0.35);
+}
+
+/* ✅ img принудительно видимый */
+.match3-tile img.tile-icon{
+    display: block;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
 .tile-icon{
     width: 72%;
     height: 72%;
@@ -319,6 +342,7 @@
     backdrop-filter: blur(10px);
 
     transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease, opacity 120ms ease;
+    position: relative; /* ✅ FIX: было level-node без точки */
 }
 
 .level-node:active{
@@ -354,7 +378,9 @@
 .level-node.locked::after{
     content: "🔒";
     position:absolute;
-    transform: translateY(2px);
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
     font-size: 16px;
     opacity: 0.9;
 }
@@ -388,16 +414,14 @@
     filter: drop-shadow(0 6px 12px rgba(0,0,0,0.25));
 }
 
-/* соединительная линия между уровнями */
 /* Candy-Crush style road between nodes */
 .level-link{
-    width: 46px;          /* было 26px */
+    width: 46px;
     height: 12px;
     border-radius: 999px;
     position: relative;
     overflow: hidden;
 
-    /* мягкий "трубопровод" */
     background:
             linear-gradient(90deg,
             rgba(255,255,255,0.06),
@@ -418,7 +442,6 @@
     inset: 0;
     opacity: 0.95;
 
-    /* точки-пончики */
     background:
             radial-gradient(circle at 10px 6px, rgba(255,255,255,0.95) 0 2px, rgba(255,255,255,0) 3px),
             radial-gradient(circle at 23px 6px, rgba(255,255,255,0.95) 0 2px, rgba(255,255,255,0) 3px),
@@ -442,17 +465,13 @@
     rgba(255,255,255,0)
     );
     opacity: 0.55;
+
+    animation: link-shine 1600ms ease-in-out infinite;
 }
-level-node{
-    position: relative;
-}
+
 @keyframes link-shine {
     0%   { transform: translateX(-40%) rotate(18deg); opacity: 0.0; }
     15%  { opacity: 0.55; }
     50%  { opacity: 0.35; }
     100% { transform: translateX(220%) rotate(18deg); opacity: 0.0; }
-}
-
-.level-link::after{
-    animation: link-shine 1600ms ease-in-out infinite;
 }
