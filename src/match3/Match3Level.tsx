@@ -1,27 +1,14 @@
 // src/Match3Level.tsx
 import './match3.css';
 import { useMemo, useRef, useState } from 'react';
+import { getLevelConfig } from './levelGen';
 
-/**
- * ✅ TELEGRAM MINI APP FIX:
- * В Telegram WebView пути типа /tiles/* и BASE_URL часто ломаются.
- * Самый надежный способ — импортировать картинки через Vite,
- * чтобы они попали в билд и получили корректные URL.
- *
- * 📌 Положи файлы сюда:
- * src/assets/tiles/
- *   monster-2.png
- *   monster-3.png
- *   monster-4.png
- *   monster.png
- *   cute.png
- */
-
-import demonImg from './assets/tiles/monster-2.png';
-import coinImg from './assets/tiles/cute.png';
-import gemImg from './assets/tiles/monster-3.png';
-import fireImg from './assets/tiles/monster-4.png';
-import cloverImg from './assets/tiles/monster.png';
+// assets (Vite safe for Telegram)
+import demonImg from '../assets/tiles/monster-2.png';
+import coinImg from '../assets/tiles/cute.png';
+import gemImg from '../assets/tiles/monster-3.png';
+import fireImg from '../assets/tiles/monster-4.png';
+import cloverImg from '../assets/tiles/monster.png';
 
 const EMPTY = '' as const;
 
@@ -29,11 +16,13 @@ const TYPES = ['DEMON', 'COIN', 'GEM', 'FIRE', 'CLOVER'] as const;
 type TileType = (typeof TYPES)[number];
 
 type Cell = TileType | typeof EMPTY;
+
+// ✅ board is rows×cols now
 type Board = Cell[][];
 type Pos = { x: number; y: number };
 type Booster = 'BOMB' | null;
 
-// ✅ Vite asset URLs (работает в Telegram)
+// ✅ Vite asset URLs
 const TILE_ICON: Record<TileType, string> = {
     DEMON: demonImg,
     COIN: coinImg,
@@ -42,17 +31,17 @@ const TILE_ICON: Record<TileType, string> = {
     CLOVER: cloverImg,
 };
 
-// ✅ fallback если img 404 — чтобы не было пустых клеток
+// ✅ emoji fallback (only if img breaks)
 const TILE_FALLBACK: Record<TileType, string> = {
     DEMON: '😈',
     COIN: '🪙',
-    GEM: '💎',
+    GEM: '👾',
     FIRE: '🔥',
     CLOVER: '🍀',
 };
 
-function randomTile(): TileType {
-    return TYPES[Math.floor(Math.random() * TYPES.length)];
+function sleep(ms: number) {
+    return new Promise((r) => setTimeout(r, ms));
 }
 
 function keyOf(x: number, y: number) {
@@ -65,49 +54,66 @@ function isNeighbor(a: Pos, b: Pos) {
     return (dx === 1 && dy === 0) || (dx === 0 && dy === 1);
 }
 
-function sleep(ms: number) {
-    return new Promise((r) => setTimeout(r, ms));
+function getUiForSize(rows: number, cols: number) {
+    const max = Math.max(rows, cols);
+    if (max <= 6) return { tile: 52, gap: 10, font: 26 };
+    if (max === 7) return { tile: 44, gap: 8, font: 24 };
+    if (max === 8) return { tile: 38, gap: 7, font: 22 };
+    return { tile: 34, gap: 6, font: 20 };
 }
 
-function getUiForSize(size: number) {
-    if (size <= 6) return { tile: 52, gap: 10, font: 26 };
-    if (size === 7) return { tile: 44, gap: 8, font: 24 };
-    return { tile: 38, gap: 7, font: 22 };
+function randomTile(allowed: TileType[]): TileType {
+    return allowed[Math.floor(Math.random() * allowed.length)];
 }
 
-/** Находит все клетки, которые входят в линии 3+ */
-function findMatches(board: Board): Set<string> {
-    const size = board.length;
+/** ✅ Find matches on masked board (skip holes + empty) */
+/** ✅ Find matches on masked board (skip holes + empty) */
+function findMatches(board: Board, mask: boolean[][]): Set<string> {
+    const rows = board.length;
+    const cols = board[0].length;
     const matched = new Set<string>();
 
-    // горизонталь
-    for (let y = 0; y < size; y++) {
+    // horizontal
+    for (let y = 0; y < rows; y++) {
         let runStart = 0;
-        for (let x = 1; x <= size; x++) {
-            const prev = board[y][x - 1];
-            const cur = x < size ? board[y][x] : null;
 
+        for (let x = 1; x <= cols; x++) {
+            const prevValid = mask[y][x - 1];
+            const prev: Cell = prevValid ? board[y][x - 1] : EMPTY;
+
+            const curValid = x < cols ? mask[y][x] : false;
+            const cur: Cell = x < cols && curValid ? board[y][x] : EMPTY;
+
+            // разрыв если дырка/граница/пусто/другой тип
             if (cur !== prev || prev === EMPTY) {
                 const runLen = x - runStart;
                 if (prev !== EMPTY && runLen >= 3) {
-                    for (let k = runStart; k < x; k++) matched.add(keyOf(k, y));
+                    for (let k = runStart; k < x; k++) {
+                        if (mask[y][k]) matched.add(keyOf(k, y));
+                    }
                 }
                 runStart = x;
             }
         }
     }
 
-    // вертикаль
-    for (let x = 0; x < size; x++) {
+    // vertical
+    for (let x = 0; x < cols; x++) {
         let runStart = 0;
-        for (let y = 1; y <= size; y++) {
-            const prev = board[y - 1][x];
-            const cur = y < size ? board[y][x] : null;
+
+        for (let y = 1; y <= rows; y++) {
+            const prevValid = mask[y - 1][x];
+            const prev: Cell = prevValid ? board[y - 1][x] : EMPTY;
+
+            const curValid = y < rows ? mask[y][x] : false;
+            const cur: Cell = y < rows && curValid ? board[y][x] : EMPTY;
 
             if (cur !== prev || prev === EMPTY) {
                 const runLen = y - runStart;
                 if (prev !== EMPTY && runLen >= 3) {
-                    for (let k = runStart; k < y; k++) matched.add(keyOf(x, k));
+                    for (let k = runStart; k < y; k++) {
+                        if (mask[k][x]) matched.add(keyOf(x, k));
+                    }
                 }
                 runStart = y;
             }
@@ -116,7 +122,6 @@ function findMatches(board: Board): Set<string> {
 
     return matched;
 }
-
 function swapInBoard(board: Board, a: Pos, b: Pos): Board {
     const next = board.map((r) => r.slice()) as Board;
     const tmp = next[a.y][a.x];
@@ -125,68 +130,38 @@ function swapInBoard(board: Board, a: Pos, b: Pos): Board {
     return next;
 }
 
-/** генерация препятствий под уровень */
-function genObstacles(level: number, size: number) {
-    const ice: number[][] = Array.from({ length: size }, () => Array.from({ length: size }, () => 0));
-    const stone: boolean[][] = Array.from({ length: size }, () => Array.from({ length: size }, () => false));
-    const honey: boolean[][] = Array.from({ length: size }, () => Array.from({ length: size }, () => false));
+/** ✅ gen board on mask and avoid start matches */
+function genBoard(rows: number, cols: number, mask: boolean[][], allowed: TileType[]) {
+    const b: Board = Array.from({ length: rows }, (_, y) =>
+        Array.from({ length: cols }, (_, x) => (mask[y][x] ? randomTile(allowed) : EMPTY))
+    );
 
-    // С 3 уровня: лёд
-    if (level >= 3) {
-        const count = Math.min(10, 3 + level);
-        for (let i = 0; i < count; i++) {
-            const x = Math.floor(Math.random() * size);
-            const y = Math.floor(Math.random() * size);
-            ice[y][x] = 2;
-        }
-    }
-
-    // С 5 уровня: камни
-    if (level >= 5) {
-        const count = Math.min(8, 2 + Math.floor(level / 2));
-        for (let i = 0; i < count; i++) {
-            const x = Math.floor(Math.random() * size);
-            const y = Math.floor(Math.random() * size);
-            stone[y][x] = true;
-            ice[y][x] = 0;
-            honey[y][x] = false;
-        }
-    }
-
-    // С 7 уровня: мёд (блокеры падения)
-    if (level >= 7) {
-        const count = Math.min(8, 3 + Math.floor(level / 2));
-        for (let i = 0; i < count; i++) {
-            const x = Math.floor(Math.random() * size);
-            const y = Math.floor(Math.random() * size);
-            if (stone[y][x]) continue;
-            honey[y][x] = true;
-            ice[y][x] = Math.min(ice[y][x], 1);
-        }
-    }
-
-    return { ice, stone, honey };
-}
-
-/** генерируем доску без стартовых матчей */
-function genBoard(size: number) {
-    const b: Board = Array.from({ length: size }, () => Array.from({ length: size }, () => randomTile()));
-    for (let i = 0; i < 5; i++) {
-        const m = findMatches(b);
+    // try remove initial matches
+    for (let i = 0; i < 6; i++) {
+        const m = findMatches(b, mask);
         if (m.size === 0) break;
         for (const k of m) {
             const [x, y] = k.split(':').map(Number);
-            b[y][x] = randomTile();
+            b[y][x] = randomTile(allowed);
         }
     }
+
     return b;
 }
 
-/** очищаем матчи с учётом препятствий */
-function applyMatchesWithObstacles(board: Board, matches: Set<string>, ice: number[][], honey: boolean[][], stone: boolean[][]) {
+/** ✅ clear matches with obstacles (skip holes) */
+function applyMatchesWithObstacles(
+    board: Board,
+    matches: Set<string>,
+    mask: boolean[][],
+    ice: number[][],
+    honey: boolean[][],
+    stone: boolean[][]
+) {
     const nextBoard = board.map((r) => r.slice()) as Board;
     const nextIce = ice.map((r) => r.slice());
     const nextHoney = honey.map((r) => r.slice());
+    const nextStone = stone.map((r) => r.slice());
 
     let clearedCount = 0;
     let gemHits = 0;
@@ -195,18 +170,19 @@ function applyMatchesWithObstacles(board: Board, matches: Set<string>, ice: numb
 
     for (const k of matches) {
         const [x, y] = k.split(':').map(Number);
+        if (!mask[y][x]) continue;
 
-        // камень матчем не очищаем
-        if (stone[y][x]) continue;
+        // stone not cleared by match
+        if (nextStone[y][x]) continue;
 
-        // лёд: сначала ломаем
+        // ice first
         if (nextIce[y][x] > 0) {
             nextIce[y][x] = Math.max(0, nextIce[y][x] - 1);
             brokeIce++;
-            if (nextIce[y][x] > 0) continue; // лёд ещё есть — символ не очищаем
+            if (nextIce[y][x] > 0) continue;
         }
 
-        // мёд: снимаем 1 ударом
+        // honey removed by 1 hit
         if (nextHoney[y][x]) {
             nextHoney[y][x] = false;
             brokeHoney++;
@@ -218,35 +194,74 @@ function applyMatchesWithObstacles(board: Board, matches: Set<string>, ice: numb
         clearedCount++;
     }
 
-    return { board: nextBoard, ice: nextIce, honey: nextHoney, clearedCount, gemHits, brokeIce, brokeHoney };
+    return {
+        board: nextBoard,
+        ice: nextIce,
+        honey: nextHoney,
+        stone: nextStone,
+        clearedCount,
+        gemHits,
+        brokeIce,
+        brokeHoney,
+    };
 }
 
-/** падение с учётом блокеров (stone/honey). Они стопят колонку */
-function collapseWithBlocks(board: Board, stone: boolean[][], honey: boolean[][]) {
-    const size = board.length;
-    const next: Board = Array.from({ length: size }, () => Array.from({ length: size }, () => EMPTY));
+/**
+ * ✅ Collapse with blocks + mask.
+ * Holes are ignored. Column collapses only within existing cells.
+ * Honey/Stone stay fixed and block fall-through.
+ */
+function collapseWithBlocks(board: Board, mask: boolean[][], stone: boolean[][], honey: boolean[][]) {
+    const rows = board.length;
+    const cols = board[0].length;
 
-    for (let x = 0; x < size; x++) {
-        let writeY = size - 1;
+    const next: Board = Array.from({ length: rows }, (_, y) =>
+        Array.from({ length: cols }, (_, x) => (mask[y][x] ? EMPTY : EMPTY))
+    );
 
-        for (let y = size - 1; y >= 0; y--) {
-            // блокер: фиксируем и перезапускаем запись над ним
+    // copy holes as EMPTY (they'll not render)
+    for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+            if (!mask[y][x]) next[y][x] = EMPTY;
+        }
+    }
+
+    for (let x = 0; x < cols; x++) {
+        // collect valid y positions (cells exist)
+        const ys: number[] = [];
+        for (let y = 0; y < rows; y++) if (mask[y][x]) ys.push(y);
+
+        // write pointer from bottom valid cell upwards
+        let writeIdx = ys.length - 1;
+
+        for (let idx = ys.length - 1; idx >= 0; idx--) {
+            const y = ys[idx];
+
+            // blockers fixed in place
             if (stone[y][x] || honey[y][x]) {
                 next[y][x] = board[y][x];
-                writeY = y - 1;
+                writeIdx = idx - 1;
                 continue;
             }
 
             const v = board[y][x];
-            if (v !== EMPTY) {
-                while (writeY >= 0 && (stone[writeY][x] || honey[writeY][x])) {
-                    next[writeY][x] = board[writeY][x];
-                    writeY--;
+            if (v === EMPTY) continue;
+
+            // move writeIdx up until it's not a blocker
+            while (writeIdx >= 0) {
+                const wy = ys[writeIdx];
+                if (stone[wy][x] || honey[wy][x]) {
+                    next[wy][x] = board[wy][x];
+                    writeIdx--;
+                    continue;
                 }
-                if (writeY >= 0) {
-                    next[writeY][x] = v;
-                    writeY--;
-                }
+                break;
+            }
+
+            if (writeIdx >= 0) {
+                const wy = ys[writeIdx];
+                next[wy][x] = v;
+                writeIdx--;
             }
         }
     }
@@ -254,14 +269,16 @@ function collapseWithBlocks(board: Board, stone: boolean[][], honey: boolean[][]
     return next;
 }
 
-function refill(board: Board, stone: boolean[][], honey: boolean[][]) {
-    const size = board.length;
+function refill(board: Board, mask: boolean[][], stone: boolean[][], honey: boolean[][], allowed: TileType[]) {
+    const rows = board.length;
+    const cols = board[0].length;
     const next = board.map((r) => r.slice()) as Board;
 
-    for (let y = 0; y < size; y++) {
-        for (let x = 0; x < size; x++) {
+    for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+            if (!mask[y][x]) continue;
             if (stone[y][x] || honey[y][x]) continue;
-            if (next[y][x] === EMPTY) next[y][x] = randomTile();
+            if (next[y][x] === EMPTY) next[y][x] = randomTile(allowed);
         }
     }
 
@@ -269,20 +286,32 @@ function refill(board: Board, stone: boolean[][], honey: boolean[][]) {
 }
 
 export default function Match3Level({ level, onBack }: { level: number; onBack: () => void }) {
-    const size = level <= 2 ? 6 : level <= 5 ? 7 : 8;
-    const movesInit = Math.max(10, 22 - level);
-    const targetGem = Math.min(20, 8 + level * 2);
+    const cfg = useMemo(() => getLevelConfig(level), [level]);
 
-    const { tile, gap, font } = getUiForSize(size);
+    const rows = cfg.rows;
+    const cols = cfg.cols;
+    const mask = cfg.mask;
 
-    const initialBoard = useMemo(() => genBoard(size), [size]);
-    const obstacles = useMemo(() => genObstacles(level, size), [level, size]);
+    const movesInit = cfg.moves;
+
+    // Step 1: win by collect GEM amount
+    const targetGem =
+        cfg.objectives.find((o) => o.type === 'COLLECT' && o.tile === 'GEM')?.amount ?? 15;
+
+    const { tile, gap, font } = getUiForSize(rows, cols);
+
+    const initialBoard = useMemo(
+        () => genBoard(rows, cols, mask, cfg.allowedTiles),
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [rows, cols, level]
+    );
+
+    // obstacles from config (make local copies)
+    const [ice, setIce] = useState<number[][]>(() => cfg.ice.map((r) => r.slice()));
+    const [stone, setStone] = useState<boolean[][]>(() => cfg.stone.map((r) => r.slice()));
+    const [honey, setHoney] = useState<boolean[][]>(() => cfg.honey.map((r) => r.slice()));
 
     const [board, setBoard] = useState<Board>(initialBoard);
-
-    const [ice, setIce] = useState<number[][]>(obstacles.ice);
-    const [stone, setStone] = useState<boolean[][]>(obstacles.stone);
-    const [honey, setHoney] = useState<boolean[][]>(obstacles.honey);
 
     const [moves, setMoves] = useState<number>(movesInit);
     const [score, setScore] = useState<number>(0);
@@ -297,7 +326,7 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
     const [booster, setBooster] = useState<Booster>(null);
     const opId = useRef(0);
 
-    // ✅ фикс пустых клеток при 404: запоминаем сломанные картинки по key "x:y"
+    // img broken map per cell (x:y)
     const [imgBroken, setImgBroken] = useState<Record<string, boolean>>({});
 
     const won = gems >= targetGem;
@@ -329,26 +358,31 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
         onBack();
     };
 
-    const canInteractCell = (x: number, y: number) => !stone[y][x] && !honey[y][x];
+    const inBounds = (x: number, y: number) => x >= 0 && y >= 0 && x < cols && y < rows;
+    const isHole = (x: number, y: number) => !mask[y][x];
+    const blockedCell = (x: number, y: number) => stone[y][x] || honey[y][x];
+    const canInteractCell = (x: number, y: number) => inBounds(x, y) && !isHole(x, y) && !blockedCell(x, y);
 
     const dirToNeighbor = (x: number, y: number, dx: number, dy: number) => {
         const nx = x + dx;
         const ny = y + dy;
-        if (nx < 0 || ny < 0 || nx >= size || ny >= size) return null;
+        if (!inBounds(nx, ny)) return null;
+        if (isHole(nx, ny)) return null;
         return { x: nx, y: ny };
     };
 
-    const runCascade = async (startBoard: Board, startIce: number[][], startHoney: boolean[][]) => {
+    const runCascade = async (startBoard: Board, startIce: number[][], startHoney: boolean[][], startStone: boolean[][]) => {
         opId.current += 1;
         const my = opId.current;
 
         let cur = startBoard;
         let curIce = startIce;
         let curHoney = startHoney;
+        let curStone = startStone;
         let chain = 0;
 
         while (true) {
-            const matches = findMatches(cur);
+            const matches = findMatches(cur, mask);
             if (matches.size === 0) break;
 
             chain += 1;
@@ -357,15 +391,17 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
             await sleep(140);
             if (opId.current !== my) return;
 
-            const applied = applyMatchesWithObstacles(cur, matches, curIce, curHoney, stone);
+            const applied = applyMatchesWithObstacles(cur, matches, mask, curIce, curHoney, curStone);
 
             cur = applied.board;
             curIce = applied.ice;
             curHoney = applied.honey;
+            curStone = applied.stone;
 
             setBoard(cur);
             setIce(curIce);
             setHoney(curHoney);
+            setStone(curStone);
 
             if (applied.gemHits) setGems((v) => v + applied.gemHits);
 
@@ -374,14 +410,14 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
             await sleep(120);
             if (opId.current !== my) return;
 
-            cur = collapseWithBlocks(cur, stone, curHoney);
+            cur = collapseWithBlocks(cur, mask, curStone, curHoney);
             setBoard(cur);
             setClearing(new Set());
 
             await sleep(140);
             if (opId.current !== my) return;
 
-            cur = refill(cur, stone, curHoney);
+            cur = refill(cur, mask, curStone, curHoney, cfg.allowedTiles);
             setBoard(cur);
 
             await sleep(140);
@@ -390,6 +426,8 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
     };
 
     const doBomb = async (x: number, y: number) => {
+        if (isHole(x, y)) return;
+
         setBusy(true);
 
         const toClear = new Set<string>();
@@ -397,7 +435,9 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
             for (let dx = -1; dx <= 1; dx++) {
                 const nx = x + dx;
                 const ny = y + dy;
-                if (nx >= 0 && ny >= 0 && nx < size && ny < size) toClear.add(keyOf(nx, ny));
+                if (!inBounds(nx, ny)) continue;
+                if (isHole(nx, ny)) continue;
+                toClear.add(keyOf(nx, ny));
             }
         }
 
@@ -411,7 +451,7 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
 
         let gemHits = 0;
 
-        // чистим broken-состояние для очищаемых клеток одним батчем
+        // clear broken cache for cells we touch
         setImgBroken((prev) => {
             const n = { ...prev };
             for (const kk of toClear) delete n[kk];
@@ -423,9 +463,10 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
 
             if (nextBoard[cy][cx] === 'GEM') gemHits++;
 
+            // bomb destroys everything
             nextIce[cy][cx] = 0;
             nextHoney[cy][cx] = false;
-            if (nextStone[cy][cx]) nextStone[cy][cx] = false;
+            nextStone[cy][cx] = false;
 
             nextBoard[cy][cx] = EMPTY;
         }
@@ -440,13 +481,13 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
 
         await sleep(120);
 
-        nextBoard = collapseWithBlocks(nextBoard, nextStone, nextHoney);
-        nextBoard = refill(nextBoard, nextStone, nextHoney);
+        nextBoard = collapseWithBlocks(nextBoard, mask, nextStone, nextHoney);
+        nextBoard = refill(nextBoard, mask, nextStone, nextHoney, cfg.allowedTiles);
 
         setBoard(nextBoard);
         setClearing(new Set());
 
-        await runCascade(nextBoard, nextIce, nextHoney);
+        await runCascade(nextBoard, nextIce, nextHoney, nextStone);
 
         setBooster(null);
         setBusy(false);
@@ -476,7 +517,7 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
         setBoard(swapped);
         setSelected(null);
 
-        const matches = findMatches(swapped);
+        const matches = findMatches(swapped, mask);
 
         if (matches.size === 0) {
             await sleep(140);
@@ -488,7 +529,7 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
         }
 
         setMoves((m) => Math.max(0, m - 1));
-        await runCascade(swapped, ice, honey);
+        await runCascade(swapped, ice, honey, stone);
         setBusy(false);
     };
 
@@ -534,7 +575,7 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
     };
 
     return (
-        <div className="match3-wrap">
+        <div className={`match3-wrap theme-${cfg.theme}`}>
             <div className="match3-topbar">
                 <button className="match3-back" onClick={onBack}>
                     ⬅ Уровни
@@ -543,7 +584,11 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
                 <div className="match3-title">🍬 Monster Crush · Level {level}</div>
 
                 <div className="match3-moves">
-                    Ходы: {moves} · Очки: {score} · 💎 {gems}/{targetGem}
+                    Ходы: {moves} · Очки: {score} ·
+                    <span className="match3-goal">
+            <img className="match3-goal-icon" src={TILE_ICON.GEM} alt="GEM" />
+                        {gems}/{targetGem}
+          </span>
                 </div>
             </div>
 
@@ -564,12 +609,17 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
                 <div
                     className={`match3-board ${busy ? 'match3-board--busy' : ''} ${shake ? 'match3-board--shake' : ''}`}
                     style={{
-                        gridTemplateColumns: `repeat(${size}, ${tile}px)`,
+                        gridTemplateColumns: `repeat(${cols}, ${tile}px)`,
                         gap: `${gap}px`,
                     }}
                 >
                     {board.flatMap((row, yy) =>
                         row.map((cell, xx) => {
+                            const hole = !mask[yy][xx];
+                            if (hole) {
+                                return <div key={`${xx}-${yy}`} className="match3-hole" style={{ width: tile, height: tile }} />;
+                            }
+
                             const active = selected?.x === xx && selected?.y === yy;
                             const willClear = clearing.has(keyOf(xx, yy));
 
@@ -641,9 +691,7 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
 
                                         // swipe direction
                                         const horiz = Math.abs(dx) >= Math.abs(dy);
-                                        const step = horiz
-                                            ? { dx: dx > 0 ? 1 : -1, dy: 0 }
-                                            : { dx: 0, dy: dy > 0 ? 1 : -1 };
+                                        const step = horiz ? { dx: dx > 0 ? 1 : -1, dy: 0 } : { dx: 0, dy: dy > 0 ? 1 : -1 };
 
                                         const a = { x: d.x, y: d.y };
                                         const b = dirToNeighbor(a.x, a.y, step.dx, step.dy);
@@ -681,27 +729,18 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
                                                 />
                                             )}
 
-                                            {/* FALLBACK (если img сломан) */}
-                                            {imgBroken[k] && (
-                                                <span className="tile-fallback">
-            {TILE_FALLBACK[cell]}
-          </span>
-                                            )}
+                                            {/* FALLBACK */}
+                                            {imgBroken[k] && <span className="tile-fallback">{TILE_FALLBACK[cell]}</span>}
                                         </>
                                     ) : null}
 
                                     {/* ICE overlay */}
-                                    {hasIce && (
-                                        <span className="match3-ice-overlay">
-        {ice[yy][xx] === 2 ? '🧊' : '❄️'}
-      </span>
-                                    )}
+                                    {hasIce && <span className="match3-ice-overlay">{ice[yy][xx] === 2 ? '🧊' : '❄️'}</span>}
 
                                     {/* HONEY overlay */}
                                     {hasHoney && <span className="match3-honey-overlay">🍯</span>}
                                 </div>
                             );
-
                         })
                     )}
                 </div>
@@ -712,9 +751,22 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
                 <div className="match3-over">
                     <div className="match3-over-card">
                         <div className="match3-over-title">Победа! 🎉</div>
-                        <div style={{ opacity: 0.9, marginBottom: 10 }}>
-                            Ты собрал 💎 {gems}/{targetGem}
+
+                        <div
+                            style={{
+                                opacity: 0.9,
+                                marginBottom: 10,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 8,
+                                justifyContent: 'center',
+                            }}
+                        >
+                            Ты собрал
+                            <img className="match3-goal-icon" src={TILE_ICON.GEM} alt="GEM" />
+                            {gems}/{targetGem}
                         </div>
+
                         <button className="match3-back" onClick={unlockNextAndBack}>
                             ✅ Забрать и открыть следующий
                         </button>
