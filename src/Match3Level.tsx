@@ -24,6 +24,15 @@ const TILE_ICON: Record<TileType, string> = {
     CLOVER: `${BASE}tiles/monster.png`,
 };
 
+// ✅ fallback если img 404 — чтобы не было пустых клеток
+const TILE_FALLBACK: Record<TileType, string> = {
+    DEMON: '😈',
+    COIN: '🪙',
+    GEM: '💎',
+    FIRE: '🔥',
+    CLOVER: '🍀',
+};
+
 function randomTile(): TileType {
     return TYPES[Math.floor(Math.random() * TYPES.length)];
 }
@@ -156,13 +165,7 @@ function genBoard(size: number) {
 }
 
 /** очищаем матчи с учётом препятствий */
-function applyMatchesWithObstacles(
-    board: Board,
-    matches: Set<string>,
-    ice: number[][],
-    honey: boolean[][],
-    stone: boolean[][]
-) {
+function applyMatchesWithObstacles(board: Board, matches: Set<string>, ice: number[][], honey: boolean[][], stone: boolean[][]) {
     const nextBoard = board.map((r) => r.slice()) as Board;
     const nextIce = ice.map((r) => r.slice());
     const nextHoney = honey.map((r) => r.slice());
@@ -275,6 +278,9 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
 
     const [booster, setBooster] = useState<Booster>(null);
     const opId = useRef(0);
+
+    // ✅ фикс пустых клеток при 404: запоминаем сломанные картинки по key "x:y"
+    const [imgBroken, setImgBroken] = useState<Record<string, boolean>>({});
 
     const won = gems >= targetGem;
 
@@ -397,6 +403,13 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
             if (nextStone[cy][cx]) nextStone[cy][cx] = false;
 
             nextBoard[cy][cx] = EMPTY;
+
+            // если клетка очищается — сбрасываем broken, чтобы новый символ мог попытаться загрузить img
+            setImgBroken((prev) => {
+                const n = { ...prev };
+                delete n[keyOf(cx, cy)];
+                return n;
+            });
         }
 
         setGems((v) => v + gemHits);
@@ -547,6 +560,8 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
                             const hasHoney = honey[yy][xx];
                             const blocked = hasStone || hasHoney;
 
+                            const k = keyOf(xx, yy);
+
                             return (
                                 <button
                                     key={`${xx}-${yy}`}
@@ -614,20 +629,27 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
                                     onPointerCancel={() => (dragRef.current = null)}
                                     onPointerLeave={() => (dragRef.current = null)}
                                 >
-                                    {/* STONE: оставим emoji */}
+                                    {/* STONE */}
                                     {hasStone ? (
                                         '🪨'
                                     ) : cell ? (
-                                        <img
-                                            src={TILE_ICON[cell]}
-                                            className={`tile-icon ${cell === 'GEM' ? 'breathe' : ''}`}
-                                            draggable={false}
-                                            alt={cell}
-                                            onError={() => {
-                                                // eslint-disable-next-line no-console
-                                                console.error('IMG 404:', TILE_ICON[cell]);
-                                            }}
-                                        />
+                                        imgBroken[k] ? (
+                                            <span className="tile-fallback" style={{ fontSize: font }}>
+                        {TILE_FALLBACK[cell]}
+                      </span>
+                                        ) : (
+                                            <img
+                                                src={TILE_ICON[cell]}
+                                                className={`tile-icon ${cell === 'GEM' ? 'breathe' : ''}`}
+                                                draggable={false}
+                                                alt={cell}
+                                                onError={() => {
+                                                    // eslint-disable-next-line no-console
+                                                    console.error('IMG 404:', TILE_ICON[cell]);
+                                                    setImgBroken((prev) => ({ ...prev, [k]: true }));
+                                                }}
+                                            />
+                                        )
                                     ) : null}
 
                                     {/* ICE overlay */}
