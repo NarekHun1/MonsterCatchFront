@@ -16,8 +16,6 @@ const TYPES = ['DEMON', 'COIN', 'GEM', 'FIRE', 'CLOVER'] as const;
 type TileType = (typeof TYPES)[number];
 
 type Cell = TileType | typeof EMPTY;
-
-// ✅ board is rows×cols now
 type Board = Cell[][];
 type Pos = { x: number; y: number };
 type Booster = 'BOMB' | null;
@@ -67,7 +65,6 @@ function randomTile(allowed: TileType[]): TileType {
 }
 
 /** ✅ Find matches on masked board (skip holes + empty) */
-/** ✅ Find matches on masked board (skip holes + empty) */
 function findMatches(board: Board, mask: boolean[][]): Set<string> {
     const rows = board.length;
     const cols = board[0].length;
@@ -84,7 +81,6 @@ function findMatches(board: Board, mask: boolean[][]): Set<string> {
             const curValid = x < cols ? mask[y][x] : false;
             const cur: Cell = x < cols && curValid ? board[y][x] : EMPTY;
 
-            // разрыв если дырка/граница/пусто/другой тип
             if (cur !== prev || prev === EMPTY) {
                 const runLen = x - runStart;
                 if (prev !== EMPTY && runLen >= 3) {
@@ -122,6 +118,7 @@ function findMatches(board: Board, mask: boolean[][]): Set<string> {
 
     return matched;
 }
+
 function swapInBoard(board: Board, a: Pos, b: Pos): Board {
     const next = board.map((r) => r.slice()) as Board;
     const tmp = next[a.y][a.x];
@@ -215,11 +212,9 @@ function collapseWithBlocks(board: Board, mask: boolean[][], stone: boolean[][],
     const rows = board.length;
     const cols = board[0].length;
 
-    const next: Board = Array.from({ length: rows }, (_, y) =>
-        Array.from({ length: cols }, (_, x) => (mask[y][x] ? EMPTY : EMPTY))
-    );
+    const next: Board = Array.from({ length: rows }, () => Array.from({ length: cols }, () => EMPTY));
 
-    // copy holes as EMPTY (they'll not render)
+    // keep holes empty
     for (let y = 0; y < rows; y++) {
         for (let x = 0; x < cols; x++) {
             if (!mask[y][x]) next[y][x] = EMPTY;
@@ -227,17 +222,14 @@ function collapseWithBlocks(board: Board, mask: boolean[][], stone: boolean[][],
     }
 
     for (let x = 0; x < cols; x++) {
-        // collect valid y positions (cells exist)
         const ys: number[] = [];
         for (let y = 0; y < rows; y++) if (mask[y][x]) ys.push(y);
 
-        // write pointer from bottom valid cell upwards
         let writeIdx = ys.length - 1;
 
         for (let idx = ys.length - 1; idx >= 0; idx--) {
             const y = ys[idx];
 
-            // blockers fixed in place
             if (stone[y][x] || honey[y][x]) {
                 next[y][x] = board[y][x];
                 writeIdx = idx - 1;
@@ -247,7 +239,6 @@ function collapseWithBlocks(board: Board, mask: boolean[][], stone: boolean[][],
             const v = board[y][x];
             if (v === EMPTY) continue;
 
-            // move writeIdx up until it's not a blocker
             while (writeIdx >= 0) {
                 const wy = ys[writeIdx];
                 if (stone[wy][x] || honey[wy][x]) {
@@ -269,7 +260,13 @@ function collapseWithBlocks(board: Board, mask: boolean[][], stone: boolean[][],
     return next;
 }
 
-function refill(board: Board, mask: boolean[][], stone: boolean[][], honey: boolean[][], allowed: TileType[]) {
+function refill(
+    board: Board,
+    mask: boolean[][],
+    stone: boolean[][],
+    honey: boolean[][],
+    allowed: TileType[]
+) {
     const rows = board.length;
     const cols = board[0].length;
     const next = board.map((r) => r.slice()) as Board;
@@ -285,6 +282,51 @@ function refill(board: Board, mask: boolean[][], stone: boolean[][], honey: bool
     return next;
 }
 
+/** ✅ AUTO-SWAP: find best neighbor swap from cell (x,y) that creates match */
+function bestSwapFromCell(
+    board: Board,
+    mask: boolean[][],
+    stone: boolean[][],
+    honey: boolean[][],
+    x: number,
+    y: number
+): Pos | null {
+    const rows = board.length;
+    const cols = board[0].length;
+
+    const inBounds = (xx: number, yy: number) => xx >= 0 && yy >= 0 && xx < cols && yy < rows;
+    const hole = (xx: number, yy: number) => !mask[yy][xx];
+    const blocked = (xx: number, yy: number) => stone[yy][xx] || honey[yy][xx];
+
+    if (!inBounds(x, y) || hole(x, y) || blocked(x, y)) return null;
+
+    const dirs = [
+        { dx: 1, dy: 0 },
+        { dx: -1, dy: 0 },
+        { dx: 0, dy: 1 },
+        { dx: 0, dy: -1 },
+    ];
+
+    let best: { pos: Pos; score: number } | null = null;
+
+    for (const d of dirs) {
+        const nx = x + d.dx;
+        const ny = y + d.dy;
+
+        if (!inBounds(nx, ny) || hole(nx, ny) || blocked(nx, ny)) continue;
+
+        const swapped = swapInBoard(board, { x, y }, { x: nx, y: ny });
+        const matches = findMatches(swapped, mask);
+
+        if (matches.size > 0) {
+            const score = matches.size; // bigger is better
+            if (!best || score > best.score) best = { pos: { x: nx, y: ny }, score };
+        }
+    }
+
+    return best?.pos ?? null;
+}
+
 export default function Match3Level({ level, onBack }: { level: number; onBack: () => void }) {
     const cfg = useMemo(() => getLevelConfig(level), [level]);
 
@@ -295,23 +337,17 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
     const movesInit = cfg.moves;
 
     // Step 1: win by collect GEM amount
-    const targetGem =
-        cfg.objectives.find((o) => o.type === 'COLLECT' && o.tile === 'GEM')?.amount ?? 15;
+    const targetGem = cfg.objectives.find((o) => o.type === 'COLLECT' && o.tile === 'GEM')?.amount ?? 15;
 
     const { tile, gap, font } = getUiForSize(rows, cols);
 
-    const initialBoard = useMemo(
-        () => genBoard(rows, cols, mask, cfg.allowedTiles),
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [rows, cols, level]
-    );
+    const initialBoard = useMemo(() => genBoard(rows, cols, mask, cfg.allowedTiles), [rows, cols, level]);
+    const [board, setBoard] = useState<Board>(initialBoard);
 
     // obstacles from config (make local copies)
     const [ice, setIce] = useState<number[][]>(() => cfg.ice.map((r) => r.slice()));
     const [stone, setStone] = useState<boolean[][]>(() => cfg.stone.map((r) => r.slice()));
     const [honey, setHoney] = useState<boolean[][]>(() => cfg.honey.map((r) => r.slice()));
-
-    const [board, setBoard] = useState<Board>(initialBoard);
 
     const [moves, setMoves] = useState<number>(movesInit);
     const [score, setScore] = useState<number>(0);
@@ -493,6 +529,7 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
         setBusy(false);
     };
 
+    /** ✅ TRY SWAP + AUTO-SWAP ALWAYS */
     const trySwap = async (a: Pos, b: Pos) => {
         if (busy || moves <= 0 || won) return;
 
@@ -513,13 +550,36 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
         setBusy(true);
 
         const before = board;
+
+        // 1) do user swap
         const swapped = swapInBoard(before, a, b);
         setBoard(swapped);
         setSelected(null);
 
-        const matches = findMatches(swapped, mask);
+        let matches = findMatches(swapped, mask);
 
         if (matches.size === 0) {
+            // 2) AUTO-SWAP: find best neighbor from cell "a"
+            const autoB = bestSwapFromCell(before, mask, stone, honey, a.x, a.y);
+
+            if (autoB) {
+                // small delay for better feel
+                await sleep(110);
+
+                const autoSwapped = swapInBoard(before, a, autoB);
+                setBoard(autoSwapped);
+
+                matches = findMatches(autoSwapped, mask);
+
+                if (matches.size > 0) {
+                    setMoves((m) => Math.max(0, m - 1));
+                    await runCascade(autoSwapped, ice, honey, stone);
+                    setBusy(false);
+                    return;
+                }
+            }
+
+            // 3) revert if nothing works
             await sleep(140);
             setBoard(before);
             setShake(true);
@@ -528,6 +588,7 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
             return;
         }
 
+        // normal success
         setMoves((m) => Math.max(0, m - 1));
         await runCascade(swapped, ice, honey, stone);
         setBusy(false);
@@ -691,7 +752,9 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
 
                                         // swipe direction
                                         const horiz = Math.abs(dx) >= Math.abs(dy);
-                                        const step = horiz ? { dx: dx > 0 ? 1 : -1, dy: 0 } : { dx: 0, dy: dy > 0 ? 1 : -1 };
+                                        const step = horiz
+                                            ? { dx: dx > 0 ? 1 : -1, dy: 0 }
+                                            : { dx: 0, dy: dy > 0 ? 1 : -1 };
 
                                         const a = { x: d.x, y: d.y };
                                         const b = dirToNeighbor(a.x, a.y, step.dx, step.dy);
