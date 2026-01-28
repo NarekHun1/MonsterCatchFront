@@ -3,11 +3,11 @@ import './match3.css';
 import { useMemo, useRef, useState } from 'react';
 
 // ✅ PNG (обычные символы)
-import demonPng from './assets/tiles/monster-2.png';
-import coinPng from './assets/tiles/cute.png';
-import gemPng from './assets/tiles/monster-3.png';
-import firePng from './assets/tiles/monster-4.png';
-import cloverPng from './assets/tiles/monster.png';
+import demonPng from '../public/monster-2.png';
+import coinPng from '../public/cute.png';
+import gemPng from '../public/monster-3.png';
+import firePng from '../public/monster-4.png';
+import cloverPng from '../public/monster.png';
 
 const EMPTY: '' = '';
 
