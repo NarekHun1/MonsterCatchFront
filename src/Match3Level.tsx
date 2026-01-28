@@ -2,16 +2,34 @@
 import './match3.css';
 import { useMemo, useRef, useState } from 'react';
 
-const TYPES = ['😈', '🪙', '💎', '🔥', '🍀'];
-const EMPTY = '';
+// ✅ PNG (обычные символы)
+import demonPng from './assets/tiles/monster-2.png';
+import coinPng from './assets/tiles/cute.png';
+import gemPng from './assets/tiles/monster-3.png';
+import firePng from './assets/tiles/monster-4.png';
+import cloverPng from './assets/tiles/monster.png';
 
-type Pos = { x: number; y: number };
-type Cell = string;
+const EMPTY: '' = '';
+
+const TYPES = ['DEMON', 'COIN', 'GEM', 'FIRE', 'CLOVER'] as const;
+type TileType = (typeof TYPES)[number];
+
+type Cell = TileType | '';
 type Board = Cell[][];
 
+type Pos = { x: number; y: number };
 type Booster = 'BOMB' | null;
 
-function randomTile() {
+// ✅ маппинг PNG
+const TILE_ICON: Record<TileType, string> = {
+    DEMON: demonPng,
+    COIN: coinPng,
+    GEM: gemPng,
+    FIRE: firePng,
+    CLOVER: cloverPng,
+};
+
+function randomTile(): TileType {
     return TYPES[Math.floor(Math.random() * TYPES.length)];
 }
 
@@ -78,7 +96,7 @@ function findMatches(board: Board): Set<string> {
 }
 
 function swapInBoard(board: Board, a: Pos, b: Pos): Board {
-    const next = board.map((r) => r.slice());
+    const next = board.map((r) => r.slice()) as Board;
     const tmp = next[a.y][a.x];
     next[a.y][a.x] = next[b.y][b.x];
     next[b.y][b.x] = tmp;
@@ -105,7 +123,7 @@ function genObstacles(level: number, size: number) {
         for (let i = 0; i < count; i++) {
             const x = Math.floor(Math.random() * size);
             const y = Math.floor(Math.random() * size);
-            ice[y][x] = 2; // 2 слоя
+            ice[y][x] = 2;
         }
     }
 
@@ -121,7 +139,7 @@ function genObstacles(level: number, size: number) {
         }
     }
 
-    // С 7 уровня: мёд (блокеры падения)
+    // С 7 уровня: мёд
     if (level >= 7) {
         const count = Math.min(8, 3 + Math.floor(level / 2));
         for (let i = 0; i < count; i++) {
@@ -142,7 +160,7 @@ function genBoard(size: number) {
         Array.from({ length: size }, () => randomTile())
     );
 
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 5; i++) {
         const m = findMatches(b);
         if (m.size === 0) break;
         for (const k of m) {
@@ -161,7 +179,7 @@ function applyMatchesWithObstacles(
     honey: boolean[][],
     stone: boolean[][]
 ) {
-    const nextBoard = board.map((r) => r.slice());
+    const nextBoard = board.map((r) => r.slice()) as Board;
     const nextIce = ice.map((r) => r.slice());
     const nextHoney = honey.map((r) => r.slice());
 
@@ -173,23 +191,21 @@ function applyMatchesWithObstacles(
     for (const k of matches) {
         const [x, y] = k.split(':').map(Number);
 
-        // камень не очищаем матчем
         if (stone[y][x]) continue;
 
-        // лёд: сначала ломаем
         if (nextIce[y][x] > 0) {
             nextIce[y][x] = Math.max(0, nextIce[y][x] - 1);
             brokeIce++;
-            if (nextIce[y][x] > 0) continue; // лёд ещё есть — не очищаем символ
+            if (nextIce[y][x] > 0) continue;
         }
 
-        // мёд: снимаем 1 ударом (и клетка очищается)
         if (nextHoney[y][x]) {
             nextHoney[y][x] = false;
             brokeHoney++;
         }
 
-        if (nextBoard[y][x] === '💎') gemHits++;
+        // ✅ теперь GEM, а не '💎'
+        if (nextBoard[y][x] === 'GEM') gemHits++;
 
         nextBoard[y][x] = EMPTY;
         clearedCount++;
@@ -206,7 +222,7 @@ function applyMatchesWithObstacles(
     };
 }
 
-/** падение с учётом блокеров (stone/honey). Они стопят колонку. */
+/** падение с учётом блокеров */
 function collapseWithBlocks(board: Board, stone: boolean[][], honey: boolean[][]) {
     const size = board.length;
     const next: Board = Array.from({ length: size }, () =>
@@ -217,7 +233,6 @@ function collapseWithBlocks(board: Board, stone: boolean[][], honey: boolean[][]
         let writeY = size - 1;
 
         for (let y = size - 1; y >= 0; y--) {
-            // блокер: камень или мёд — фиксируем и "перезапускаем" writeY над ним
             if (stone[y][x] || honey[y][x]) {
                 next[y][x] = board[y][x];
                 writeY = y - 1;
@@ -243,7 +258,7 @@ function collapseWithBlocks(board: Board, stone: boolean[][], honey: boolean[][]
 
 function refill(board: Board, stone: boolean[][], honey: boolean[][]) {
     const size = board.length;
-    const next = board.map((r) => r.slice());
+    const next = board.map((r) => r.slice()) as Board;
     for (let y = 0; y < size; y++) {
         for (let x = 0; x < size; x++) {
             if (stone[y][x] || honey[y][x]) continue;
@@ -262,7 +277,6 @@ export default function Match3Level({
 }) {
     const size = level <= 2 ? 6 : level <= 5 ? 7 : 8;
     const movesInit = Math.max(10, 22 - level);
-
     const targetGem = Math.min(20, 8 + level * 2);
 
     const { tile, gap, font } = getUiForSize(size);
@@ -301,7 +315,6 @@ export default function Match3Level({
     } | null>(null);
 
     const SWIPE_PX = 16;
-
     const won = gems >= targetGem;
 
     const unlockNextAndBack = () => {
@@ -398,7 +411,7 @@ export default function Match3Level({
         setClearing(toClear);
         await sleep(180);
 
-        let nextBoard = board.map((r) => r.slice());
+        let nextBoard = board.map((r) => r.slice()) as Board;
         const nextIce = ice.map((r) => r.slice());
         const nextHoney = honey.map((r) => r.slice());
         const nextStone = stone.map((r) => r.slice());
@@ -408,7 +421,7 @@ export default function Match3Level({
         for (const k of toClear) {
             const [cx, cy] = k.split(':').map(Number);
 
-            if (nextBoard[cy][cx] === '💎') gemHits++;
+            if (nextBoard[cy][cx] === 'GEM') gemHits++;
 
             nextIce[cy][cx] = 0;
             nextHoney[cy][cx] = false;
@@ -547,9 +560,7 @@ export default function Match3Level({
                     💣 Bomb
                 </button>
 
-                <div className="match3-legend">
-                    🧊 лёд (2 удара) · 🪨 камень (только 💣) · 🍯 мёд (блок падения)
-                </div>
+                <div className="match3-legend">🧊 лёд (2 удара) · 🪨 камень (только 💣) · 🍯 мёд (блок падения)</div>
             </div>
 
             <div className="match3-stage">
@@ -561,102 +572,104 @@ export default function Match3Level({
                     }}
                 >
                     {board.flatMap((row, yy) =>
-                            row.map((cell, xx) => {
-                                const active = selected?.x === xx && selected?.y === yy;
-                                const willClear = clearing.has(keyOf(xx, yy));
+                        row.map((cell, xx) => {
+                            const active = selected?.x === xx && selected?.y === yy;
+                            const willClear = clearing.has(keyOf(xx, yy));
 
-                                const hasIce = ice[yy][xx] > 0;
-                                const hasStone = stone[yy][xx];
-                                const hasHoney = honey[yy][xx];
-                                const blocked = hasStone || hasHoney;
+                            const hasIce = ice[yy][xx] > 0;
+                            const hasStone = stone[yy][xx];
+                            const hasHoney = honey[yy][xx];
+                            const blocked = hasStone || hasHoney;
 
-                                return (
-                                    <button
-                                        key={`${xx}-${yy}`}
-                                        className={[
-                                            'match3-tile',
-                                            active ? 'match3-tile--selected' : '',
-                                            willClear ? 'match3-tile--clearing' : '',
-                                            hasIce ? `match3-tile--ice ice-${ice[yy][xx]}` : '',
-                                            hasStone ? 'match3-tile--stone' : '',
-                                            hasHoney ? 'match3-tile--honey' : '',
-                                            blocked ? 'match3-tile--blocked' : '',
-                                        ].join(' ')}
-                                        style={{ width: tile, height: tile, fontSize: font }}
-                                        disabled={busy || won}
-                                        onPointerDown={(e) => {
-                                            if (busy || moves <= 0 || won) return;
-                                            (e.currentTarget as HTMLButtonElement).setPointerCapture?.(e.pointerId);
+                            return (
+                                <button
+                                    key={`${xx}-${yy}`}
+                                    className={[
+                                        'match3-tile',
+                                        active ? 'match3-tile--selected' : '',
+                                        willClear ? 'match3-tile--clearing' : '',
+                                        hasIce ? `match3-tile--ice ice-${ice[yy][xx]}` : '',
+                                        hasStone ? 'match3-tile--stone' : '',
+                                        hasHoney ? 'match3-tile--honey' : '',
+                                        blocked ? 'match3-tile--blocked' : '',
+                                    ].join(' ')}
+                                    style={{ width: tile, height: tile, fontSize: font }}
+                                    disabled={busy || won}
+                                    onPointerDown={(e) => {
+                                        if (busy || moves <= 0 || won) return;
+                                        (e.currentTarget as HTMLButtonElement).setPointerCapture?.(e.pointerId);
 
-                                            dragRef.current = {
-                                                x: xx,
-                                                y: yy,
-                                                sx: e.clientX,
-                                                sy: e.clientY,
-                                                moved: false,
-                                                pid: e.pointerId,
-                                            };
-                                        }}
-                                        onPointerMove={(e) => {
-                                            const d = dragRef.current;
-                                            if (!d) return;
-                                            if (d.pid !== e.pointerId) return;
+                                        dragRef.current = {
+                                            x: xx,
+                                            y: yy,
+                                            sx: e.clientX,
+                                            sy: e.clientY,
+                                            moved: false,
+                                            pid: e.pointerId,
+                                        };
+                                    }}
+                                    onPointerMove={(e) => {
+                                        const d = dragRef.current;
+                                        if (!d) return;
+                                        if (d.pid !== e.pointerId) return;
 
-                                            const dx = e.clientX - d.sx;
-                                            const dy = e.clientY - d.sy;
+                                        const dx = e.clientX - d.sx;
+                                        const dy = e.clientY - d.sy;
+                                        if (Math.abs(dx) > 6 || Math.abs(dy) > 6) d.moved = true;
+                                    }}
+                                    onPointerUp={async (e) => {
+                                        const d = dragRef.current;
+                                        dragRef.current = null;
 
-                                            if (Math.abs(dx) > 6 || Math.abs(dy) > 6) d.moved = true;
-                                        }}
-                                        onPointerUp={async (e) => {
-                                            const d = dragRef.current;
-                                            dragRef.current = null;
+                                        if (!d) {
+                                            await onTileTap(xx, yy);
+                                            return;
+                                        }
 
-                                            if (!d) {
-                                                await onTileTap(xx, yy);
-                                                return;
-                                            }
+                                        const dx = e.clientX - d.sx;
+                                        const dy = e.clientY - d.sy;
 
-                                            const dx = e.clientX - d.sx;
-                                            const dy = e.clientY - d.sy;
+                                        // tap
+                                        if (Math.abs(dx) < SWIPE_PX && Math.abs(dy) < SWIPE_PX) {
+                                            await onTileTap(d.x, d.y);
+                                            return;
+                                        }
 
-                                            // tap
-                                            if (Math.abs(dx) < SWIPE_PX && Math.abs(dy) < SWIPE_PX) {
-                                                await onTileTap(d.x, d.y);
-                                                return;
-                                            }
+                                        // swipe direction
+                                        const horiz = Math.abs(dx) >= Math.abs(dy);
+                                        const step = horiz
+                                            ? { dx: dx > 0 ? 1 : -1, dy: 0 }
+                                            : { dx: 0, dy: dy > 0 ? 1 : -1 };
 
-                                            // swipe direction
-                                            const horiz = Math.abs(dx) >= Math.abs(dy);
-                                            const step = horiz
-                                                ? { dx: dx > 0 ? 1 : -1, dy: 0 }
-                                                : { dx: 0, dy: dy > 0 ? 1 : -1 };
+                                        const a = { x: d.x, y: d.y };
+                                        const b = dirToNeighbor(a.x, a.y, step.dx, step.dy);
+                                        if (!b) return;
 
-                                            const a = { x: d.x, y: d.y };
-                                            const b = dirToNeighbor(a.x, a.y, step.dx, step.dy);
-                                            if (!b) return;
+                                        await trySwap(a, b);
+                                    }}
+                                >
+                                    {/* ✅ STONE оставляем emoji */}
+                                    {hasStone ? (
+                                        '🪨'
+                                    ) : cell ? (
+                                        <img
+                                            src={TILE_ICON[cell]}
+                                            className={`tile-icon ${cell === 'GEM' ? 'breathe' : ''}`}
+                                            draggable={false}
+                                            alt={cell}
+                                        />
+                                    ) : null}
 
-                                            await trySwap(a, b);
-                                        }}
-                                        onClick={(e) => {
-                                            // если было движение — гасим click, чтобы не было дубля
-                                            if (dragRef.current?.moved) {
-                                                e.preventDefault();
-                                                e.stopPropagation();
-                                            }
-                                        }}
-                                    >
-                                        {hasStone ? '🪨' : cell}
+                                    {/* ✅ ICE оставляем emoji overlay */}
+                                    {hasIce && (
+                                        <span className="match3-ice-overlay">{ice[yy][xx] === 2 ? '🧊' : '❄️'}</span>
+                                    )}
 
-                                        {hasIce && (
-                                            <span className="match3-ice-overlay">
-                      {ice[yy][xx] === 2 ? '🧊' : '❄️'}
-                    </span>
-                                        )}
-
-                                        {hasHoney && <span className="match3-honey-overlay">🍯</span>}
-                                    </button>
-                                );
-                            })
+                                    {/* ✅ HONEY как было */}
+                                    {hasHoney && <span className="match3-honey-overlay">🍯</span>}
+                                </button>
+                            );
+                        })
                     )}
                 </div>
             </div>

@@ -8,6 +8,34 @@
     padding: 14px;
     padding-bottom: 120px; /* место под BottomNav */
 }
+.tile-icon{
+    width: 72%;
+    height: 72%;
+    object-fit: contain;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+
+    filter: drop-shadow(0 6px 10px rgba(0,0,0,0.35));
+    transform-origin: 50% 60%;
+}
+
+/* дыхание (например только GEM) */
+.tile-icon.breathe{
+    animation: tile-breathe 1400ms ease-in-out infinite;
+}
+
+@keyframes tile-breathe{
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* при очистке */
+.match3-tile--clearing .tile-icon{
+    transform: scale(0.75);
+    opacity: 0.3;
+}
 
 .match3-topbar {
     display: flex;
