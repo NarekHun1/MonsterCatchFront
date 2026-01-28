@@ -446,3 +446,13 @@
 level-node{
     position: relative;
 }
+@keyframes link-shine {
+    0%   { transform: translateX(-40%) rotate(18deg); opacity: 0.0; }
+    15%  { opacity: 0.55; }
+    50%  { opacity: 0.35; }
+    100% { transform: translateX(220%) rotate(18deg); opacity: 0.0; }
+}
+
+.level-link::after{
+    animation: link-shine 1600ms ease-in-out infinite;
+}
