@@ -644,3 +644,134 @@
     object-fit: contain;
     filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35));
 }
+/* ─────────────────────────────────────────────
+   💡 HINT highlight (2 cells)
+   class: match3-tile--hint
+───────────────────────────────────────────── */
+
+.match3-tile--hint{
+    outline: 2px solid rgba(255, 215, 0, 0.95);
+    outline-offset: 2px;
+    box-shadow:
+            0 0 0 3px rgba(255, 215, 0, 0.22),
+            0 12px 26px rgba(0,0,0,0.35);
+    z-index: 3;
+    animation: match3HintPulse 0.55s ease-in-out infinite alternate;
+}
+
+@keyframes match3HintPulse{
+    from{
+        transform: translateZ(0) scale(1);
+        filter: brightness(1);
+    }
+    to{
+        transform: translateZ(0) scale(1.045);
+        filter: brightness(1.08);
+    }
+}
+
+/* optional: add tiny "sparkle" overlay */
+.match3-tile--hint::after{
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: 18px;
+    pointer-events: none;
+    background:
+            radial-gradient(circle at 25% 30%, rgba(255,255,255,0.55), rgba(255,255,255,0) 45%),
+            radial-gradient(circle at 70% 75%, rgba(255,255,255,0.35), rgba(255,255,255,0) 55%);
+    opacity: .55;
+    animation: match3HintGlow 0.7s ease-in-out infinite alternate;
+}
+
+@keyframes match3HintGlow{
+    from{ opacity: .35; }
+    to{ opacity: .7; }
+}
+
+
+/* ─────────────────────────────────────────────
+   Buttons: Hint / Shuffle (same style as boosters)
+   (если у тебя уже есть match3-booster-btn — это
+    просто улучшение/перезапись)
+───────────────────────────────────────────── */
+
+.match3-boosters{
+    display:flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    margin: 10px 0 12px;
+}
+
+.match3-booster-btn{
+    appearance:none;
+    border: 1px solid rgba(255,255,255,0.14);
+    background:
+            radial-gradient(circle at 20% 20%, rgba(255,255,255,0.14), rgba(255,255,255,0) 55%),
+            rgba(12, 12, 18, 0.72);
+    color: rgba(255,255,255,0.94);
+    padding: 10px 12px;
+    border-radius: 14px;
+    font-weight: 900;
+    letter-spacing: .2px;
+    cursor: pointer;
+    box-shadow:
+            0 0 0 1px rgba(255,255,255,0.06),
+            0 10px 24px rgba(0,0,0,0.35);
+    transition: transform .15s ease, filter .15s ease, background .2s ease, border-color .2s ease;
+    user-select: none;
+}
+
+.match3-booster-btn:hover{
+    transform: translateY(-1px);
+    filter: brightness(1.06);
+    border-color: rgba(255,255,255,0.22);
+}
+
+.match3-booster-btn:active{
+    transform: translateY(0px) scale(0.99);
+    filter: brightness(0.98);
+}
+
+.match3-booster-btn:disabled{
+    opacity: .55;
+    cursor: not-allowed;
+    transform: none;
+    filter: none;
+}
+
+.match3-booster-btn.active{
+    border-color: rgba(255, 215, 0, 0.45);
+    box-shadow:
+            0 0 0 1px rgba(255, 215, 0, 0.22),
+            0 12px 28px rgba(0,0,0,0.42);
+}
+
+/* Legend line */
+.match3-legend{
+    width: 100%;
+    text-align: center;
+    font-size: 12px;
+    opacity: .78;
+    margin-top: 4px;
+}
+
+
+/* ─────────────────────────────────────────────
+   Make sure tiles can render ::after overlays
+   (если у тебя match3-tile уже есть — просто
+    убедись что position: relative)
+───────────────────────────────────────────── */
+
+.match3-tile{
+    position: relative; /* важно для ::after (sparkle) */
+    will-change: transform;
+}
+
+/* Optional: nicer focus for keyboard */
+.match3-tile:focus-visible{
+    outline: 2px solid rgba(255,255,255,0.35);
+    outline-offset: 2px;
+}

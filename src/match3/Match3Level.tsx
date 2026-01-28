@@ -260,13 +260,7 @@ function collapseWithBlocks(board: Board, mask: boolean[][], stone: boolean[][],
     return next;
 }
 
-function refill(
-    board: Board,
-    mask: boolean[][],
-    stone: boolean[][],
-    honey: boolean[][],
-    allowed: TileType[]
-) {
+function refill(board: Board, mask: boolean[][], stone: boolean[][], honey: boolean[][], allowed: TileType[]) {
     const rows = board.length;
     const cols = board[0].length;
     const next = board.map((r) => r.slice()) as Board;
@@ -327,6 +321,127 @@ function bestSwapFromCell(
     return best?.pos ?? null;
 }
 
+/* ─────────────────────────────────────────────
+   ✅ HINT + NO-MOVES RESHUFFLE
+───────────────────────────────────────────── */
+
+type MoveHint = { a: Pos; b: Pos; score: number };
+
+function findAnyMove(board: Board, mask: boolean[][], stone: boolean[][], honey: boolean[][]): MoveHint | null {
+    const rows = board.length;
+    const cols = board[0].length;
+
+    const inBounds = (x: number, y: number) => x >= 0 && y >= 0 && x < cols && y < rows;
+    const hole = (x: number, y: number) => !mask[y][x];
+    const blocked = (x: number, y: number) => stone[y][x] || honey[y][x];
+
+    const dirs = [
+        { dx: 1, dy: 0 },
+        { dx: 0, dy: 1 },
+        { dx: -1, dy: 0 },
+        { dx: 0, dy: -1 },
+    ];
+
+    let best: MoveHint | null = null;
+
+    for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+            if (!inBounds(x, y) || hole(x, y) || blocked(x, y)) continue;
+            if (board[y][x] === EMPTY) continue;
+
+            for (const d of dirs) {
+                const nx = x + d.dx;
+                const ny = y + d.dy;
+                if (!inBounds(nx, ny) || hole(nx, ny) || blocked(nx, ny)) continue;
+                if (board[ny][nx] === EMPTY) continue;
+
+                const swapped = swapInBoard(board, { x, y }, { x: nx, y: ny });
+                const matches = findMatches(swapped, mask);
+                if (matches.size > 0) {
+                    const score = matches.size;
+                    if (!best || score > best.score) best = { a: { x, y }, b: { x: nx, y: ny }, score };
+                }
+            }
+        }
+    }
+
+    return best;
+}
+
+function hasAnyMoves(board: Board, mask: boolean[][], stone: boolean[][], honey: boolean[][]) {
+    return findAnyMove(board, mask, stone, honey) !== null;
+}
+
+function reshuffleBoard(
+    board: Board,
+    mask: boolean[][],
+    stone: boolean[][],
+    honey: boolean[][],
+    allowed: TileType[]
+): Board {
+    const rows = board.length;
+    const cols = board[0].length;
+
+    // positions we can reshuffle (not holes, not blocked)
+    const cells: Pos[] = [];
+    const bag: TileType[] = [];
+
+    for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+            if (!mask[y][x]) continue;
+            if (stone[y][x] || honey[y][x]) continue;
+
+            const v = board[y][x];
+            if (v !== EMPTY) {
+                cells.push({ x, y });
+                bag.push(v as TileType);
+            }
+        }
+    }
+
+    if (cells.length < 3) {
+        return genBoard(rows, cols, mask, allowed);
+    }
+
+    const shuffle = <T,>(arr: T[]) => {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    };
+
+    for (let attempt = 0; attempt < 40; attempt++) {
+        const mixed = shuffle(bag);
+
+        const next = board.map((r) => r.slice()) as Board;
+        for (let i = 0; i < cells.length; i++) {
+            const { x, y } = cells[i];
+            next[y][x] = mixed[i];
+        }
+
+        // remove start matches by small random replacements
+        for (let i = 0; i < 6; i++) {
+            const m = findMatches(next, mask);
+            if (m.size === 0) break;
+
+            for (const k of m) {
+                const [x, y] = k.split(':').map(Number);
+                if (!mask[y][x]) continue;
+                if (stone[y][x] || honey[y][x]) continue;
+                next[y][x] = randomTile(allowed);
+            }
+        }
+
+        if (findMatches(next, mask).size === 0 && hasAnyMoves(next, mask, stone, honey)) {
+            return next;
+        }
+    }
+
+    return genBoard(rows, cols, mask, allowed);
+}
+
 export default function Match3Level({ level, onBack }: { level: number; onBack: () => void }) {
     const cfg = useMemo(() => getLevelConfig(level), [level]);
 
@@ -364,6 +479,9 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
 
     // img broken map per cell (x:y)
     const [imgBroken, setImgBroken] = useState<Record<string, boolean>>({});
+
+    // ✅ hint
+    const [hint, setHint] = useState<MoveHint | null>(null);
 
     const won = gems >= targetGem;
 
@@ -405,6 +523,12 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
         if (!inBounds(nx, ny)) return null;
         if (isHole(nx, ny)) return null;
         return { x: nx, y: ny };
+    };
+
+    const showHint = (srcBoard = board, srcStone = stone, srcHoney = honey) => {
+        const h = findAnyMove(srcBoard, mask, srcStone, srcHoney);
+        setHint(h);
+        window.setTimeout(() => setHint(null), 1200);
     };
 
     const runCascade = async (startBoard: Board, startIce: number[][], startHoney: boolean[][], startStone: boolean[][]) => {
@@ -459,12 +583,26 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
             await sleep(140);
             if (opId.current !== my) return;
         }
+
+        // ✅ after cascade: if NO moves -> reshuffle
+        if (!hasAnyMoves(cur, mask, curStone, curHoney)) {
+            const reshuffled = reshuffleBoard(cur, mask, curStone, curHoney, cfg.allowedTiles);
+            setBoard(reshuffled);
+            setClearing(new Set());
+            setSelected(null);
+
+            // optional: show hint after reshuffle
+            const h = findAnyMove(reshuffled, mask, curStone, curHoney);
+            setHint(h);
+            window.setTimeout(() => setHint(null), 900);
+        }
     };
 
     const doBomb = async (x: number, y: number) => {
         if (isHole(x, y)) return;
 
         setBusy(true);
+        setHint(null);
 
         const toClear = new Set<string>();
         for (let dy = -1; dy <= 1; dy++) {
@@ -542,12 +680,14 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
             setShake(true);
             setTimeout(() => setShake(false), 220);
             setSelected(null);
+            showHint();
             return;
         }
 
         if (!isNeighbor(a, b)) return;
 
         setBusy(true);
+        setHint(null);
 
         const before = board;
 
@@ -563,7 +703,6 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
             const autoB = bestSwapFromCell(before, mask, stone, honey, a.x, a.y);
 
             if (autoB) {
-                // small delay for better feel
                 await sleep(110);
 
                 const autoSwapped = swapInBoard(before, a, autoB);
@@ -584,6 +723,10 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
             setBoard(before);
             setShake(true);
             setTimeout(() => setShake(false), 220);
+
+            // ✅ show hint after bad move
+            showHint(before, stone, honey);
+
             setBusy(false);
             return;
         }
@@ -605,6 +748,7 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
         if (!canInteractCell(x, y)) {
             setShake(true);
             setTimeout(() => setShake(false), 220);
+            showHint();
             return;
         }
 
@@ -663,6 +807,31 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
                     💣 Bomb
                 </button>
 
+                <button
+                    className="match3-booster-btn"
+                    onClick={() => showHint()}
+                    disabled={busy || won}
+                    title="Подсказка"
+                >
+                    💡 Hint
+                </button>
+
+                <button
+                    className="match3-booster-btn"
+                    onClick={() => {
+                        if (busy || won) return;
+                        const reshuffled = reshuffleBoard(board, mask, stone, honey, cfg.allowedTiles);
+                        setBoard(reshuffled);
+                        setSelected(null);
+                        setClearing(new Set());
+                        showHint(reshuffled, stone, honey);
+                    }}
+                    disabled={busy || won}
+                    title="Перемешать (если не хочешь ждать auto)"
+                >
+                    🔀 Shuffle
+                </button>
+
                 <div className="match3-legend">🧊 лёд (2 удара) · 🪨 камень (только 💣) · 🍯 мёд (блок падения)</div>
             </div>
 
@@ -691,6 +860,9 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
 
                             const k = keyOf(xx, yy);
 
+                            const hinted =
+                                !!hint && ((hint.a.x === xx && hint.a.y === yy) || (hint.b.x === xx && hint.b.y === yy));
+
                             return (
                                 <div
                                     key={`${xx}-${yy}`}
@@ -701,6 +873,7 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
                                         'match3-tile',
                                         active ? 'match3-tile--selected' : '',
                                         willClear ? 'match3-tile--clearing' : '',
+                                        hinted ? 'match3-tile--hint' : '',
                                         hasIce ? `match3-tile--ice ice-${ice[yy][xx]}` : '',
                                         hasStone ? 'match3-tile--stone' : '',
                                         hasHoney ? 'match3-tile--honey' : '',
