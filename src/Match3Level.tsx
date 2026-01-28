@@ -581,8 +581,11 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
                             const k = keyOf(xx, yy);
 
                             return (
-                                <button
+                                <div
                                     key={`${xx}-${yy}`}
+                                    role="button"
+                                    tabIndex={0}
+                                    aria-disabled={busy || won}
                                     className={[
                                         'match3-tile',
                                         active ? 'match3-tile--selected' : '',
@@ -591,12 +594,12 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
                                         hasStone ? 'match3-tile--stone' : '',
                                         hasHoney ? 'match3-tile--honey' : '',
                                         blocked ? 'match3-tile--blocked' : '',
+                                        busy || won ? 'match3-tile--disabled' : '',
                                     ].join(' ')}
                                     style={{ width: tile, height: tile, fontSize: font }}
-                                    disabled={busy || won}
                                     onPointerDown={(e) => {
                                         if (busy || moves <= 0 || won) return;
-                                        (e.currentTarget as HTMLButtonElement).setPointerCapture?.(e.pointerId);
+                                        (e.currentTarget as HTMLDivElement).setPointerCapture?.(e.pointerId);
 
                                         dragRef.current = {
                                             x: xx,
@@ -617,6 +620,8 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
                                         if (Math.abs(dx) > 6 || Math.abs(dy) > 6) d.moved = true;
                                     }}
                                     onPointerUp={async (e) => {
+                                        if (busy || moves <= 0 || won) return;
+
                                         const d = dragRef.current;
                                         dragRef.current = null;
 
@@ -636,7 +641,9 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
 
                                         // swipe direction
                                         const horiz = Math.abs(dx) >= Math.abs(dy);
-                                        const step = horiz ? { dx: dx > 0 ? 1 : -1, dy: 0 } : { dx: 0, dy: dy > 0 ? 1 : -1 };
+                                        const step = horiz
+                                            ? { dx: dx > 0 ? 1 : -1, dy: 0 }
+                                            : { dx: 0, dy: dy > 0 ? 1 : -1 };
 
                                         const a = { x: d.x, y: d.y };
                                         const b = dirToNeighbor(a.x, a.y, step.dx, step.dy);
@@ -646,39 +653,55 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
                                     }}
                                     onPointerCancel={() => (dragRef.current = null)}
                                     onPointerLeave={() => (dragRef.current = null)}
+                                    onClick={async () => {
+                                        if (busy || moves <= 0 || won) return;
+                                        await onTileTap(xx, yy);
+                                    }}
+                                    onKeyDown={async (e) => {
+                                        if (busy || moves <= 0 || won) return;
+                                        if (e.key === 'Enter' || e.key === ' ') {
+                                            e.preventDefault();
+                                            await onTileTap(xx, yy);
+                                        }
+                                    }}
                                 >
                                     {/* STONE */}
                                     {hasStone ? (
-                                        '🪨'
+                                        <span className="tile-fallback tile-fallback--stone">🪨</span>
                                     ) : cell ? (
-                                            <>
-                                                {/* IMG (может не загрузиться) */}
-                                                {!imgBroken[k] && (
-                                                    <img
-                                                        src={TILE_ICON[cell]}
-                                                        className={`tile-icon ${cell === 'GEM' ? 'breathe' : ''}`}
-                                                        draggable={false}
-                                                        alt={cell}
-                                                        onError={() => setImgBroken((prev) => ({ ...prev, [k]: true }))}
-                                                    />
-                                                )}
+                                        <>
+                                            {/* IMG */}
+                                            {!imgBroken[k] && (
+                                                <img
+                                                    src={TILE_ICON[cell]}
+                                                    className={`tile-icon ${cell === 'GEM' ? 'breathe' : ''}`}
+                                                    draggable={false}
+                                                    alt={cell}
+                                                    onError={() => setImgBroken((prev) => ({ ...prev, [k]: true }))}
+                                                />
+                                            )}
 
-                                                {/* FALLBACK overlay (виден всегда, если img сломан) */}
-                                                {imgBroken[k] && (
-                                                    <span className="tile-fallback">
-        {TILE_FALLBACK[cell]}
-      </span>
-                                                )}
-                                            </>
-                                        ) : null}
+                                            {/* FALLBACK (если img сломан) */}
+                                            {imgBroken[k] && (
+                                                <span className="tile-fallback">
+            {TILE_FALLBACK[cell]}
+          </span>
+                                            )}
+                                        </>
+                                    ) : null}
 
                                     {/* ICE overlay */}
-                                    {hasIce && <span className="match3-ice-overlay">{ice[yy][xx] === 2 ? '🧊' : '❄️'}</span>}
+                                    {hasIce && (
+                                        <span className="match3-ice-overlay">
+        {ice[yy][xx] === 2 ? '🧊' : '❄️'}
+      </span>
+                                    )}
 
                                     {/* HONEY overlay */}
                                     {hasHoney && <span className="match3-honey-overlay">🍯</span>}
-                                </button>
+                                </div>
                             );
+
                         })
                     )}
                 </div>

@@ -525,3 +525,75 @@
 /* 5) Чтобы overlays льда/мёда/камня не перекрывали иконку */
 .match3-tile .tile-icon{ z-index: 2; }
 .match3-ice-overlay, .match3-honey-overlay{ z-index: 4; }
+/* ===== Telegram/Safari FIX: не button, а div role=button ===== */
+.match3-tile{
+    border: 0;
+    cursor: pointer;
+    position: relative;
+
+    border-radius: 14px;
+
+    background: rgba(255, 255, 255, 0.02);
+    box-shadow:
+            inset 0 0 0 1px rgba(255,255,255,0.08),
+            0 6px 14px rgba(0,0,0,0.22);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    -webkit-user-select: none;
+    user-select: none;
+
+    transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+    touch-action: none;
+
+    /* важное для отрисовки в WebView */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+}
+
+.match3-tile:active {
+    transform: translateZ(0) scale(0.97);
+}
+
+/* имитация disabled */
+.match3-tile--disabled{
+    pointer-events: none;
+    opacity: 0.95;
+}
+
+/* чтобы img/spans всегда были видны */
+.tile-icon,
+.tile-fallback{
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+/* fallback emoji слой */
+.tile-fallback{
+    position: relative;
+    z-index: 2;
+    line-height: 1;
+    font-weight: 900;
+    filter: drop-shadow(0 6px 10px rgba(0,0,0,0.35));
+}
+
+/* камень чуть больше */
+.tile-fallback--stone{
+    font-size: 26px;
+}
+
+/* если хочешь: чтобы img был над фоном, но под оверлеями */
+.tile-icon{
+    position: relative;
+    z-index: 1;
+}
+
+/* оверлеи выше всего */
+.match3-ice-overlay,
+.match3-honey-overlay{
+    z-index: 3;
+}
