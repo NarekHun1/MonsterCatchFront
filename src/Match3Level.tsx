@@ -2,6 +2,27 @@
 import './match3.css';
 import { useMemo, useRef, useState } from 'react';
 
+/**
+ * ✅ TELEGRAM MINI APP FIX:
+ * В Telegram WebView пути типа /tiles/* и BASE_URL часто ломаются.
+ * Самый надежный способ — импортировать картинки через Vite,
+ * чтобы они попали в билд и получили корректные URL.
+ *
+ * 📌 Положи файлы сюда:
+ * src/assets/tiles/
+ *   monster-2.png
+ *   monster-3.png
+ *   monster-4.png
+ *   monster.png
+ *   cute.png
+ */
+
+import demonImg from './assets/tiles/monster-2.png';
+import coinImg from './assets/tiles/cute.png';
+import gemImg from './assets/tiles/monster-3.png';
+import fireImg from './assets/tiles/monster-4.png';
+import cloverImg from './assets/tiles/monster.png';
+
 const EMPTY = '' as const;
 
 const TYPES = ['DEMON', 'COIN', 'GEM', 'FIRE', 'CLOVER'] as const;
@@ -12,16 +33,13 @@ type Board = Cell[][];
 type Pos = { x: number; y: number };
 type Booster = 'BOMB' | null;
 
-// ✅ base-path safe (Vite). В проде может быть не "/" (например "/app/").
-const BASE = import.meta.env.BASE_URL ?? '/';
-
-// ✅ public/tiles/*
+// ✅ Vite asset URLs (работает в Telegram)
 const TILE_ICON: Record<TileType, string> = {
-    DEMON: `${BASE}tiles/monster-2.png`,
-    COIN: `${BASE}tiles/cute.png`,
-    GEM: `${BASE}tiles/monster-3.png`,
-    FIRE: `${BASE}tiles/monster-4.png`,
-    CLOVER: `${BASE}tiles/monster.png`,
+    DEMON: demonImg,
+    COIN: coinImg,
+    GEM: gemImg,
+    FIRE: fireImg,
+    CLOVER: cloverImg,
 };
 
 // ✅ fallback если img 404 — чтобы не было пустых клеток
@@ -393,8 +411,15 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
 
         let gemHits = 0;
 
-        for (const k of toClear) {
-            const [cx, cy] = k.split(':').map(Number);
+        // чистим broken-состояние для очищаемых клеток одним батчем
+        setImgBroken((prev) => {
+            const n = { ...prev };
+            for (const kk of toClear) delete n[kk];
+            return n;
+        });
+
+        for (const kk of toClear) {
+            const [cx, cy] = kk.split(':').map(Number);
 
             if (nextBoard[cy][cx] === 'GEM') gemHits++;
 
@@ -403,13 +428,6 @@ export default function Match3Level({ level, onBack }: { level: number; onBack: 
             if (nextStone[cy][cx]) nextStone[cy][cx] = false;
 
             nextBoard[cy][cx] = EMPTY;
-
-            // если клетка очищается — сбрасываем broken, чтобы новый символ мог попытаться загрузить img
-            setImgBroken((prev) => {
-                const n = { ...prev };
-                delete n[keyOf(cx, cy)];
-                return n;
-            });
         }
 
         setGems((v) => v + gemHits);
