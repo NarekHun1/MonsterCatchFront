@@ -1,3 +1,4 @@
+// src/Match3Level.tsx
 import './match3.css';
 import { useMemo, useRef, useState } from 'react';
 
@@ -128,7 +129,7 @@ function genObstacles(level: number, size: number) {
             const y = Math.floor(Math.random() * size);
             if (stone[y][x]) continue;
             honey[y][x] = true;
-            ice[y][x] = Math.min(ice[y][x], 1); // если лёд был 2, пусть будет 1
+            ice[y][x] = Math.min(ice[y][x], 1);
         }
     }
 
@@ -144,7 +145,6 @@ function genBoard(size: number) {
     for (let i = 0; i < 4; i++) {
         const m = findMatches(b);
         if (m.size === 0) break;
-        // просто перебьём совпавшие клетки
         for (const k of m) {
             const [x, y] = k.split(':').map(Number);
             b[y][x] = randomTile();
@@ -161,7 +161,6 @@ function applyMatchesWithObstacles(
     honey: boolean[][],
     stone: boolean[][]
 ) {
-    // const size = board.length;
     const nextBoard = board.map((r) => r.slice());
     const nextIce = ice.map((r) => r.slice());
     const nextHoney = honey.map((r) => r.slice());
@@ -177,20 +176,17 @@ function applyMatchesWithObstacles(
         // камень не очищаем матчем
         if (stone[y][x]) continue;
 
-        // если есть лёд — сначала ломаем лёд
+        // лёд: сначала ломаем
         if (nextIce[y][x] > 0) {
             nextIce[y][x] = Math.max(0, nextIce[y][x] - 1);
             brokeIce++;
-            // если лёд ещё остался — клетка НЕ очищается
-            if (nextIce[y][x] > 0) continue;
-            // лёд ушёл, тогда матч может очистить клетку
+            if (nextIce[y][x] > 0) continue; // лёд ещё есть — не очищаем символ
         }
 
-        // если есть мёд — первый удар снимает мёд, и клетка очищается как обычно
+        // мёд: снимаем 1 ударом (и клетка очищается)
         if (nextHoney[y][x]) {
             nextHoney[y][x] = false;
             brokeHoney++;
-            // и дальше очищаем клетку
         }
 
         if (nextBoard[y][x] === '💎') gemHits++;
@@ -213,22 +209,23 @@ function applyMatchesWithObstacles(
 /** падение с учётом блокеров (stone/honey). Они стопят колонку. */
 function collapseWithBlocks(board: Board, stone: boolean[][], honey: boolean[][]) {
     const size = board.length;
-    const next: Board = Array.from({ length: size }, () => Array.from({ length: size }, () => EMPTY));
+    const next: Board = Array.from({ length: size }, () =>
+        Array.from({ length: size }, () => EMPTY)
+    );
 
     for (let x = 0; x < size; x++) {
         let writeY = size - 1;
 
         for (let y = size - 1; y >= 0; y--) {
-            // блокер: камень или мёд — фиксируем в next и "перезапускаем" writeY над ним
+            // блокер: камень или мёд — фиксируем и "перезапускаем" writeY над ним
             if (stone[y][x] || honey[y][x]) {
-                next[y][x] = board[y][x]; // что бы там ни было — оставляем как есть
+                next[y][x] = board[y][x];
                 writeY = y - 1;
                 continue;
             }
 
             const v = board[y][x];
             if (v !== EMPTY) {
-                // пропускаем вниз, но не перескакиваем через блокер
                 while (writeY >= 0 && (stone[writeY][x] || honey[writeY][x])) {
                     next[writeY][x] = board[writeY][x];
                     writeY--;
@@ -239,8 +236,6 @@ function collapseWithBlocks(board: Board, stone: boolean[][], honey: boolean[][]
                 }
             }
         }
-
-        // остальное сверху — пустое, блокеры уже проставлены
     }
 
     return next;
@@ -251,7 +246,7 @@ function refill(board: Board, stone: boolean[][], honey: boolean[][]) {
     const next = board.map((r) => r.slice());
     for (let y = 0; y < size; y++) {
         for (let x = 0; x < size; x++) {
-            if (stone[y][x] || honey[y][x]) continue; // блокер не заполняем
+            if (stone[y][x] || honey[y][x]) continue;
             if (next[y][x] === EMPTY) next[y][x] = randomTile();
         }
     }
@@ -268,7 +263,6 @@ export default function Match3Level({
     const size = level <= 2 ? 6 : level <= 5 ? 7 : 8;
     const movesInit = Math.max(10, 22 - level);
 
-    // 🎯 цель: собрать 💎
     const targetGem = Math.min(20, 8 + level * 2);
 
     const { tile, gap, font } = getUiForSize(size);
@@ -296,6 +290,18 @@ export default function Match3Level({
 
     const opId = useRef(0);
 
+    // --- SWIPE/DRAG ---
+    const dragRef = useRef<{
+        x: number;
+        y: number;
+        sx: number;
+        sy: number;
+        moved: boolean;
+        pid: number | null;
+    } | null>(null);
+
+    const SWIPE_PX = 16;
+
     const won = gems >= targetGem;
 
     const unlockNextAndBack = () => {
@@ -311,6 +317,19 @@ export default function Match3Level({
         localStorage.setItem('mc_match3_unlocked', String(next));
 
         onBack();
+    };
+
+    const canInteractCell = (x: number, y: number) => {
+        if (stone[y][x]) return false;
+        if (honey[y][x]) return false;
+        return true;
+    };
+
+    const dirToNeighbor = (x: number, y: number, dx: number, dy: number) => {
+        const nx = x + dx;
+        const ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= size || ny >= size) return null;
+        return { x: nx, y: ny };
     };
 
     const runCascade = async (startBoard: Board, startIce: number[][], startHoney: boolean[][]) => {
@@ -344,20 +363,17 @@ export default function Match3Level({
 
             if (applied.gemHits > 0) setGems((v) => v + applied.gemHits);
 
-            // очки: очищенные клетки + бонус за разрушение льда/мёда
             setScore((s) => s + applied.clearedCount * 10 * chain + applied.brokeIce * 4 + applied.brokeHoney * 6);
 
             await sleep(120);
             if (opId.current !== my) return;
 
-            // падение с блокерами
             cur = collapseWithBlocks(cur, stone, curHoney);
             setBoard(cur);
             setClearing(new Set());
             await sleep(140);
             if (opId.current !== my) return;
 
-            // новые
             cur = refill(cur, stone, curHoney);
             setBoard(cur);
             await sleep(140);
@@ -374,7 +390,6 @@ export default function Match3Level({
                 const nx = x + dx;
                 const ny = y + dy;
                 if (nx >= 0 && ny >= 0 && nx < size && ny < size) {
-                    // камни тоже можно чистить бомбой? сделаем: камень ломается бомбой
                     toClear.add(keyOf(nx, ny));
                 }
             }
@@ -383,7 +398,6 @@ export default function Match3Level({
         setClearing(toClear);
         await sleep(180);
 
-        // бомба: очищает клетки, снимает мёд/лёд, ломает камни
         let nextBoard = board.map((r) => r.slice());
         const nextIce = ice.map((r) => r.slice());
         const nextHoney = honey.map((r) => r.slice());
@@ -396,7 +410,6 @@ export default function Match3Level({
 
             if (nextBoard[cy][cx] === '💎') gemHits++;
 
-            // ломаем препятствия
             nextIce[cy][cx] = 0;
             nextHoney[cy][cx] = false;
             if (nextStone[cy][cx]) nextStone[cy][cx] = false;
@@ -414,37 +427,69 @@ export default function Match3Level({
 
         await sleep(120);
 
-        // падение и refill
         nextBoard = collapseWithBlocks(nextBoard, nextStone, nextHoney);
         nextBoard = refill(nextBoard, nextStone, nextHoney);
 
         setBoard(nextBoard);
         setClearing(new Set());
 
-        // каскад после бомбы
         await runCascade(nextBoard, nextIce, nextHoney);
 
         setBooster(null);
         setBusy(false);
     };
 
-    const canInteractCell = (x: number, y: number) => {
-        // камень/мёд нельзя двигать
-        if (stone[y][x]) return false;
-        if (honey[y][x]) return false;
-        return true;
-    };
-
-    const onTileClick = async (x: number, y: number) => {
+    const trySwap = async (a: Pos, b: Pos) => {
         if (busy || moves <= 0 || won) return;
 
-        // 💣 booster
+        if (booster === 'BOMB') {
+            await doBomb(a.x, a.y);
+            return;
+        }
+
+        if (!canInteractCell(a.x, a.y) || !canInteractCell(b.x, b.y)) {
+            setShake(true);
+            setTimeout(() => setShake(false), 220);
+            setSelected(null);
+            return;
+        }
+
+        if (!isNeighbor(a, b)) return;
+
+        setBusy(true);
+
+        const before = board;
+        const swapped = swapInBoard(before, a, b);
+        setBoard(swapped);
+        setSelected(null);
+
+        const matches = findMatches(swapped);
+
+        if (matches.size === 0) {
+            await sleep(140);
+            setBoard(before);
+
+            setShake(true);
+            setTimeout(() => setShake(false), 220);
+
+            setBusy(false);
+            return;
+        }
+
+        setMoves((m) => Math.max(0, m - 1));
+        await runCascade(swapped, ice, honey);
+
+        setBusy(false);
+    };
+
+    const onTileTap = async (x: number, y: number) => {
+        if (busy || moves <= 0 || won) return;
+
         if (booster === 'BOMB') {
             await doBomb(x, y);
             return;
         }
 
-        // нельзя выбрать/двигать блокеры
         if (!canInteractCell(x, y)) {
             setShake(true);
             setTimeout(() => setShake(false), 220);
@@ -463,7 +508,6 @@ export default function Match3Level({
             return;
         }
 
-        // если выбрана клетка-блокер — сброс
         if (!canInteractCell(selected.x, selected.y)) {
             setSelected(null);
             return;
@@ -474,39 +518,9 @@ export default function Match3Level({
             return;
         }
 
-        // запрет swap если цель — блокер
-        if (!canInteractCell(cur.x, cur.y)) {
-            setShake(true);
-            setTimeout(() => setShake(false), 220);
-            setSelected(null);
-            return;
-        }
-
-        setBusy(true);
-
-        const before = board;
-        const swapped = swapInBoard(before, selected, cur);
-        setBoard(swapped);
+        const a = selected;
         setSelected(null);
-
-        const matches = findMatches(swapped);
-
-        if (matches.size === 0) {
-            await sleep(140);
-            setBoard(before);
-
-            setShake(true);
-            setTimeout(() => setShake(false), 220);
-
-            setBusy(false);
-            return;
-        }
-
-        setMoves((m) => Math.max(0, m - 1));
-
-        await runCascade(swapped, ice, honey);
-
-        setBusy(false);
+        await trySwap(a, cur);
     };
 
     return (
@@ -523,7 +537,6 @@ export default function Match3Level({
                 </div>
             </div>
 
-            {/* 🔥 BOOSTERS */}
             <div className="match3-boosters">
                 <button
                     className={`match3-booster-btn ${booster === 'BOMB' ? 'active' : ''}`}
@@ -548,48 +561,106 @@ export default function Match3Level({
                     }}
                 >
                     {board.flatMap((row, yy) =>
-                        row.map((cell, xx) => {
-                            const active = selected?.x === xx && selected?.y === yy;
-                            const willClear = clearing.has(keyOf(xx, yy));
+                            row.map((cell, xx) => {
+                                const active = selected?.x === xx && selected?.y === yy;
+                                const willClear = clearing.has(keyOf(xx, yy));
 
-                            const hasIce = ice[yy][xx] > 0;
-                            const hasStone = stone[yy][xx];
-                            const hasHoney = honey[yy][xx];
+                                const hasIce = ice[yy][xx] > 0;
+                                const hasStone = stone[yy][xx];
+                                const hasHoney = honey[yy][xx];
+                                const blocked = hasStone || hasHoney;
 
-                            const blocked = hasStone || hasHoney;
+                                return (
+                                    <button
+                                        key={`${xx}-${yy}`}
+                                        className={[
+                                            'match3-tile',
+                                            active ? 'match3-tile--selected' : '',
+                                            willClear ? 'match3-tile--clearing' : '',
+                                            hasIce ? `match3-tile--ice ice-${ice[yy][xx]}` : '',
+                                            hasStone ? 'match3-tile--stone' : '',
+                                            hasHoney ? 'match3-tile--honey' : '',
+                                            blocked ? 'match3-tile--blocked' : '',
+                                        ].join(' ')}
+                                        style={{ width: tile, height: tile, fontSize: font }}
+                                        disabled={busy || won}
+                                        onPointerDown={(e) => {
+                                            if (busy || moves <= 0 || won) return;
+                                            (e.currentTarget as HTMLButtonElement).setPointerCapture?.(e.pointerId);
 
-                            return (
-                                <button
-                                    key={`${xx}-${yy}`}
-                                    className={[
-                                        'match3-tile',
-                                        active ? 'match3-tile--selected' : '',
-                                        willClear ? 'match3-tile--clearing' : '',
-                                        hasIce ? `match3-tile--ice ice-${ice[yy][xx]}` : '',
-                                        hasStone ? 'match3-tile--stone' : '',
-                                        hasHoney ? 'match3-tile--honey' : '',
-                                        blocked ? 'match3-tile--blocked' : '',
-                                    ].join(' ')}
-                                    style={{ width: tile, height: tile, fontSize: font }}
-                                    onClick={() => onTileClick(xx, yy)}
-                                    disabled={busy || won}
-                                >
-                                    {/* если камень — показываем камень, иначе символ */}
-                                    {hasStone ? '🪨' : cell}
+                                            dragRef.current = {
+                                                x: xx,
+                                                y: yy,
+                                                sx: e.clientX,
+                                                sy: e.clientY,
+                                                moved: false,
+                                                pid: e.pointerId,
+                                            };
+                                        }}
+                                        onPointerMove={(e) => {
+                                            const d = dragRef.current;
+                                            if (!d) return;
+                                            if (d.pid !== e.pointerId) return;
 
-                                    {/* лёд слой */}
-                                    {hasIce && <span className="match3-ice-overlay">{ice[yy][xx] === 2 ? '🧊' : '❄️'}</span>}
+                                            const dx = e.clientX - d.sx;
+                                            const dy = e.clientY - d.sy;
 
-                                    {/* мёд слой */}
-                                    {hasHoney && <span className="match3-honey-overlay">🍯</span>}
-                                </button>
-                            );
-                        })
+                                            if (Math.abs(dx) > 6 || Math.abs(dy) > 6) d.moved = true;
+                                        }}
+                                        onPointerUp={async (e) => {
+                                            const d = dragRef.current;
+                                            dragRef.current = null;
+
+                                            if (!d) {
+                                                await onTileTap(xx, yy);
+                                                return;
+                                            }
+
+                                            const dx = e.clientX - d.sx;
+                                            const dy = e.clientY - d.sy;
+
+                                            // tap
+                                            if (Math.abs(dx) < SWIPE_PX && Math.abs(dy) < SWIPE_PX) {
+                                                await onTileTap(d.x, d.y);
+                                                return;
+                                            }
+
+                                            // swipe direction
+                                            const horiz = Math.abs(dx) >= Math.abs(dy);
+                                            const step = horiz
+                                                ? { dx: dx > 0 ? 1 : -1, dy: 0 }
+                                                : { dx: 0, dy: dy > 0 ? 1 : -1 };
+
+                                            const a = { x: d.x, y: d.y };
+                                            const b = dirToNeighbor(a.x, a.y, step.dx, step.dy);
+                                            if (!b) return;
+
+                                            await trySwap(a, b);
+                                        }}
+                                        onClick={(e) => {
+                                            // если было движение — гасим click, чтобы не было дубля
+                                            if (dragRef.current?.moved) {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                            }
+                                        }}
+                                    >
+                                        {hasStone ? '🪨' : cell}
+
+                                        {hasIce && (
+                                            <span className="match3-ice-overlay">
+                      {ice[yy][xx] === 2 ? '🧊' : '❄️'}
+                    </span>
+                                        )}
+
+                                        {hasHoney && <span className="match3-honey-overlay">🍯</span>}
+                                    </button>
+                                );
+                            })
                     )}
                 </div>
             </div>
 
-            {/* ✅ Победа */}
             {won && (
                 <div className="match3-over">
                     <div className="match3-over-card">
@@ -605,7 +676,6 @@ export default function Match3Level({
                 </div>
             )}
 
-            {/* ❌ Проигрыш */}
             {moves <= 0 && !busy && !won && (
                 <div className="match3-over">
                     <div className="match3-over-card">

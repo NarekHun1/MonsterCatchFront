@@ -1,60 +1,4 @@
-/* =========================
-   LEVELS MAP (Candy path)
-   ========================= */
-
-.levels-map {
-    width: 100%;
-    max-width: 420px;
-    margin: 20px auto 0;
-    padding: 12px 12px 120px; /* чтобы BottomNav не перекрывал */
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-
-.level-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.level-row.left { justify-content: flex-start; }
-.level-row.right { justify-content: flex-end; }
-
-.level-node {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.06);
-    color: #fff;
-    font-weight: 900;
-    font-size: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    user-select: none;
-    position: relative;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
-}
-
-.level-node.open {
-    background: linear-gradient(135deg, #3cff00, #00ffd5);
-    color: #07110c;
-    cursor: pointer;
-    box-shadow: 0 10px 22px rgba(0, 255, 180, 0.18);
-}
-
-.level-node.locked {
-    opacity: 0.35;
-    filter: grayscale(0.2);
-}
-
-.level-link {
-    height: 6px;
-    width: 56px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.12);
-}
+/* src/match3.css */
 
 /* =========================
    MATCH3 LEVEL
@@ -83,6 +27,7 @@
 .match3-moves {
     font-weight: 900;
     opacity: 0.85;
+    white-space: nowrap;
 }
 
 .match3-back {
@@ -91,150 +36,16 @@
     border-radius: 14px;
     background: rgba(255, 255, 255, 0.08);
     color: #fff;
-}
-
-/* контейнер панели с бордом */
-.match3-stage {
-    display: flex;
-    justify-content: center;
-    margin-top: 8px;
-}
-
-/* сама панель */
-.match3-board {
-    display: grid;
-    justify-content: center;
-    padding: 14px;
-    border-radius: 18px;
-
-    background: rgba(255, 255, 255, 0.04);
-    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
-    backdrop-filter: blur(10px);
-
-    max-width: 92vw; /* чтобы всегда влезало */
-}
-
-/* клетка */
-.match3-tile {
-    border: 0;
     cursor: pointer;
-
-    border-radius: 16px;
-    background: radial-gradient(circle at 30% 25%, rgba(255,255,255,0.14), rgba(255,255,255,0.06));
-    box-shadow:
-            inset 0 0 0 1px rgba(255,255,255,0.08),
-            0 8px 18px rgba(0,0,0,0.25);
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    user-select: none;
-    transition: transform 120ms ease, box-shadow 120ms ease;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
 }
 
-.match3-tile:active {
-    transform: scale(0.97);
+.match3-back:active {
+    transform: scale(0.98);
 }
 
-.match3-tile--selected {
-    box-shadow:
-            inset 0 0 0 2px rgba(0,255,200,0.95),
-            0 16px 26px rgba(0,255,200,0.12);
-    transform: scale(1.03);
-}
+/* 🔥 BOOSTERS */
 
-/* popup окончания ходов */
-.match3-over {
-    margin-top: 14px;
-    display: flex;
-    justify-content: center;
-}
-
-.match3-over-card {
-    padding: 14px 16px;
-    border-radius: 14px;
-    background: rgba(255,255,255,0.08);
-}
-
-.match3-over-title {
-    font-weight: 900;
-    margin-bottom: 10px;
-}
-.match3-tile--clearing {
-    transform: scale(0.92);
-    opacity: 0.2;
-    filter: blur(0.2px);
-}
-
-.match3-board--busy .match3-tile {
-    cursor: default;
-}
-.match3-board--shake {
-    animation: match3-shake 220ms ease-in-out;
-}
-.app-bg-glow {
-    display: none;
-}
-
-.app-root {
-    background: linear-gradient(
-            180deg,
-            #0f172a 0%,
-            #020617 100%
-    );
-}
-
-@keyframes match3-shake {
-    0% { transform: translateX(0); }
-    20% { transform: translateX(-6px); }
-    40% { transform: translateX(6px); }
-    60% { transform: translateX(-4px); }
-    80% { transform: translateX(4px); }
-    100% { transform: translateX(0); }
-}
-.level-node {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: 0;
-}
-
-.level-num {
-    line-height: 1;
-}
-
-.level-stars {
-    display: flex;
-    gap: 2px;
-    font-size: 12px;
-    line-height: 1;
-    opacity: 0.75;
-}
-
-.level-stars span {
-    color: rgba(255,255,255,0.35);
-}
-
-.level-node.open .level-stars span {
-    color: rgba(0,0,0,0.25);
-}
-
-.level-stars span.on {
-    color: #ffd54a;
-    opacity: 1;
-}
-
-.level-node.open .level-stars span.on {
-    color: #b04d00;
-}
-
-/* адаптив */
-@media (max-width: 380px) {
-    .level-node { width: 54px; height: 54px; font-size: 18px; }
-    .level-link { width: 44px; }
-}
 .match3-boosters {
     display: flex;
     flex-direction: column;
@@ -265,24 +76,126 @@
     text-align: center;
 }
 
-.match3-tile {
-    position: relative;
+/* контейнер панели */
+.match3-stage {
+    display: flex;
+    justify-content: center;
+    margin-top: 8px;
 }
+
+/* сама панель */
+.match3-board {
+    display: grid;
+    justify-content: center;
+
+    padding: 14px;
+    border-radius: 18px;
+
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(10px);
+
+    max-width: 92vw; /* чтобы всегда влезало */
+
+    /* важно для свайпов в Telegram */
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* клетка — ЧИСТЫЙ стиль (без "кружочков") */
+.match3-tile {
+    border: 0;
+    cursor: pointer;
+    position: relative;
+
+    border-radius: 14px;
+
+    /* чистый фон */
+    background: rgba(255, 255, 255, 0.02);
+    box-shadow:
+            inset 0 0 0 1px rgba(255,255,255,0.08),
+            0 6px 14px rgba(0,0,0,0.22);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    -webkit-user-select: none;
+    user-select: none;
+
+    transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+    touch-action: none;
+}
+
+.match3-tile:active {
+    transform: scale(0.97);
+}
+
+/* hover для десктопа */
+@media (hover:hover) {
+    .match3-tile:hover {
+        background: rgba(255,255,255,0.04);
+        box-shadow:
+                inset 0 0 0 1px rgba(255,255,255,0.10),
+                0 10px 18px rgba(0,0,0,0.26);
+    }
+}
+
+.match3-tile--selected {
+    box-shadow:
+            inset 0 0 0 2px rgba(0,255,200,0.95),
+            0 16px 26px rgba(0,255,200,0.12);
+    transform: scale(1.03);
+}
+
+.match3-tile--clearing {
+    transform: scale(0.92);
+    opacity: 0.2;
+    filter: blur(0.2px);
+}
+
+.match3-board--busy .match3-tile {
+    cursor: default;
+}
+
+.match3-board--shake {
+    animation: match3-shake 220ms ease-in-out;
+}
+
+@keyframes match3-shake {
+    0% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+    100% { transform: translateX(0); }
+}
+
+/* препятствия */
 
 .match3-tile--blocked {
     filter: saturate(0.95);
 }
 
 .match3-tile--ice {
-    box-shadow: inset 0 0 0 2px rgba(120, 220, 255, 0.35);
+    box-shadow:
+            inset 0 0 0 2px rgba(120, 220, 255, 0.35),
+            inset 0 0 0 1px rgba(255,255,255,0.08),
+            0 6px 14px rgba(0,0,0,0.22);
 }
 
 .match3-tile--stone {
-    background: rgba(255,255,255,0.05);
+    background: rgba(255,255,255,0.02);
 }
 
 .match3-tile--honey {
-    box-shadow: inset 0 0 0 2px rgba(255, 196, 0, 0.28);
+    box-shadow:
+            inset 0 0 0 2px rgba(255, 196, 0, 0.28),
+            inset 0 0 0 1px rgba(255,255,255,0.08),
+            0 6px 14px rgba(0,0,0,0.22);
 }
 
 .match3-ice-overlay,
@@ -298,4 +211,32 @@
 .match3-ice-overlay {
     left: 6px;
     right: auto;
+}
+
+/* popup */
+
+.match3-over {
+    margin-top: 14px;
+    display: flex;
+    justify-content: center;
+}
+
+.match3-over-card {
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+}
+
+.match3-over-title {
+    font-weight: 900;
+    margin-bottom: 10px;
+}
+
+/* твой общий фон (если нужно) */
+.app-bg-glow { display: none; }
+
+.app-root {
+    background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
 }
