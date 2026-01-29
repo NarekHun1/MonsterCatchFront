@@ -428,3 +428,12 @@
     align-items: center;
     justify-content: center;
 }
+.game-monster-img--arena {
+    transition: transform 0.08s ease-out, filter 0.08s ease-out;
+}
+
+.game-monster-emoji-wrapper--blink .game-monster-img--arena {
+    transform: scaleY(0.18);
+    filter: brightness(0.92);
+    transform-origin: center;
+}

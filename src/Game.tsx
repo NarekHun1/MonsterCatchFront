@@ -81,6 +81,16 @@
                 });
                 const [isHit, setIsHit] = useState(false);
                 const [hits, setHits] = useState<HitLabel[]>([]);
+                const [isBlink, setIsBlink] = useState(false);
+                const blinkRef = useRef<number | null>(null);
+                const blinkOffRef = useRef<number | null>(null);
+
+                const blink = useCallback(() => {
+                    setIsBlink(true);
+                    if (blinkOffRef.current) window.clearTimeout(blinkOffRef.current);
+                    blinkOffRef.current = window.setTimeout(() => setIsBlink(false), 120) as unknown as number;
+                }, []);
+
 
                 const timerRef = useRef<number | null>(null);
                 const finishSentRef = useRef(false);
@@ -247,6 +257,39 @@
                     }
                     // eslint-disable-next-line react-hooks/exhaustive-deps
                 }, [status]);
+                useEffect(() => {
+                    if (phase !== 'playing' || status !== 'running') return;
+
+                    let cancelled = false;
+
+                    if (blinkOffRef.current) window.clearTimeout(blinkOffRef.current);
+                    blinkOffRef.current = null;
+
+                    if (blinkRef.current) window.clearTimeout(blinkRef.current);
+                    blinkRef.current = null;
+
+                    const schedule = () => {
+                        const ms = 1200 + Math.random() * 1800; // 1.2–3 сек
+                        blinkRef.current = window.setTimeout(() => {
+                            if (cancelled) return;
+                            blink();
+                            schedule();
+                        }, ms) as unknown as number;
+                    };
+
+                    schedule();
+
+                    return () => {
+                        cancelled = true;
+
+                        if (blinkRef.current) window.clearTimeout(blinkRef.current);
+                        blinkRef.current = null;
+
+                        if (blinkOffRef.current) window.clearTimeout(blinkOffRef.current);
+                        blinkOffRef.current = null;
+                    };
+                }, [phase, status, blink]);
+
 
                 useEffect(() => {
                     return () => {
@@ -254,8 +297,11 @@
                     };
                 }, []);
 
+
                 const handleCatch = () => {
                     if (status !== 'running') return;
+
+                    blink();
 
                     setIsHit(true);
                     setTimeout(() => setIsHit(false), 120);
@@ -373,6 +419,8 @@
                                             ? 'game-monster-emoji-wrapper--finished'
                                             : '',
                                         isHit ? 'game-monster-emoji-wrapper--hit' : '',
+                                        isBlink ? 'game-monster-emoji-wrapper--blink' : '',
+
                                     ]
                                         .filter(Boolean)
                                         .join(' ')}
