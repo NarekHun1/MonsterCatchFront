@@ -395,3 +395,36 @@
         opacity: 1;
     }
 }
+.game-monster-img {
+    display: block;
+    pointer-events: none; /* ✅ клики проходят */
+    user-select: none;
+    -webkit-user-drag: none;
+    object-fit: contain;
+}
+
+.game-monster-img--arena {
+    width: 96px;
+    height: 96px;
+}
+
+.game-intro-monster-emoji .game-monster-img {
+    width: 56px;
+    height: 56px;
+}
+/* ✅ контейнер для img, чтобы не зависеть от font-size */
+.game-intro-monster-emoji{
+    width: 56px;
+    height: 56px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.game-monster-emoji-wrapper{
+    width: 110px;   /* зона клика */
+    height: 110px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
