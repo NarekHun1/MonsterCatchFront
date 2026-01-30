@@ -161,15 +161,14 @@ export function TournamentCard({
                         <span className="tc-badge tc-badge--active">🟢 {t('activeNow')}</span>
 
                         <div className="tc-timer">
-                            ⏳ {t('timeLeft')}: <strong>{formatTime(data.timeLeftSec)}</strong>
+                            ⏳ {t('timeLeft')}: <strong>{formatTime(data.timeLeftSec ?? 0)}</strong>
                         </div>
                     </>
                 ) : (
-                    <span className="tc-badge tc-badge--finished">
-            🏁 {t('finished')}
-          </span>
+                    <span className="tc-badge tc-badge--finished">🏁 {t('finished')}</span>
                 )}
             </div>
+
 
             <div className="tc-actions">
 
