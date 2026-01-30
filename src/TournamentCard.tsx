@@ -23,6 +23,7 @@ interface TournamentData {
     entryFee: number;
     ticketsCount: number;
     coins: number;
+    timeLeftSec: number;
 }
 
 
@@ -78,6 +79,17 @@ export function TournamentCard({
         const i = setInterval(load, 15000); // 🔁 live leaderboard
         return () => clearInterval(i);
     }, [type]);
+
+    function formatTime(sec: number) {
+        if (sec <= 0) return '00:00';
+
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+
+        return `${m.toString().padStart(2, '0')}:${s
+            .toString()
+            .padStart(2, '0')}`;
+    }
 
     // ─────────────────────────────────────────────
     // JOIN
@@ -145,10 +157,13 @@ export function TournamentCard({
 
             <div className="tc-status">
                 {data.status === 'ACTIVE' ? (
-                    <span className="tc-badge tc-badge--active">
-            🟢 {t('activeNow')}
+                    <>
+                        <span className="tc-badge tc-badge--active">🟢 {t('activeNow')}</span>
 
-          </span>
+                        <div className="tc-timer">
+                            ⏳ {t('timeLeft')}: <strong>{formatTime(data.timeLeftSec)}</strong>
+                        </div>
+                    </>
                 ) : (
                     <span className="tc-badge tc-badge--finished">
             🏁 {t('finished')}
