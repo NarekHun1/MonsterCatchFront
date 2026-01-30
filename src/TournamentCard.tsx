@@ -46,49 +46,67 @@ export function TournamentCard({
     const [,setJoining] = useState(false);
     const [hint, setHint] = useState<string | null>(null);
     const [error, setError] = useState('');
+    const [timeLeft, setTimeLeft] = useState(0);
 
     // ─────────────────────────────────────────────
     // LOAD TOURNAMENT (SERVER = SOURCE OF TRUTH)
     // ─────────────────────────────────────────────
-    const load = async () => {
-        setLoading(true);
+    const load = async (first = false) => {
+        if (first) setLoading(true);
         setError('');
 
         try {
-            const res = await apiFetch(
-                `/tournament/current?type=${type}`,
-                token,
-            );
-
+            const res = await apiFetch(`/tournament/current?type=${type}`, token);
             const json = await res.json().catch(() => ({}));
-
-            if (!res.ok) {
-                throw new Error(json.message || 'Failed to load tournament');
-            }
-
+            if (!res.ok) throw new Error(json.message || 'Failed to load tournament');
             setData(json as TournamentData);
         } catch (e: any) {
             setError(e.message || 'Ошибка загрузки турнира');
         } finally {
-            setLoading(false);
+            if (first) setLoading(false);
         }
     };
 
     useEffect(() => {
-        load();
-        const i = setInterval(load, 15000); // 🔁 live leaderboard
+        if (!data) return;
+
+        // берем серверное timeLeftSec и тикаем вниз
+        let left = (data as any).timeLeftSec ?? Math.ceil(timeLeft / 1000);
+
+        setTimeLeft(left * 1000);
+
+        const i = setInterval(() => {
+            left -= 1;
+            setTimeLeft(Math.max(0, left) * 1000);
+        }, 1000);
+
+        return () => clearInterval(i);
+    }, [data?.tournamentId, data?.timeLeftSec]);
+
+
+    useEffect(() => {
+        load(true); // первый раз
+        const i = setInterval(() => load(false), 15000);
         return () => clearInterval(i);
     }, [type]);
 
-    function formatTime(sec: number) {
-        if (sec <= 0) return '00:00';
 
-        const m = Math.floor(sec / 60);
-        const s = sec % 60;
-
-        return `${m.toString().padStart(2, '0')}:${s
-            .toString()
-            .padStart(2, '0')}`;
+    // function formatTime(sec: number) {
+    //     if (sec <= 0) return '00:00';
+    //
+    //     const m = Math.floor(sec / 60);
+    //     const s = sec % 60;
+    //
+    //     return `${m.toString().padStart(2, '0')}:${s
+    //         .toString()
+    //         .padStart(2, '0')}`;
+    // }
+    function formatMs(ms: number) {
+        if (ms <= 0) return '00:00';
+        const total = Math.floor(ms / 1000);
+        const m = Math.floor(total / 60);
+        const s = total % 60;
+        return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
     }
 
     // ─────────────────────────────────────────────
@@ -161,7 +179,7 @@ export function TournamentCard({
                         <span className="tc-badge tc-badge--active">🟢 {t('activeNow')}</span>
 
                         <div className="tc-timer">
-                            ⏳ {t('timeLeft')}: <strong>{formatTime(data.timeLeftSec ?? 0)}</strong>
+                            ⏳ {t('timeLeft')}: <strong>{formatMs(timeLeft)}</strong>
                         </div>
                     </>
                 ) : (
