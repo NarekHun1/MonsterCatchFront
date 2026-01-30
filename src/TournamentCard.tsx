@@ -66,22 +66,19 @@ export function TournamentCard({
             if (first) setLoading(false);
         }
     };
-
     useEffect(() => {
-        if (!data) return;
+        if (!data?.endsAt) return;
 
-        // берем серверное timeLeftSec и тикаем вниз
-        let left = (data as any).timeLeftSec ?? Math.ceil(timeLeft / 1000);
+        const tick = () => {
+            const endMs = new Date(data.endsAt).getTime();
+            const leftMs = Math.max(0, endMs - Date.now());
+            setTimeLeft(leftMs);
+        };
 
-        setTimeLeft(left * 1000);
-
-        const i = setInterval(() => {
-            left -= 1;
-            setTimeLeft(Math.max(0, left) * 1000);
-        }, 1000);
-
+        tick();
+        const i = setInterval(tick, 1000);
         return () => clearInterval(i);
-    }, [data?.tournamentId, data?.timeLeftSec]);
+    }, [data?.endsAt, data?.tournamentId]);
 
 
     useEffect(() => {
