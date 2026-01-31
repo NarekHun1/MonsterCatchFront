@@ -103,7 +103,7 @@ export function CashCupCard({
     }, [data?.endsAt]);
 
     /* ───────────────── JOIN (🎟 or 🪙) ───────────────── */
-    const join = async (entry: 'TICKET' | 'COINS') => {
+    const join = async (payWith: 'tickets' | 'coins') => {
         if (!data) return;
         if (joining) return;
 
@@ -115,13 +115,13 @@ export function CashCupCard({
             const canByTickets = data.ticketsCount >= 10;
             const canByCoins = data.coins >= 10;
 
-            if (entry === 'TICKET' && !canByTickets) {
+            if (payWith === 'tickets' && !canByTickets) {
                 setHint(`❌ Нужно ещё ${10 - data.ticketsCount} 🎟`);
                 setTimeout(() => setHint(null), 2500);
                 return;
             }
 
-            if (entry === 'COINS' && !canByCoins) {
+            if (payWith === 'coins' && !canByCoins) {
                 setHint(`❌ Нужно ещё ${10 - data.coins} 🪙`);
                 setTimeout(() => setHint(null), 2500);
                 return;
@@ -129,7 +129,7 @@ export function CashCupCard({
 
             const res = await apiFetch('/tournament/join', token, {
                 method: 'POST',
-                body: JSON.stringify({ type: 'CASH_CUP', entry }),
+                body: JSON.stringify({ type: 'CASH_CUP', payWith }), // ✅ FIX
             });
 
             const json: unknown = await res.json().catch(() => ({}));
@@ -146,14 +146,8 @@ export function CashCupCard({
     };
 
     /* ───────────────── RENDER ───────────────── */
-    if (loading) {
-        return <div className="tournament-card">{t('loading')}</div>;
-    }
-
-    if (error) {
-        return <div className="tournament-card error">{error}</div>;
-    }
-
+    if (loading) return <div className="tournament-card">{t('loading')}</div>;
+    if (error) return <div className="tournament-card error">{error}</div>;
     if (!data) return null;
 
     const canByTickets = data.ticketsCount >= 10;
@@ -163,7 +157,6 @@ export function CashCupCard({
         <div className="tournament-card cash-cup">
             <h3>💰 CASH CUP</h3>
 
-            {/* ⏳ TIMER */}
             <div className="tc-timer">
                 ⏳ {timeLeft > 0 ? formatMs(timeLeft) : t('nextRound')}
             </div>
@@ -178,13 +171,11 @@ export function CashCupCard({
                 <strong>{data.prizePool} 🪙</strong>
             </div>
 
-            {/* ───────── JOIN POLICY UI ───────── */}
             <div className="cashcup-join-grid">
-                {/* 🎟 TICKETS */}
                 <button
                     className={`cashcup-join-card ticket ${!canByTickets ? 'locked' : ''}`}
                     disabled={!canByTickets || joining}
-                    onClick={() => join('TICKET')}
+                    onClick={() => join('tickets')} // ✅ FIX
                 >
                     <div className="join-icon">🎟</div>
                     <div className="join-title">{t('joinWithTickets')}</div>
@@ -195,11 +186,10 @@ export function CashCupCard({
                     </div>
                 </button>
 
-                {/* 🪙 COINS */}
                 <button
                     className={`cashcup-join-card coin ${!canByCoins ? 'locked' : ''}`}
                     disabled={!canByCoins || joining}
-                    onClick={() => join('COINS')}
+                    onClick={() => join('coins')} // ✅ FIX
                 >
                     <div className="join-icon">🪙</div>
                     <div className="join-title">{t('joinWithCoins')}</div>
@@ -209,7 +199,6 @@ export function CashCupCard({
 
             {hint && <div className="tc-hint">{hint}</div>}
 
-            {/* 🎮 PLAY */}
             {data.joined && (
                 <div className="tc-actions">
                     <button className="tc-play-main" onClick={() => onStartGame(data.tournamentId)}>
@@ -218,7 +207,6 @@ export function CashCupCard({
                 </div>
             )}
 
-            {/* ───────────── LEADERBOARD ───────────── */}
             <div className="tc-leaderboard">
                 <h4>🏆 {t('topPlayers')}</h4>
 
