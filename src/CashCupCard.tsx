@@ -127,9 +127,14 @@ export function CashCupCard({
                 return;
             }
 
+            console.log('[JOIN CLICK]', payWith); // ✅ 1) клик реально сюда дошел?
+
+            const payload = { type: 'CASH_CUP', payWith };
+            console.log('[JOIN PAYLOAD]', payload, JSON.stringify(payload)); // ✅ 2) что реально сериализуется
+
             const res = await apiFetch('/tournament/join', token, {
                 method: 'POST',
-                body: JSON.stringify({ type: 'CASH_CUP', payWith }), // ✅ FIX
+                body: JSON.stringify(payload), // ✅ FIX
             });
 
             const json: unknown = await res.json().catch(() => ({}));
