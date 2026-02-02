@@ -6,6 +6,7 @@ import commonImg from './assets/monsters/common.svg';
 import rareImg from './assets/monsters/rare.svg';
 import epicImg from './assets/monsters/epic.svg';
 import legendaryImg from './assets/monsters/legendary.svg';
+import catchSfx from './assets/sfx/catch.wav';
 
 interface GameProps {
     token: string;
@@ -15,7 +16,6 @@ interface GameProps {
     onStatsChange?: (stats: { stars: number; level: number; xp: number }) => void;
     tournamentId?: number; // ✅ ЕДИНСТВЕННЫЙ ИСТОЧНИК
 }
-
 
 type GameStatus = 'idle' | 'running' | 'finished';
 type GamePhase = 'intro' | 'playing';
@@ -28,7 +28,6 @@ interface MonsterDef {
     weight: number;
 }
 
-
 interface HitLabel {
     id: number;
     x: number;
@@ -37,12 +36,11 @@ interface HitLabel {
 }
 
 const MONSTERS: MonsterDef[] = [
-    { img: commonImg,    rarity: 'common',    score: 1,  weight: 60 },
-    { img: rareImg,      rarity: 'rare',      score: 3,  weight: 25 },
-    { img: epicImg,      rarity: 'epic',      score: 5,  weight: 10 },
-    { img: legendaryImg, rarity: 'legendary', score: 10, weight: 5  },
+    { img: commonImg, rarity: 'common', score: 1, weight: 60 },
+    { img: rareImg, rarity: 'rare', score: 3, weight: 25 },
+    { img: epicImg, rarity: 'epic', score: 5, weight: 10 },
+    { img: legendaryImg, rarity: 'legendary', score: 10, weight: 5 },
 ];
-
 
 function pickRandomMonster(): MonsterDef {
     const totalWeight = MONSTERS.reduce((sum, m) => sum + m.weight, 0);
@@ -61,7 +59,7 @@ function randomPosition() {
     return { x, y };
 }
 
-export function Game({ token, onBack, onStarsChange, onStatsChange,t, tournamentId}: GameProps) {
+export function Game({ token, onBack, onStarsChange, onStatsChange, t, tournamentId }: GameProps) {
     const [phase, setPhase] = useState<GamePhase>('intro');
     const [status, setStatus] = useState<GameStatus>('idle');
     const [gameId, setGameId] = useState<number | null>(null);
@@ -84,6 +82,25 @@ export function Game({ token, onBack, onStarsChange, onStatsChange,t, tournament
 
     const timerRef = useRef<number | null>(null);
     const finishSentRef = useRef(false);
+
+    // ✅ SFX: monster click (один раз создаём, потом переиспользуем)
+    const catchAudioRef = useRef<HTMLAudioElement | null>(null);
+
+    const playCatchSound = async () => {
+        try {
+            if (!catchAudioRef.current) {
+                const a = new Audio(catchSfx);
+                a.preload = 'auto';
+                a.volume = 0.7; // подстрой
+                catchAudioRef.current = a;
+            }
+            const a = catchAudioRef.current;
+            a.currentTime = 0; // чтобы можно было часто кликать
+            await a.play();
+        } catch {
+            // если звук заблокирован — просто молчим
+        }
+    };
 
     const clearTimer = () => {
         if (timerRef.current !== null) {
@@ -133,23 +150,21 @@ export function Game({ token, onBack, onStarsChange, onStatsChange,t, tournament
             const data = await res.json().catch(() => ({}));
 
             if (!res.ok) {
-                throw new Error(data?.message || 'Не удалось завершить игру');
+                throw new Error((data as any)?.message || 'Не удалось завершить игру');
             }
 
             // 2️⃣ Локальные обновления
-            setBestScore((prev) =>
-                prev === null || score > prev ? score : prev,
-            );
+            setBestScore((prev) => (prev === null || score > prev ? score : prev));
 
-            if (typeof data.totalStars === 'number') {
-                onStarsChange?.(data.totalStars);
+            if (typeof (data as any).totalStars === 'number') {
+                onStarsChange?.((data as any).totalStars);
             }
 
-            if (typeof data.level === 'number' && typeof data.xp === 'number') {
+            if (typeof (data as any).level === 'number' && typeof (data as any).xp === 'number') {
                 onStatsChange?.({
-                    stars: data.totalStars,
-                    level: data.level,
-                    xp: data.xp,
+                    stars: (data as any).totalStars,
+                    level: (data as any).level,
+                    xp: (data as any).xp,
                 });
             }
 
@@ -166,10 +181,7 @@ export function Game({ token, onBack, onStarsChange, onStatsChange,t, tournament
                 const tData = await tRes.json().catch(() => ({}));
 
                 if (!tRes.ok) {
-                    console.error(
-                        'Tournament submit failed:',
-                        tData?.message || tData,
-                    );
+                    console.error('Tournament submit failed:', (tData as any)?.message || tData);
                 } else {
                     console.log('✅ Tournament score submitted:', tData);
                 }
@@ -178,7 +190,7 @@ export function Game({ token, onBack, onStarsChange, onStatsChange,t, tournament
             setStatus('finished');
         } catch (e: any) {
             console.error('finishGame failed:', e);
-            setError(e.message || 'Ошибка завершения игры');
+            setError(e?.message || 'Ошибка завершения игры');
         } finally {
             setLoading(false);
         }
@@ -192,8 +204,6 @@ export function Game({ token, onBack, onStarsChange, onStatsChange,t, tournament
         onStarsChange,
         onStatsChange,
     ]);
-
-
 
     // ✅ ПРАВИЛЬНЫЙ /game/start
     const startGame = useCallback(async () => {
@@ -212,12 +222,12 @@ export function Game({ token, onBack, onStarsChange, onStatsChange,t, tournament
 
             if (!res.ok) {
                 console.error('startGame error response:', res.status, data);
-                throw new Error(data.message || 'Не удалось начать игру');
+                throw new Error((data as any)?.message || 'Не удалось начать игру');
             }
 
-            const duration = data.roundDurationMs ?? 60_000;
+            const duration = (data as any).roundDurationMs ?? 60_000;
 
-            setGameId(data.gameId);
+            setGameId((data as any).gameId);
             setTotalMs(duration);
             setRemainingMs(duration);
 
@@ -233,7 +243,7 @@ export function Game({ token, onBack, onStarsChange, onStatsChange,t, tournament
             startLocalTimer(duration);
         } catch (e: any) {
             console.error('startGame failed:', e);
-            setError(e.message || 'Ошибка старта игры');
+            setError(e?.message || 'Ошибка старта игры');
         } finally {
             setLoading(false);
         }
@@ -251,11 +261,21 @@ export function Game({ token, onBack, onStarsChange, onStatsChange,t, tournament
     useEffect(() => {
         return () => {
             clearTimer();
+            // ✅ cleanup audio
+            if (catchAudioRef.current) {
+                try {
+                    catchAudioRef.current.pause();
+                } catch {}
+                catchAudioRef.current = null;
+            }
         };
     }, []);
 
     const handleCatch = () => {
         if (status !== 'running') return;
+
+        // ✅ play sound on click
+        void playCatchSound();
 
         setIsHit(true);
         setTimeout(() => setIsHit(false), 120);
@@ -279,8 +299,7 @@ export function Game({ token, onBack, onStarsChange, onStatsChange,t, tournament
     };
 
     const secondsLeft = Math.ceil(remainingMs / 1000);
-    const progress =
-        totalMs > 0 ? Math.max(0, Math.min(1, remainingMs / totalMs)) : 0;
+    const progress = totalMs > 0 ? Math.max(0, Math.min(1, remainingMs / totalMs)) : 0;
 
     return (
         <div className="game-fullscreen">
@@ -305,15 +324,11 @@ export function Game({ token, onBack, onStarsChange, onStatsChange,t, tournament
                         </div>
                         <div className="game-hud-item">
                             <span className="game-hud-label">{t('best')}</span>
-                            <span className="game-hud-value">
-                                            {bestScore !== null ? bestScore : '—'}
-                                        </span>
+                            <span className="game-hud-value">{bestScore !== null ? bestScore : '—'}</span>
                         </div>
                         <div className="game-hud-item">
                             <span className="game-hud-label">{t('time')}</span>
-                            <span className="game-hud-value">
-                                            {status === 'running' ? `${secondsLeft}s` : '—'}
-                                        </span>
+                            <span className="game-hud-value">{status === 'running' ? `${secondsLeft}s` : '—'}</span>
                         </div>
                     </div>
                 )}
@@ -322,10 +337,7 @@ export function Game({ token, onBack, onStarsChange, onStatsChange,t, tournament
             {/* Таймер — только в игре */}
             {phase === 'playing' && (
                 <div className="game-timer-bar game-timer-bar--overlay">
-                    <div
-                        className="game-timer-fill"
-                        style={{ transform: `scaleX(${progress})` }}
-                    />
+                    <div className="game-timer-fill" style={{ transform: `scaleX(${progress})` }} />
                 </div>
             )}
 
@@ -334,9 +346,7 @@ export function Game({ token, onBack, onStarsChange, onStatsChange,t, tournament
                 <div className="game-intro">
                     <div className="game-intro-top">
                         <h2 className="game-intro-title">{t('gameGoal')}</h2>
-                        <p className="game-intro-text">
-                            {t('gameGoalDesc')}
-                        </p>
+                        <p className="game-intro-text">{t('gameGoalDesc')}</p>
                     </div>
 
                     <div className="game-intro-monsters">
@@ -352,11 +362,7 @@ export function Game({ token, onBack, onStarsChange, onStatsChange,t, tournament
                         ))}
                     </div>
 
-                    <button
-                        className="game-start-btn"
-                        onClick={() => void startGame()}
-                        disabled={loading}
-                    >
+                    <button className="game-start-btn" onClick={() => void startGame()} disabled={loading}>
                         {loading ? t('loading') : t('startGame')}
                     </button>
                 </div>
@@ -369,9 +375,7 @@ export function Game({ token, onBack, onStarsChange, onStatsChange,t, tournament
                         className={[
                             'game-monster-emoji-wrapper',
                             status === 'running' ? 'game-monster-emoji-wrapper--active' : '',
-                            status === 'finished'
-                                ? 'game-monster-emoji-wrapper--finished'
-                                : '',
+                            status === 'finished' ? 'game-monster-emoji-wrapper--finished' : '',
                             isHit ? 'game-monster-emoji-wrapper--hit' : '',
                         ]
                             .filter(Boolean)
@@ -403,6 +407,7 @@ export function Game({ token, onBack, onStarsChange, onStatsChange,t, tournament
                     ))}
                 </div>
             )}
+
             {status === 'finished' && (
                 <div className="game-finish-overlay">
                     <div className="game-finish-card">
@@ -424,10 +429,7 @@ export function Game({ token, onBack, onStarsChange, onStatsChange,t, tournament
                                 🔄 {t('restart')}
                             </button>
 
-                            <button
-                                className="game-back-btn"
-                                onClick={onBack}
-                            >
+                            <button className="game-back-btn" onClick={onBack}>
                                 ⬅ {t('back')}
                             </button>
                         </div>
