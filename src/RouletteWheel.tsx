@@ -32,6 +32,7 @@ const SECTORS: Sector[] = [
     { id: 'coins_10', label: '+10', icon: '🪙', variant: 'coin' },
     { id: 'coins_25', label: '+25', icon: '🪙', variant: 'coin' },
     { id: 'stars_5', label: '+5', icon: '⭐', variant: 'star' },
+    { id: 'stars_10', label: '+10', icon: '⭐', variant: 'star' },
     { id: 'nothing', label: '0', icon: '⭕', variant: 'zero' },
     { id: 'jackpot', label: 'JACKPOT', icon: '💎', variant: 'jackpot' },
 ];
@@ -132,14 +133,24 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
 
             // 2) найти сектор по sectorId
             const idx = sectorIndexById.get(data.sectorId);
+
             if (idx === undefined) {
-                // если не нашли — не ломаемся, просто покажем результат
-                setError(`Сектор "${data.sectorId}" не найден на фронте. Проверь SECTORS ids.`);
-                setResult(data);
-                flyToHeader(data.type);
-                onReward(data);
-                setSpinning(false);
-                return;
+                console.warn('[ROULETTE] Unknown sectorId from backend:', data.sectorId);
+                console.warn('[ROULETTE] Front SECTORS ids:', SECTORS.map(s => s.id));
+
+                // ✅ fallback: чтобы не "зависало" — крутим на случайный сектор
+                const randomIdx = Math.floor(Math.random() * SECTORS.length);
+                spinToIndex(randomIdx);
+
+                // после анимации всё равно показываем настоящий результат с бэка
+                window.setTimeout(() => {
+                    setResult(data);
+                    onReward(data);
+                    flyToHeader(data.type);
+                    setSpinning(false);
+                }, 4300);
+
+                return; // важно, чтобы дальше код не шел
             }
 
             // 3) крутить и остановить на нужном секторе
