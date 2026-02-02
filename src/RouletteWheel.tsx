@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import './RouletteWheel.css';
 import { apiFetch } from './api';
+import spinSfx from './assets/sfx/spin.wav';
 
 type PrizeType = 'COINS' | 'TICKETS' | 'STARS' | 'NOTHING' | 'JACKPOT';
 
@@ -16,12 +17,13 @@ type SpinResponse = {
 export type RouletteWheelProps = {
     token: string | null;
     onClose: () => void;
-    onReward: (r: SpinResponse) => void;};
+    onReward: (r: SpinResponse) => void;
+};
 
 type Sector = {
-    id: string;      // ⚠️ ДОЛЖЕН совпадать с ROULETTE_SECTORS.id на backend
-    label: string;   // текст на секторе
-    icon: string;    // можно заменить на <img/>
+    id: string; // ⚠️ ДОЛЖЕН совпадать с ROULETTE_SECTORS.id на backend
+    label: string; // текст на секторе
+    icon: string; // можно заменить на <img/>
     variant?: 'coin' | 'ticket' | 'star' | 'jackpot' | 'zero';
 };
 
@@ -49,6 +51,40 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
     const [spinning, setSpinning] = useState(false);
     const [error, setError] = useState<string>('');
     const [result, setResult] = useState<SpinResponse | null>(null);
+
+    // ✅ SFX (ТОЛЬКО ДЛЯ SPIN)
+    const spinAudioRef = useRef<HTMLAudioElement | null>(null);
+
+    const ensureSpinAudio = () => {
+        if (!spinAudioRef.current) {
+            const a = new Audio(spinSfx);
+            a.preload = 'auto';
+            a.loop = true;     // ✅ играет пока крутится
+            a.volume = 0.6;    // подстрой
+            spinAudioRef.current = a;
+        }
+    };
+
+    const startSpinSound = async () => {
+        ensureSpinAudio();
+        const a = spinAudioRef.current!;
+        try {
+            // чтобы каждый раз стартовал одинаково
+            a.currentTime = 0;
+            await a.play(); // вызывается по клику → обычно разрешено в Telegram WebApp
+        } catch {
+            // если Telegram/браузер заблокировал — просто молчим
+        }
+    };
+
+    const stopSpinSound = () => {
+        const a = spinAudioRef.current;
+        if (!a) return;
+        try {
+            a.pause();
+            a.currentTime = 0;
+        } catch {}
+    };
 
     // текущий “остаточный” угол, чтобы не было дерганий между спинами
     const rotationRef = useRef<number>(0);
@@ -115,6 +151,7 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
         }
 
         setSpinning(true);
+        startSpinSound(); // ✅ START SFX (сразу по клику)
 
         try {
             // 1) просим сервер сделать спин (он решает: free/paid, списание и награда)
@@ -127,6 +164,8 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
 
                 // если монет не хватает — красиво покажем
                 showAlert(msg);
+
+                stopSpinSound(); // ✅ STOP SFX (ошибка)
                 setSpinning(false);
                 return;
             }
@@ -136,7 +175,7 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
 
             if (idx === undefined) {
                 console.warn('[ROULETTE] Unknown sectorId from backend:', data.sectorId);
-                console.warn('[ROULETTE] Front SECTORS ids:', SECTORS.map(s => s.id));
+                console.warn('[ROULETTE] Front SECTORS ids:', SECTORS.map((s) => s.id));
 
                 // ✅ fallback: чтобы не "зависало" — крутим на случайный сектор
                 const randomIdx = Math.floor(Math.random() * SECTORS.length);
@@ -144,6 +183,8 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
 
                 // после анимации всё равно показываем настоящий результат с бэка
                 window.setTimeout(() => {
+                    stopSpinSound(); // ✅ STOP SFX (после остановки)
+
                     setResult(data);
                     onReward(data);
                     flyToHeader(data.type, data.amount);
@@ -159,6 +200,8 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
 
             // 4) когда барабан остановился — показать результат + дернуть onReward()
             window.setTimeout(() => {
+                stopSpinSound(); // ✅ STOP SFX (после остановки)
+
                 setResult(data);
                 onReward(data);
                 flyToHeader(data.type, data.amount);
@@ -168,6 +211,8 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
             console.error(e);
             setError(e?.message || 'Ошибка сети');
             showAlert(e?.message || 'Ошибка сети');
+
+            stopSpinSound(); // ✅ STOP SFX (ошибка сети)
             setSpinning(false);
         }
     };
@@ -264,6 +309,7 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
             </div>
         </div>
     );
+
     function flyToHeader(type: PrizeType, amount?: number) {
         // ❌ Ничего не выиграли — ничего не летит
         if (type === 'NOTHING' || !amount || amount <= 0) return;
@@ -307,19 +353,21 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
         el.style.left = `${x1}px`;
         el.style.top = `${y1}px`;
 
-        el.animate(
-            [
-                { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
+        el
+            .animate(
+                [
+                    { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
+                    {
+                        transform: `translate(${x2 - x1}px, ${y2 - y1}px) scale(0.35)`,
+                        opacity: 0.95,
+                    },
+                ],
                 {
-                    transform: `translate(${x2 - x1}px, ${y2 - y1}px) scale(0.35)`,
-                    opacity: 0.95,
-                },
-            ],
-            {
-                duration: 700,
-                easing: 'cubic-bezier(.2,.9,.2,1)',
-            }
-        ).onfinish = () => {
+                    duration: 700,
+                    easing: 'cubic-bezier(.2,.9,.2,1)',
+                }
+            )
+            .onfinish = () => {
             el.remove();
         };
     }
