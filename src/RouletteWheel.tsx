@@ -146,7 +146,7 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
                 window.setTimeout(() => {
                     setResult(data);
                     onReward(data);
-                    flyToHeader(data.type);
+                    flyToHeader(data.type, data.amount);
                     setSpinning(false);
                 }, 4300);
 
@@ -161,7 +161,7 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
             window.setTimeout(() => {
                 setResult(data);
                 onReward(data);
-                flyToHeader(data.type);
+                flyToHeader(data.type, data.amount);
                 setSpinning(false);
             }, 4300);
         } catch (e: any) {
@@ -264,19 +264,27 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
             </div>
         </div>
     );
-    function flyToHeader(type: PrizeType) {
+    function flyToHeader(type: PrizeType, amount?: number) {
+        // ❌ Ничего не выиграли — ничего не летит
+        if (type === 'NOTHING' || !amount || amount <= 0) return;
+
         const icon =
-            type === 'COINS' || type === 'JACKPOT' ? '🪙' :
-                type === 'STARS' ? '⭐' :
-                    type === 'TICKETS' ? '🎟' :
-                        '🎁';
+            type === 'COINS' || type === 'JACKPOT'
+                ? '🪙'
+                : type === 'STARS'
+                    ? '⭐'
+                    : type === 'TICKETS'
+                        ? '🎟️'
+                        : '🎁';
 
         const target =
             type === 'COINS' || type === 'JACKPOT'
                 ? document.querySelector('.user-pill--coins')
                 : type === 'STARS'
                     ? document.querySelector('.user-pill--stars')
-                    : document.querySelector('.user-pill--tickets');
+                    : type === 'TICKETS'
+                        ? document.querySelector('.user-pill--tickets')
+                        : null;
 
         if (!target) return;
 
@@ -301,15 +309,20 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
 
         el.animate(
             [
-                { transform: 'translate(-50%,-50%) scale(1)', opacity: 1 },
-                { transform: `translate(${x2 - x1}px, ${y2 - y1}px) scale(0.35)`, opacity: 0.95 }
+                { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
+                {
+                    transform: `translate(${x2 - x1}px, ${y2 - y1}px) scale(0.35)`,
+                    opacity: 0.95,
+                },
             ],
-            { duration: 700, easing: 'cubic-bezier(.2,.9,.2,1)' }
+            {
+                duration: 700,
+                easing: 'cubic-bezier(.2,.9,.2,1)',
+            }
         ).onfinish = () => {
             el.remove();
         };
     }
-
 }
 
 export default RouletteWheel;
