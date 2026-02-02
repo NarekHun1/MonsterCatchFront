@@ -28,6 +28,7 @@ type Sector = {
 // ⚠️ ОБЯЗАТЕЛЬНО подгони id под твой backend roulette.config
 const SECTORS: Sector[] = [
     { id: 'ticket_1', label: '+1', icon: '🎟️', variant: 'ticket' },
+    { id: 'ticket_3', label: '+3', icon: '🎟️', variant: 'ticket' },
     { id: 'coins_10', label: '+10', icon: '🪙', variant: 'coin' },
     { id: 'coins_25', label: '+25', icon: '🪙', variant: 'coin' },
     { id: 'stars_5', label: '+5', icon: '⭐', variant: 'star' },
@@ -195,7 +196,7 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
                             >
                                 <div className="sector-content">
                                     <div className="sector-icon">{s.icon}</div>
-                                    {/*<div className="sector-label">{s.label}</div>*/}
+                                    <div className="sector-label">{s.label}</div>
                                 </div>
                             </div>
                         ))}
