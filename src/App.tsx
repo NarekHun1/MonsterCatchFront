@@ -446,17 +446,45 @@
             const tg = (window as any).Telegram?.WebApp;
             if (!tg) return;
 
-            // говорим, что всё загрузили
-            tg.ready?.();
+            const doExpand = () => {
+                try {
+                    tg.ready?.();
+                    tg.expand?.();
+                    tg.setBackgroundColor?.('#000000');
+                    tg.disableVerticalSwipes?.();
+                } catch {}
+            };
 
-            // просим максимум доступной высоты
-            tg.expand?.();
+            // 1) сразу
+            doExpand();
 
-            // опционально — отключить свайпы, чтобы не сворачивался
-            tg.disableVerticalSwipes?.();
+            // 2) чуть позже — на iOS это часто решает “не фулл”
+            const t1 = setTimeout(doExpand, 120);
+            const t2 = setTimeout(doExpand, 350);
+            const t3 = setTimeout(doExpand, 900);
 
-            tg.setBackgroundColor?.('#000000');
+            // 3) ещё и на resize (когда телега пересчитает размеры)
+            const onResize = () => doExpand();
+            tg.onEvent?.('viewportChanged', onResize);
+
+            return () => {
+                clearTimeout(t1);
+                clearTimeout(t2);
+                clearTimeout(t3);
+                tg.offEvent?.('viewportChanged', onResize);
+            };
         }, []);
+
+        useEffect(() => {
+            if (isBooting) return;
+            const tg = (window as any).Telegram?.WebApp;
+            if (!tg) return;
+
+            // когда приложение реально показало UI
+            tg.expand?.();
+        }, [isBooting]);
+
+
 
         useEffect(() => {
             if (currentPage !== 'menu') {
