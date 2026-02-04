@@ -1,0 +1,222 @@
+/* =========================
+   Monsters Farm – Telegram UI
+   ========================= */
+
+:root {
+    --bg: #0e0f1a;
+    --card: #17192b;
+    --card-hover: #1e2140;
+
+    --border: rgba(255, 255, 255, 0.08);
+    --text: #ffffff;
+    --muted: rgba(255, 255, 255, 0.6);
+
+    --green: #4caf50;
+    --gold: #f5c542;
+    --red: #ff5c5c;
+
+    --common: #9aa4ff;
+    --rare: #4fd1ff;
+    --epic: #b26cff;
+    --legendary: #ff9f43;
+}
+
+body {
+    background: radial-gradient(120% 120% at 50% 0%, #1b1e3a 0%, var(--bg) 60%);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', system-ui,
+    sans-serif;
+}
+
+/* =========================
+   Layout
+   ========================= */
+
+.monsters-farm {
+    padding: 16px;
+}
+
+.monsters-farm h2 {
+    margin-bottom: 12px;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+/* =========================
+   Grid
+   ========================= */
+
+.farm-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+}
+
+/* =========================
+   Slot Card
+   ========================= */
+
+.slot-card {
+    background: linear-gradient(180deg, var(--card), #121329);
+    border-radius: 14px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s ease, box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+
+.slot-card:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(180deg, var(--card-hover), #16183a);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+/* =========================
+   Locked Slot
+   ========================= */
+
+.slot-locked {
+    opacity: 0.9;
+}
+
+.slot-locked .lock {
+    font-size: 22px;
+    margin-bottom: 6px;
+}
+
+.unlock-price {
+    margin-top: 6px;
+    font-size: 13px;
+    color: var(--gold);
+    font-weight: 600;
+}
+
+/* =========================
+   Empty Slot
+   ========================= */
+
+.slot-empty {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+/* =========================
+   Monster
+   ========================= */
+
+.monster-img {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 6px;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.6));
+}
+
+.monster-name {
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+/* rarity colors */
+.monster-common {
+    color: var(--common);
+}
+.monster-rare {
+    color: var(--rare);
+}
+.monster-epic {
+    color: var(--epic);
+}
+.monster-legendary {
+    color: var(--legendary);
+}
+
+/* =========================
+   Level & XP
+   ========================= */
+
+.monster-level {
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+.xp-bar {
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    overflow: hidden;
+    margin: 6px 0;
+}
+
+.xp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #6cf27d, #3bbf59);
+    border-radius: 999px;
+    transition: width 0.25s ease;
+}
+
+.xp-max {
+    font-size: 12px;
+    color: var(--gold);
+}
+
+/* =========================
+   Feed Info
+   ========================= */
+
+.feed-info {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 6px;
+}
+
+/* =========================
+   Buttons
+   ========================= */
+
+.btn {
+    appearance: none;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+}
+
+.btn-feed {
+    background: linear-gradient(180deg, #4caf50, #2e7d32);
+    color: white;
+}
+
+.btn-feed:active {
+    transform: scale(0.97);
+}
+
+.btn-disabled {
+    background: #555;
+    cursor: not-allowed;
+}
+
+/* =========================
+   Animations
+   ========================= */
+
+@keyframes pop {
+    0% {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.slot-card {
+    animation: pop 0.25s ease;
+}

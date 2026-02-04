@@ -20,13 +20,14 @@
     import { BottomNav } from './BottomNav';
     import LevelsMap from './match3/LevelsMap.tsx';
     import Match3Level from './match3/Match3Level.tsx';
+    import MonstersFarm from "./MonstersFarm.tsx";
 
 
 
 
 
 
-    type Page = 'menu' | 'game' | 'leaderboard' | 'invite' | 'tournament' | 'wallet' | 'cashcup'| 'roulette' | 'quests'| 'match3';
+    type Page = 'menu' | 'game' | 'leaderboard' | 'invite' | 'tournament' | 'wallet' | 'cashcup'| 'roulette' | 'quests'| 'match3'| 'monsters';
 
     interface MeResponse {
         id: number;
@@ -1088,6 +1089,10 @@
                                     </div>
 
                                 )}
+                                {currentPage === 'monsters' && token && (
+                                    <MonstersFarm token={token} />
+                                )}
+
                                 {currentPage === 'match3' && (
                                     <div className="panel panel-menu">
                                         {!match3Level ? (
@@ -1114,6 +1119,7 @@
                                             />
                                         )}
                                     </div>
+
                                 )}
 
                                 {currentPage === 'game' && token && (
@@ -1272,6 +1278,37 @@
                         </>
                     )}
                     {/* FIXED BOTTOM NAV */}
+                    {token && (
+                        <div
+                            style={{
+                                position: 'fixed',
+                                bottom: 84, // ⬅️ выше BottomNav
+                                left: 16,
+                                right: 16,
+                                zIndex: 50,
+                            }}
+                        >
+                            <button
+                                onClick={() => setCurrentPage('monsters')}
+                                style={{
+                                    width: '100%',
+                                    padding: '14px 16px',
+                                    borderRadius: 16,
+                                    border: 'none',
+                                    fontSize: 16,
+                                    fontWeight: 900,
+                                    color: '#fff',
+                                    background:
+                                        'linear-gradient(180deg, #b26cff, #7b2cff)',
+                                    boxShadow: '0 8px 24px rgba(178,108,255,0.45)',
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                🐲 Monsters Farm (TEST)
+                            </button>
+                        </div>
+                    )}
+
                     {!error && (
                         <BottomNav
                             active={
