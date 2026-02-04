@@ -1,222 +1,404 @@
-/* =========================
-   Monsters Farm – Telegram UI
-   ========================= */
+/* src/MonstersFarm.css
+   Carousel-style farm like your screenshot (center monster + dots + bottom bar)
+*/
 
 :root {
-    --bg: #0e0f1a;
-    --card: #17192b;
-    --card-hover: #1e2140;
+    --bg: #0b0b12;
+    --card1: #141427;
+    --card2: #0f1022;
+    --stroke: rgba(255, 255, 255, 0.08);
+    --muted: rgba(255, 255, 255, 0.65);
+    --muted2: rgba(255, 255, 255, 0.45);
+    --text: #fff;
 
-    --border: rgba(255, 255, 255, 0.08);
-    --text: #ffffff;
-    --muted: rgba(255, 255, 255, 0.6);
+    --common: #b6baff;
+    --rare: #67d5ff;
+    --epic: #c47bff;
+    --legendary: #ffb15a;
 
-    --green: #4caf50;
-    --gold: #f5c542;
-    --red: #ff5c5c;
-
-    --common: #9aa4ff;
-    --rare: #4fd1ff;
-    --epic: #b26cff;
-    --legendary: #ff9f43;
+    --btn1: #ffd66b;
+    --btn2: #ffb300;
 }
-
-body {
-    background: radial-gradient(120% 120% at 50% 0%, #1b1e3a 0%, var(--bg) 60%);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, 'Inter', system-ui,
-    sans-serif;
-}
-
-/* =========================
-   Layout
-   ========================= */
 
 .monsters-farm {
-    padding: 16px;
+    min-height: 100%;
+    padding: 12px 14px 92px; /* space for bottom bar */
+    color: var(--text);
+    background: radial-gradient(110% 90% at 50% 0%, #2a1135 0%, #0b0b12 60%);
 }
 
-.monsters-farm h2 {
-    margin-bottom: 12px;
-    font-size: 20px;
+/* ===== Top bar ===== */
+.farm-top {
+    display: grid;
+    grid-template-columns: 44px 1fr 44px;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.farm-title {
+    text-align: center;
+    font-weight: 900;
+    letter-spacing: 0.4px;
+    font-size: 16px;
+    opacity: 0.95;
+}
+
+.farm-back,
+.farm-refresh {
+    height: 38px;
+    width: 38px;
+    border-radius: 12px;
+    border: 1px solid var(--stroke);
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.farm-back:active,
+.farm-refresh:active {
+    transform: scale(0.98);
+}
+
+/* ===== Loading / Error / Empty ===== */
+.farm-loading {
+    padding: 18px;
+    text-align: center;
+    color: var(--muted);
     font-weight: 700;
 }
 
-/* =========================
-   Grid
-   ========================= */
-
-.farm-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
+.farm-error {
+    border: 1px solid rgba(255, 92, 92, 0.35);
+    background: rgba(255, 92, 92, 0.08);
+    border-radius: 16px;
+    padding: 14px;
 }
 
-/* =========================
-   Slot Card
-   ========================= */
-
-.slot-card {
-    background: linear-gradient(180deg, var(--card), #121329);
-    border-radius: 14px;
-    padding: 12px;
-    border: 1px solid var(--border);
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.15s ease, box-shadow 0.15s ease,
-    background 0.15s ease;
-}
-
-.slot-card:hover {
-    transform: translateY(-2px);
-    background: linear-gradient(180deg, var(--card-hover), #16183a);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
-}
-
-/* =========================
-   Locked Slot
-   ========================= */
-
-.slot-locked {
-    opacity: 0.9;
-}
-
-.slot-locked .lock {
-    font-size: 22px;
+.farm-error-title {
+    font-weight: 900;
     margin-bottom: 6px;
 }
 
-.unlock-price {
-    margin-top: 6px;
+.farm-error-text {
+    color: rgba(255, 255, 255, 0.78);
     font-size: 13px;
-    color: var(--gold);
-    font-weight: 600;
+    margin-bottom: 10px;
 }
 
-/* =========================
-   Empty Slot
-   ========================= */
-
-.slot-empty {
+.farm-empty {
+    margin-top: 38px;
+    text-align: center;
     color: var(--muted);
+}
+
+.farm-empty-emoji {
+    font-size: 42px;
+    margin-bottom: 8px;
+}
+
+.farm-empty-text {
     font-size: 14px;
 }
 
-/* =========================
-   Monster
-   ========================= */
-
-.monster-img {
-    width: 72px;
-    height: 72px;
-    margin: 0 auto 6px;
-    object-fit: contain;
-    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.6));
+/* ===== Carousel rail ===== */
+.farm-rail {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    padding: 6px 2px 14px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
 }
 
-.monster-name {
-    font-weight: 700;
-    margin-bottom: 2px;
+.farm-rail::-webkit-scrollbar {
+    display: none;
 }
 
-/* rarity colors */
-.monster-common {
+/* One slide ~ 80-86% width to show neighbors */
+.farm-slide {
+    flex: 0 0 84%;
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+    transition: transform 0.18s ease, opacity 0.18s ease;
+    opacity: 0.72;
+    transform: scale(0.94);
+}
+
+.farm-slide--active {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* ===== Card ===== */
+.farm-card {
+    border-radius: 22px;
+    border: 1px solid var(--stroke);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+    position: relative;
+    overflow: hidden;
+    padding: 12px 14px 14px;
+    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
+}
+
+.farm-card::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    background: radial-gradient(60% 40% at 50% 0%, rgba(255, 255, 255, 0.10), transparent 60%);
+    pointer-events: none;
+}
+
+/* top chips */
+.farm-card-top {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.farm-chip {
+    border: 1px solid var(--stroke);
+    background: rgba(0, 0, 0, 0.22);
+    color: rgba(255, 255, 255, 0.85);
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.farm-chip--rarity {
+    letter-spacing: 0.4px;
+}
+
+/* ===== Rarity glow (text + chip tint) ===== */
+.rarity-common {
     color: var(--common);
+    border-color: rgba(182, 186, 255, 0.35) !important;
 }
-.monster-rare {
+
+.rarity-rare {
     color: var(--rare);
+    border-color: rgba(103, 213, 255, 0.35) !important;
 }
-.monster-epic {
+
+.rarity-epic {
     color: var(--epic);
+    border-color: rgba(196, 123, 255, 0.35) !important;
 }
-.monster-legendary {
+
+.rarity-legendary {
     color: var(--legendary);
+    border-color: rgba(255, 177, 90, 0.35) !important;
 }
 
-/* =========================
-   Level & XP
-   ========================= */
+/* ===== Monster image & text ===== */
+.farm-monster-img {
+    width: 240px;
+    height: 240px;
+    display: block;
+    margin: 6px auto 8px;
+    object-fit: contain;
+    filter: drop-shadow(0 22px 40px rgba(0, 0, 0, 0.65));
+    position: relative;
+    z-index: 1;
+}
 
-.monster-level {
+.farm-monster-name {
+    text-align: center;
+    font-weight: 950;
+    font-size: 18px;
+    letter-spacing: 0.2px;
+    position: relative;
+    z-index: 1;
+}
+
+.farm-monster-level {
+    text-align: center;
+    margin-top: 4px;
     font-size: 13px;
-    margin-bottom: 4px;
+    color: rgba(255, 255, 255, 0.78);
+    position: relative;
+    z-index: 1;
 }
 
-.xp-bar {
-    height: 6px;
+/* ===== XP ===== */
+.farm-xpbar {
+    height: 8px;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.12);
     overflow: hidden;
-    margin: 6px 0;
+    margin: 10px 0 6px;
+    position: relative;
+    z-index: 1;
 }
 
-.xp-fill {
+.farm-xpfill {
     height: 100%;
+    width: 0%;
     background: linear-gradient(90deg, #6cf27d, #3bbf59);
     border-radius: 999px;
     transition: width 0.25s ease;
 }
 
-.xp-max {
+.farm-xptext {
+    text-align: center;
     font-size: 12px;
-    color: var(--gold);
+    color: rgba(255, 255, 255, 0.72);
+    position: relative;
+    z-index: 1;
 }
 
-/* =========================
-   Feed Info
-   ========================= */
+.farm-xpmax {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 12px;
+    font-weight: 900;
+    color: var(--btn1);
+    position: relative;
+    z-index: 1;
+}
 
-.feed-info {
-    font-size: 11px;
+/* ===== Locked / Empty card states ===== */
+.farm-card--locked {
+    opacity: 0.95;
+}
+
+.farm-locked,
+.farm-empty-card {
+    padding: 26px 10px 34px;
+    text-align: center;
     color: var(--muted);
+    position: relative;
+    z-index: 1;
+}
+
+.farm-locked-emoji,
+.farm-empty-card .farm-empty-emoji {
+    font-size: 34px;
+    margin-bottom: 10px;
+}
+
+.farm-locked-title,
+.farm-empty-title {
+    font-weight: 950;
+    color: rgba(255, 255, 255, 0.9);
     margin-bottom: 6px;
 }
 
-/* =========================
-   Buttons
-   ========================= */
+.farm-locked-sub,
+.farm-empty-sub {
+    font-size: 12px;
+    color: var(--muted2);
+}
 
-.btn {
-    appearance: none;
-    border: none;
-    border-radius: 10px;
-    padding: 8px 12px;
-    font-size: 13px;
-    font-weight: 700;
+/* ===== Dots row ===== */
+.farm-dots {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    margin-top: 2px;
+    margin-bottom: 10px;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.12);
     cursor: pointer;
-    width: 100%;
+    padding: 0;
 }
 
-.btn-feed {
-    background: linear-gradient(180deg, #4caf50, #2e7d32);
-    color: white;
+.dot--active {
+    width: 12px;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(255, 255, 255, 0.35);
+    box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.06);
 }
 
-.btn-feed:active {
-    transform: scale(0.97);
+.dot--locked {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.10);
+    opacity: 0.5;
 }
 
-.btn-disabled {
-    background: #555;
+/* ===== Bottom action bar ===== */
+.farm-bottom {
+    position: fixed;
+    left: 14px;
+    right: 14px;
+    bottom: 74px; /* above your BottomNav */
+    z-index: 50;
+
+    border-radius: 22px;
+    border: 1px solid var(--stroke);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
+
+    padding: 12px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.farm-bottom-left {
+    flex: 1;
+    min-width: 0;
+}
+
+.farm-bottom-name {
+    font-weight: 950;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.farm-bottom-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+}
+
+/* ===== Primary button ===== */
+.farm-primary {
+    border: none;
+    border-radius: 16px;
+    padding: 12px 14px;
+    font-weight: 950;
+    font-size: 14px;
+    cursor: pointer;
+    color: #1a1400;
+    background: linear-gradient(180deg, var(--btn1), var(--btn2));
+    box-shadow: 0 10px 24px rgba(255, 179, 0, 0.18);
+    white-space: nowrap;
+}
+
+.farm-primary:active {
+    transform: scale(0.99);
+}
+
+.farm-primary:disabled {
+    opacity: 0.55;
     cursor: not-allowed;
+    box-shadow: none;
 }
 
-/* =========================
-   Animations
-   ========================= */
-
-@keyframes pop {
-    0% {
-        transform: scale(0.95);
-        opacity: 0;
-    }
-    100% {
-        transform: scale(1);
-        opacity: 1;
-    }
+/* Small buttons reuse */
+.farm-back,
+.farm-refresh {
+    -webkit-tap-highlight-color: transparent;
 }
 
-.slot-card {
-    animation: pop 0.25s ease;
+/* Optional: safer tap selection */
+button {
+    -webkit-tap-highlight-color: transparent;
 }
