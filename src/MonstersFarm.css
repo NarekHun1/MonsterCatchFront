@@ -1,34 +1,44 @@
 /* src/MonstersFarm.css
-   Carousel-style farm like your screenshot (center monster + dots + bottom bar)
+   Premium carousel farm UI (glass + neon + depth)
+   Works great inside Telegram WebApp
 */
 
-:root {
-    --bg: #0b0b12;
-    --card1: #141427;
-    --card2: #0f1022;
-    --stroke: rgba(255, 255, 255, 0.08);
-    --muted: rgba(255, 255, 255, 0.65);
-    --muted2: rgba(255, 255, 255, 0.45);
-    --text: #fff;
+:root{
+    --bg: #070712;
+    --stroke: rgba(255,255,255,0.10);
+    --stroke2: rgba(255,255,255,0.06);
+    --muted: rgba(255,255,255,0.70);
+    --muted2: rgba(255,255,255,0.48);
+    --text: rgba(255,255,255,0.96);
+
+    --glass1: rgba(255,255,255,0.08);
+    --glass2: rgba(255,255,255,0.03);
 
     --common: #b6baff;
     --rare: #67d5ff;
     --epic: #c47bff;
     --legendary: #ffb15a;
 
-    --btn1: #ffd66b;
+    --btn1: #ffe08a;
     --btn2: #ffb300;
+
+    --green1: #6cf27d;
+    --green2: #31c95d;
 }
 
-.monsters-farm {
+/* ===== page ===== */
+.monsters-farm{
     min-height: 100%;
     padding: 12px 14px 92px; /* space for bottom bar */
     color: var(--text);
-    background: radial-gradient(110% 90% at 50% 0%, #2a1135 0%, #0b0b12 60%);
+    background:
+            radial-gradient(120% 90% at 50% -10%, rgba(196,123,255,0.25) 0%, rgba(11,11,18,0) 55%),
+            radial-gradient(110% 90% at 50% 0%, #2a1135 0%, #0b0b12 55%),
+            linear-gradient(180deg, #060612, #0b0b12 55%, #070712);
 }
 
 /* ===== Top bar ===== */
-.farm-top {
+.farm-top{
     display: grid;
     grid-template-columns: 44px 1fr 44px;
     align-items: center;
@@ -36,74 +46,83 @@
     margin-bottom: 10px;
 }
 
-.farm-title {
+.farm-title{
     text-align: center;
-    font-weight: 900;
+    font-weight: 950;
     letter-spacing: 0.4px;
     font-size: 16px;
-    opacity: 0.95;
+    opacity: 0.96;
+    text-shadow: 0 10px 30px rgba(0,0,0,0.45);
 }
 
 .farm-back,
-.farm-refresh {
+.farm-refresh{
     height: 38px;
     width: 38px;
-    border-radius: 12px;
-    border: 1px solid var(--stroke);
-    background: rgba(255, 255, 255, 0.06);
-    color: rgba(255, 255, 255, 0.9);
-    font-weight: 900;
+    border-radius: 14px;
+    border: 1px solid var(--stroke2);
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.92);
+    font-weight: 950;
     cursor: pointer;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow:
+            0 10px 30px rgba(0,0,0,0.35),
+            inset 0 1px 0 rgba(255,255,255,0.08);
+    -webkit-tap-highlight-color: transparent;
 }
 
 .farm-back:active,
-.farm-refresh:active {
-    transform: scale(0.98);
+.farm-refresh:active{
+    transform: scale(0.985);
 }
 
 /* ===== Loading / Error / Empty ===== */
-.farm-loading {
+.farm-loading{
     padding: 18px;
     text-align: center;
     color: var(--muted);
-    font-weight: 700;
+    font-weight: 800;
 }
 
-.farm-error {
-    border: 1px solid rgba(255, 92, 92, 0.35);
-    background: rgba(255, 92, 92, 0.08);
-    border-radius: 16px;
+.farm-error{
+    border: 1px solid rgba(255,92,92,0.35);
+    background: rgba(255,92,92,0.08);
+    border-radius: 18px;
     padding: 14px;
+    box-shadow: 0 18px 55px rgba(0,0,0,0.45);
 }
 
-.farm-error-title {
-    font-weight: 900;
+.farm-error-title{
+    font-weight: 950;
     margin-bottom: 6px;
 }
 
-.farm-error-text {
-    color: rgba(255, 255, 255, 0.78);
+.farm-error-text{
+    color: rgba(255,255,255,0.80);
     font-size: 13px;
     margin-bottom: 10px;
 }
 
-.farm-empty {
+.farm-empty{
     margin-top: 38px;
     text-align: center;
     color: var(--muted);
 }
 
-.farm-empty-emoji {
+.farm-empty-emoji{
     font-size: 42px;
     margin-bottom: 8px;
 }
 
-.farm-empty-text {
+.farm-empty-text{
     font-size: 14px;
+    color: rgba(255,255,255,0.80);
 }
 
 /* ===== Carousel rail ===== */
-.farm-rail {
+.farm-rail{
     display: flex;
     gap: 14px;
     overflow-x: auto;
@@ -113,248 +132,310 @@
     overscroll-behavior-x: contain;
 }
 
-.farm-rail::-webkit-scrollbar {
-    display: none;
-}
+.farm-rail::-webkit-scrollbar{ display: none; }
 
-/* One slide ~ 80-86% width to show neighbors */
-.farm-slide {
+/* slide width to show neighbors */
+.farm-slide{
     flex: 0 0 84%;
     scroll-snap-align: center;
     scroll-snap-stop: always;
-    transition: transform 0.18s ease, opacity 0.18s ease;
-    opacity: 0.72;
+    transition: transform 0.18s ease, opacity 0.18s ease, filter 0.18s ease;
+    opacity: 0.70;
     transform: scale(0.94);
+    filter: saturate(0.92);
 }
 
-.farm-slide--active {
+.farm-slide--active{
     opacity: 1;
     transform: scale(1);
+    filter: saturate(1.05);
 }
 
 /* ===== Card ===== */
-.farm-card {
-    border-radius: 22px;
+.farm-card{
+    width: 100%;
+    border-radius: 24px;
     border: 1px solid var(--stroke);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+    background: linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.02));
     position: relative;
     overflow: hidden;
     padding: 12px 14px 14px;
-    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
+    box-shadow:
+            0 18px 70px rgba(0,0,0,0.55),
+            inset 0 1px 0 rgba(255,255,255,0.10);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
 }
 
-.farm-card::before {
-    content: "";
+/* outer glow */
+.farm-card::before{
+    content:"";
     position: absolute;
     inset: -2px;
-    background: radial-gradient(60% 40% at 50% 0%, rgba(255, 255, 255, 0.10), transparent 60%);
+    background:
+            radial-gradient(60% 40% at 50% 0%, rgba(255,255,255,0.12), transparent 60%),
+            radial-gradient(70% 50% at 30% 20%, rgba(103,213,255,0.10), transparent 60%),
+            radial-gradient(70% 50% at 70% 30%, rgba(196,123,255,0.10), transparent 60%);
     pointer-events: none;
 }
 
+/* subtle animated shine feel without animation */
+.farm-card::after{
+    content:"";
+    position:absolute;
+    inset:-60px -80px auto -80px;
+    height: 160px;
+    background: radial-gradient(closest-side, rgba(255,255,255,0.10), rgba(255,255,255,0) 70%);
+    transform: rotate(8deg);
+    pointer-events:none;
+    opacity: 0.85;
+}
+
+.farm-card:active{
+    transform: scale(0.995);
+}
+
+.farm-card--locked{
+    opacity: 0.94;
+    filter: grayscale(0.15) saturate(0.85);
+}
+
+.farm-card--tap{
+    border-color: rgba(255,255,255,0.16);
+    box-shadow:
+            0 18px 70px rgba(0,0,0,0.55),
+            0 0 0 6px rgba(255,255,255,0.035),
+            inset 0 1px 0 rgba(255,255,255,0.10);
+}
+
 /* top chips */
-.farm-card-top {
+.farm-card-top{
     position: relative;
-    z-index: 1;
-    display: flex;
+    z-index: 2;
+    display:flex;
     justify-content: space-between;
-    align-items: center;
+    align-items:center;
     margin-bottom: 8px;
 }
 
-.farm-chip {
-    border: 1px solid var(--stroke);
-    background: rgba(0, 0, 0, 0.22);
-    color: rgba(255, 255, 255, 0.85);
+.farm-chip{
+    border: 1px solid var(--stroke2);
+    background: rgba(0,0,0,0.20);
+    color: rgba(255,255,255,0.86);
     padding: 6px 10px;
     border-radius: 999px;
     font-size: 12px;
-    font-weight: 900;
+    font-weight: 950;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
 }
 
-.farm-chip--rarity {
+.farm-chip--rarity{
     letter-spacing: 0.4px;
 }
 
 /* ===== Rarity glow (text + chip tint) ===== */
-.rarity-common {
-    color: var(--common);
-    border-color: rgba(182, 186, 255, 0.35) !important;
-}
+.rarity-common{ color: var(--common); border-color: rgba(182,186,255,0.35) !important; }
+.rarity-rare{ color: var(--rare); border-color: rgba(103,213,255,0.35) !important; }
+.rarity-epic{ color: var(--epic); border-color: rgba(196,123,255,0.35) !important; }
+.rarity-legendary{ color: var(--legendary); border-color: rgba(255,177,90,0.35) !important; }
 
-.rarity-rare {
-    color: var(--rare);
-    border-color: rgba(103, 213, 255, 0.35) !important;
-}
-
-.rarity-epic {
-    color: var(--epic);
-    border-color: rgba(196, 123, 255, 0.35) !important;
-}
-
-.rarity-legendary {
-    color: var(--legendary);
-    border-color: rgba(255, 177, 90, 0.35) !important;
-}
-
-/* ===== Monster image & text ===== */
-.farm-monster-img {
-    width: 240px;
-    height: 240px;
-    display: block;
+/* ===== Monster image ===== */
+.farm-monster-img{
+    width: 250px;
+    height: 250px;
+    display:block;
     margin: 6px auto 8px;
     object-fit: contain;
-    filter: drop-shadow(0 22px 40px rgba(0, 0, 0, 0.65));
     position: relative;
-    z-index: 1;
+    z-index: 2;
+
+    /* premium depth */
+    filter:
+            drop-shadow(0 26px 50px rgba(0,0,0,0.70))
+            drop-shadow(0 0 18px rgba(196,123,255,0.06));
 }
 
-.farm-monster-name {
-    text-align: center;
+/* name / level */
+.farm-monster-name{
+    text-align:center;
     font-weight: 950;
     font-size: 18px;
     letter-spacing: 0.2px;
     position: relative;
-    z-index: 1;
+    z-index: 2;
+    text-shadow: 0 12px 30px rgba(0,0,0,0.50);
 }
 
-.farm-monster-level {
-    text-align: center;
+.farm-monster-level{
+    text-align:center;
     margin-top: 4px;
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.78);
+    color: rgba(255,255,255,0.80);
     position: relative;
-    z-index: 1;
+    z-index: 2;
 }
 
 /* ===== XP ===== */
-.farm-xpbar {
-    height: 8px;
+.farm-xpbar{
+    height: 9px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.12);
-    overflow: hidden;
+    background: rgba(255,255,255,0.12);
+    overflow:hidden;
     margin: 10px 0 6px;
     position: relative;
-    z-index: 1;
+    z-index: 2;
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
 }
 
-.farm-xpfill {
+.farm-xpfill{
     height: 100%;
     width: 0%;
-    background: linear-gradient(90deg, #6cf27d, #3bbf59);
+    background: linear-gradient(90deg, var(--green1), var(--green2));
     border-radius: 999px;
-    transition: width 0.25s ease;
+    transition: width 0.28s ease;
+    box-shadow: 0 0 18px rgba(108,242,125,0.18);
 }
 
-.farm-xptext {
-    text-align: center;
+.farm-xptext{
+    text-align:center;
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.72);
+    color: rgba(255,255,255,0.74);
     position: relative;
-    z-index: 1;
+    z-index: 2;
 }
 
-.farm-xpmax {
-    text-align: center;
+.farm-xpmax{
+    text-align:center;
+    margin-top: 10px;
+    font-size: 12px;
+    font-weight: 950;
+    color: var(--btn1);
+    position: relative;
+    z-index: 2;
+    text-shadow: 0 12px 30px rgba(0,0,0,0.55);
+}
+
+/* ===== Tap hint on card ===== */
+.farm-tap-hint{
     margin-top: 10px;
     font-size: 12px;
     font-weight: 900;
-    color: var(--btn1);
-    position: relative;
-    z-index: 1;
-}
-
-/* ===== Locked / Empty card states ===== */
-.farm-card--locked {
-    opacity: 0.95;
-}
-
-.farm-locked,
-.farm-empty-card {
-    padding: 26px 10px 34px;
     text-align: center;
+    color: rgba(255,255,255,0.82);
+    position: relative;
+    z-index: 2;
+
+    padding: 10px 12px;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(0,0,0,0.18);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* ===== Locked / Empty states ===== */
+.farm-locked,
+.farm-empty-card{
+    padding: 26px 10px 34px;
+    text-align:center;
     color: var(--muted);
     position: relative;
-    z-index: 1;
+    z-index: 2;
 }
 
 .farm-locked-emoji,
-.farm-empty-card .farm-empty-emoji {
+.farm-empty-card .farm-empty-emoji{
     font-size: 34px;
     margin-bottom: 10px;
 }
 
 .farm-locked-title,
-.farm-empty-title {
+.farm-empty-title{
     font-weight: 950;
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(255,255,255,0.92);
     margin-bottom: 6px;
+    text-shadow: 0 12px 30px rgba(0,0,0,0.50);
 }
 
 .farm-locked-sub,
-.farm-empty-sub {
+.farm-empty-sub{
     font-size: 12px;
     color: var(--muted2);
 }
 
-/* ===== Dots row ===== */
-.farm-dots {
-    display: flex;
+/* ===== Dots ===== */
+.farm-dots{
+    display:flex;
     gap: 8px;
-    justify-content: center;
-    align-items: center;
+    justify-content:center;
+    align-items:center;
     margin-top: 2px;
     margin-bottom: 10px;
 }
 
-.dot {
+.dot{
     width: 10px;
     height: 10px;
     border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.12);
     cursor: pointer;
     padding: 0;
+    -webkit-tap-highlight-color: transparent;
 }
 
-.dot--active {
+.dot--active{
     width: 12px;
     height: 12px;
-    background: rgba(255, 255, 255, 0.95);
-    border-color: rgba(255, 255, 255, 0.35);
-    box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.06);
+    background: rgba(255,255,255,0.95);
+    border-color: rgba(255,255,255,0.35);
+    box-shadow: 0 0 0 6px rgba(255,255,255,0.06);
 }
 
-.dot--locked {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.10);
+.dot--locked{
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.10);
     opacity: 0.5;
 }
 
 /* ===== Bottom action bar ===== */
-.farm-bottom {
+.farm-bottom{
     position: fixed;
     left: 14px;
     right: 14px;
     bottom: 74px; /* above your BottomNav */
     z-index: 50;
 
-    border-radius: 22px;
+    border-radius: 24px;
     border: 1px solid var(--stroke);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
-    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
+    background: linear-gradient(180deg, rgba(255,255,255,0.09), rgba(255,255,255,0.03));
+    box-shadow:
+            0 22px 70px rgba(0,0,0,0.65),
+            inset 0 1px 0 rgba(255,255,255,0.08);
 
     padding: 12px;
-    display: flex;
+    display:flex;
     gap: 12px;
-    align-items: center;
+    align-items:center;
+
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
-.farm-bottom-left {
+.farm-bottom-left{
     flex: 1;
     min-width: 0;
 }
 
-.farm-bottom-name {
+.farm-bottom-name{
     font-weight: 950;
     font-size: 14px;
     white-space: nowrap;
@@ -362,43 +443,89 @@
     text-overflow: ellipsis;
 }
 
-.farm-bottom-sub {
+.farm-bottom-sub{
     font-size: 12px;
     color: var(--muted);
     margin-top: 2px;
 }
 
-/* ===== Primary button ===== */
-.farm-primary {
-    border: none;
+.farm-hint{
+    padding: 10px 12px;
     border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(0,0,0,0.18);
+    color: rgba(255,255,255,0.88);
+    font-weight: 950;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+/* ===== Primary button ===== */
+.farm-primary{
+    border: none;
+    border-radius: 18px;
     padding: 12px 14px;
     font-weight: 950;
     font-size: 14px;
     cursor: pointer;
     color: #1a1400;
     background: linear-gradient(180deg, var(--btn1), var(--btn2));
-    box-shadow: 0 10px 24px rgba(255, 179, 0, 0.18);
+    box-shadow: 0 12px 26px rgba(255,179,0,0.18);
     white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
 }
 
-.farm-primary:active {
-    transform: scale(0.99);
-}
+.farm-primary:active{ transform: scale(0.99); }
 
-.farm-primary:disabled {
+.farm-primary:disabled{
     opacity: 0.55;
     cursor: not-allowed;
     box-shadow: none;
 }
 
-/* Small buttons reuse */
-.farm-back,
-.farm-refresh {
-    -webkit-tap-highlight-color: transparent;
+/* ===== MEAT BADGE (top-right on active monster card) ===== */
+.farm-meat-badge{
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 6;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 8px 10px;
+    border-radius: 999px;
+
+    background: rgba(10,10,16,0.52);
+    border: 1px solid rgba(255,255,255,0.14);
+    color: rgba(255,255,255,0.96);
+
+    font-weight: 950;
+    font-size: 13px;
+    letter-spacing: 0.2px;
+
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    box-shadow:
+            0 14px 36px rgba(0,0,0,0.45),
+            inset 0 1px 0 rgba(255,255,255,0.08);
 }
 
-/* Optional: safer tap selection */
-button {
-    -webkit-tap-highlight-color: transparent;
+/* small extra shine inside badge */
+.farm-meat-badge::after{
+    content:"";
+    position:absolute;
+    inset: 2px 2px auto 2px;
+    height: 18px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0));
+    opacity: 0.55;
+    pointer-events:none;
+}
+
+/* ===== globally nicer buttons on iOS ===== */
+button{
+    font-family: inherit;
 }
