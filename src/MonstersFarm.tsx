@@ -53,6 +53,8 @@ export default function MonstersFarm({ token, onBack }: Props) {
     // ✅ collection picker
     const [showPicker, setShowPicker] = useState(false);
     const [collection, setCollection] = useState<CollectionMonster[]>([]);
+    const [pickerSlotIndex, setPickerSlotIndex] = useState<number | null>(null);
+
 
     const railRef = useRef<HTMLDivElement | null>(null);
 
@@ -103,9 +105,10 @@ export default function MonstersFarm({ token, onBack }: Props) {
         setCollection((data.monsters ?? []) as CollectionMonster[]);
     }
 
-    async function openPicker() {
+    async function openPicker(slotIndex: number) {
         try {
             setBusy(true);
+            setPickerSlotIndex(slotIndex); // ✅ запоминаем для какого слота
             await loadCollection();
             setShowPicker(true);
         } catch (e: any) {
@@ -114,6 +117,7 @@ export default function MonstersFarm({ token, onBack }: Props) {
             setBusy(false);
         }
     }
+
 
     async function assignMonster(slotIndex: number, userMonsterId: number) {
         try {
@@ -128,6 +132,7 @@ export default function MonstersFarm({ token, onBack }: Props) {
             if (!res.ok) throw new Error(data.message || 'Assign failed');
 
             setShowPicker(false);
+            setPickerSlotIndex(null);
             await loadFarm(true);
             haptic('light');
         } catch (e: any) {
@@ -349,7 +354,7 @@ export default function MonstersFarm({ token, onBack }: Props) {
                         meat={meat}
                         onAssign={() => {
                             setActiveIndex(idx);
-                            openPicker();
+                            openPicker(slot.slotIndex);
                         }}
                         onClick={() => {
                             setActiveIndex(idx);
@@ -415,9 +420,14 @@ export default function MonstersFarm({ token, onBack }: Props) {
                         🔓 Unlock · {activeSlot.unlockPrice} 🪙
                     </button>
                 ) : activeSlot?.isUnlocked && !activeSlot?.monster ? (
-                    <button className="farm-primary" disabled={busy} onClick={openPicker}>
+                    <button
+                        className="farm-primary"
+                        disabled={busy || !activeSlot?.isUnlocked}
+                        onClick={() => activeSlot && openPicker(activeSlot.slotIndex)}
+                    >
                         ➕ Assign
                     </button>
+
                 ) : (
                     <div className="farm-hint">
                         {activeSlot?.monster ? '👆 Нажми на монстра чтобы кормить' : 'Назначение монстра — следующий шаг'}
@@ -432,9 +442,11 @@ export default function MonstersFarm({ token, onBack }: Props) {
                 monsters={collection}
                 onClose={() => setShowPicker(false)}
                 onPick={(userMonsterId) => {
-                    if (!activeSlot) return;
-                    if (!activeSlot.isUnlocked) return;
-                    assignMonster(activeSlot.slotIndex, userMonsterId);
+                    if (!pickerSlotIndex) {
+                        tg?.showAlert?.('Slot is not selected');
+                        return;
+                    }
+                    assignMonster(pickerSlotIndex, userMonsterId);
                 }}
             />
         </div>
