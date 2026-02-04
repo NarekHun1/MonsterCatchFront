@@ -122,21 +122,27 @@
 }
 
 /* ===== Carousel rail ===== */
+/* ===== Carousel rail (CENTERED) ===== */
 .farm-rail{
-    display: flex;
+    display:flex;
     gap: 14px;
-    overflow-x: auto;
-    padding: 6px 2px 14px;
+    overflow-x:auto;
+
+    /* ключ: большие боковые паддинги, чтобы крайние слайды могли стать по центру */
+    padding: 6px 8vw 14px;        /* было: 6px 2px 14px */
     scroll-snap-type: x mandatory;
+    scroll-padding-left: 8vw;
+    scroll-padding-right: 8vw;
+
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-x: contain;
 }
 
-.farm-rail::-webkit-scrollbar{ display: none; }
+.farm-rail::-webkit-scrollbar{ display:none; }
 
-/* slide width to show neighbors */
+/* ширина слайда чуть меньше, чтобы сосед был виден */
 .farm-slide{
-    flex: 0 0 84%;
+    flex: 0 0 82%;
     scroll-snap-align: center;
     scroll-snap-stop: always;
     transition: transform 0.18s ease, opacity 0.18s ease, filter 0.18s ease;
@@ -150,6 +156,7 @@
     transform: scale(1);
     filter: saturate(1.05);
 }
+
 
 /* ===== Card ===== */
 .farm-card{
