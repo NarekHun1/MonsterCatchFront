@@ -965,6 +965,16 @@
                                                     Match-3 · уровни · награды
                                                 </div>
                                             </button>
+                                            <button
+                                                className="menu-card"
+                                                onClick={() => setCurrentPage('monsters')}
+                                            >
+                                                <div className="menu-icon">🐲</div>
+                                                <div className="menu-card-title">Monsters</div>
+                                                <div className="menu-card-text">
+                                                    Ферма · кормление · уровни монстров
+                                                </div>
+                                            </button>
 
                                             <button
                                                 className="menu-btn menu-btn--secondary"
@@ -1288,24 +1298,6 @@
                                 zIndex: 50,
                             }}
                         >
-                            <button
-                                onClick={() => setCurrentPage('monsters')}
-                                style={{
-                                    width: '100%',
-                                    padding: '14px 16px',
-                                    borderRadius: 16,
-                                    border: 'none',
-                                    fontSize: 16,
-                                    fontWeight: 900,
-                                    color: '#fff',
-                                    background:
-                                        'linear-gradient(180deg, #b26cff, #7b2cff)',
-                                    boxShadow: '0 8px 24px rgba(178,108,255,0.45)',
-                                    cursor: 'pointer',
-                                }}
-                            >
-                                🐲 Monsters Farm (TEST)
-                            </button>
                         </div>
                     )}
 
