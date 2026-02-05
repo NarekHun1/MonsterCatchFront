@@ -25,7 +25,7 @@ type CollectionMonster = {
     count: number;
     level: number;
     xp: number;
-    xpNext: number | null;
+    xpNext: number | null; // backend может вернуть number всегда, но оставим null-safe
 };
 
 function fallbackByRarity(rarity?: string) {
@@ -55,7 +55,6 @@ export default function MonstersFarm({ token, onBack }: Props) {
     const [collection, setCollection] = useState<CollectionMonster[]>([]);
     const [pickerSlotIndex, setPickerSlotIndex] = useState<number | null>(null);
 
-
     const railRef = useRef<HTMLDivElement | null>(null);
 
     const tg = (window as any).Telegram?.WebApp;
@@ -84,13 +83,16 @@ export default function MonstersFarm({ token, onBack }: Props) {
             const nextSlots: FarmSlot[] = data.slots ?? [];
             setSlots(nextSlots);
 
-            // ✅ meat from backend (if you return it)
+            // ✅ meat from backend
             setMeat(Number(data.meat ?? 0));
 
             setError(null);
 
             if (!keepIndex) setActiveIndex(0);
-            else setActiveIndex((prev) => Math.max(0, Math.min(prev, nextSlots.length - 1)));
+            else
+                setActiveIndex((prev) =>
+                    Math.max(0, Math.min(prev, nextSlots.length - 1)),
+                );
         } catch (e: any) {
             setError(e?.message || 'Failed to load farm');
         } finally {
@@ -108,7 +110,7 @@ export default function MonstersFarm({ token, onBack }: Props) {
     async function openPicker(slotIndex: number) {
         try {
             setBusy(true);
-            setPickerSlotIndex(slotIndex); // ✅ запоминаем для какого слота
+            setPickerSlotIndex(slotIndex);
             await loadCollection();
             setShowPicker(true);
         } catch (e: any) {
@@ -117,7 +119,6 @@ export default function MonstersFarm({ token, onBack }: Props) {
             setBusy(false);
         }
     }
-
 
     async function assignMonster(slotIndex: number, userMonsterId: number) {
         try {
@@ -188,7 +189,7 @@ export default function MonstersFarm({ token, onBack }: Props) {
         haptic('light');
     };
 
-    // ✅ feed by slot index
+    // ✅ feed by slot index (UNLIMITED - no daily cap)
     async function feedSlot(slotIndex: number) {
         try {
             setBusy(true);
@@ -202,9 +203,10 @@ export default function MonstersFarm({ token, onBack }: Props) {
             const data = await res.json().catch(() => ({}));
             if (!res.ok) throw new Error(data.message || 'Feed failed');
 
-            // optional from backend
             if (typeof data.meatLeft === 'number') setMeat(data.meatLeft);
 
+            // optional: optimistically update XP without reloading all farm
+            // but оставим твой основной flow:
             await loadFarm(true);
         } catch (e: any) {
             tg?.showAlert?.(e?.message || 'Feed failed');
@@ -240,12 +242,9 @@ export default function MonstersFarm({ token, onBack }: Props) {
     const activeMonster = activeSlot?.monster ?? null;
     const canUnlock = !!activeSlot && !activeSlot.isUnlocked && !busy;
 
+    // ✅ unlimited feeding check: only meat + monster + unlocked
     const canFeedActive =
-        !!activeSlot?.isUnlocked &&
-        !!activeMonster &&
-        (activeSlot?.fedCountToday ?? 0) < 5 &&
-        meat >= 1 &&
-        !busy;
+        !!activeSlot?.isUnlocked && !!activeMonster && meat >= 1 && !busy;
 
     // ===== UI states
     if (loading) {
@@ -319,7 +318,9 @@ export default function MonstersFarm({ token, onBack }: Props) {
 
                 <div className="farm-empty">
                     <div className="farm-empty-emoji">🐣</div>
-                    <div className="farm-empty-text">Нет слотов. Проверь backend /monsters/farm</div>
+                    <div className="farm-empty-text">
+                        Нет слотов. Проверь backend /monsters/farm
+                    </div>
                 </div>
             </div>
         );
@@ -362,11 +363,6 @@ export default function MonstersFarm({ token, onBack }: Props) {
                             // tap-to-feed (only if monster exists)
                             if (!slot.isUnlocked) return;
                             if (!slot.monster) return;
-
-                            if ((slot.fedCountToday ?? 0) >= 5) {
-                                tg?.showAlert?.('Лимит кормления: 5/5 на сегодня');
-                                return;
-                            }
                             if (meat < 1) {
                                 tg?.showAlert?.('Нет мяса 🍖');
                                 return;
@@ -382,7 +378,12 @@ export default function MonstersFarm({ token, onBack }: Props) {
             {/* ===== Dots ===== */}
             <div className="farm-dots">
                 {slots.map((s, i) => {
-                    const cls = i === activeIndex ? 'dot dot--active' : s.isUnlocked ? 'dot' : 'dot dot--locked';
+                    const cls =
+                        i === activeIndex
+                            ? 'dot dot--active'
+                            : s.isUnlocked
+                                ? 'dot'
+                                : 'dot dot--locked';
                     return (
                         <button
                             key={s.slotIndex}
@@ -407,7 +408,8 @@ export default function MonstersFarm({ token, onBack }: Props) {
 
                     {activeSlot?.isUnlocked && activeMonster ? (
                         <div className="farm-bottom-sub">
-                            LVL {activeMonster.level} · Fed {activeSlot.fedCountToday}/5
+                            LVL {activeMonster.level} · XP {activeMonster.xp} /{' '}
+                            {activeMonster.xpNext ?? '—'}
                             {canFeedActive ? ' · Tap monster to feed' : ''}
                         </div>
                     ) : (
@@ -416,7 +418,11 @@ export default function MonstersFarm({ token, onBack }: Props) {
                 </div>
 
                 {activeSlot && !activeSlot.isUnlocked ? (
-                    <button className="farm-primary" disabled={!canUnlock} onClick={unlockActive}>
+                    <button
+                        className="farm-primary"
+                        disabled={!canUnlock}
+                        onClick={unlockActive}
+                    >
                         🔓 Unlock · {activeSlot.unlockPrice} 🪙
                     </button>
                 ) : activeSlot?.isUnlocked && !activeSlot?.monster ? (
@@ -427,10 +433,15 @@ export default function MonstersFarm({ token, onBack }: Props) {
                     >
                         ➕ Assign
                     </button>
-
                 ) : (
                     <div className="farm-hint">
-                        {activeSlot?.monster ? '👆 Нажми на монстра чтобы кормить' : 'Назначение монстра — следующий шаг'}
+                        {activeSlot?.monster
+                            ? canFeedActive
+                                ? '👆 Нажми на монстра чтобы кормить (-1 🍖)'
+                                : meat < 1
+                                    ? 'Нет мяса 🍖'
+                                    : 'Можно кормить бесконечно (пока есть 🍖)'
+                            : 'Назначение монстра — следующий шаг'}
                     </div>
                 )}
             </div>
@@ -442,7 +453,8 @@ export default function MonstersFarm({ token, onBack }: Props) {
                 monsters={collection}
                 onClose={() => setShowPicker(false)}
                 onPick={(userMonsterId) => {
-                    if (!pickerSlotIndex) {
+                    // ✅ важный фикс: slotIndex может быть 0 теоретически, проверяем по null
+                    if (pickerSlotIndex == null) {
                         tg?.showAlert?.('Slot is not selected');
                         return;
                     }
@@ -471,21 +483,30 @@ function Slide({
     const m = slot.monster;
 
     const rarityClass = m ? `rarity-${String(m.rarity).toLowerCase()}` : '';
-    const xpPct = m?.xpNext ? Math.max(0, Math.min(100, (m.xp / m.xpNext) * 100)) : 0;
+    const xpNext = m?.xpNext ?? 0;
+    const xpPct =
+        xpNext > 0 ? Math.max(0, Math.min(100, (m!.xp / xpNext) * 100)) : 0;
 
-    const isFeedable =
-        !!slot.isUnlocked && !!m && (slot.fedCountToday ?? 0) < 5 && meat >= 1 && !busy;
+    const isFeedable = !!slot.isUnlocked && !!m && meat >= 1 && !busy;
 
     return (
         <div className={`farm-slide ${isActive ? 'farm-slide--active' : ''}`}>
             <button
                 type="button"
-                className={`farm-card ${slot.isUnlocked ? '' : 'farm-card--locked'} ${isFeedable ? 'farm-card--tap' : ''}`}
+                className={`farm-card ${slot.isUnlocked ? '' : 'farm-card--locked'} ${
+                    isFeedable ? 'farm-card--tap' : ''
+                }`}
                 onClick={onClick}
             >
                 <div className="farm-card-top">
                     <div className="farm-chip">#{slot.slotIndex}</div>
-                    {m ? <div className={`farm-chip farm-chip--rarity ${rarityClass}`}>{m.rarity}</div> : <div />}
+                    {m ? (
+                        <div className={`farm-chip farm-chip--rarity ${rarityClass}`}>
+                            {m.rarity}
+                        </div>
+                    ) : (
+                        <div />
+                    )}
                 </div>
 
                 {/* ✅ MEAT BADGE: всегда видно на активной карточке */}
@@ -499,7 +520,9 @@ function Slide({
                     <div className="farm-locked">
                         <div className="farm-locked-emoji">🔒</div>
                         <div className="farm-locked-title">Locked</div>
-                        <div className="farm-locked-sub">Unlock price: {slot.unlockPrice} 🪙</div>
+                        <div className="farm-locked-sub">
+                            Unlock price: {slot.unlockPrice} 🪙
+                        </div>
                     </div>
                 ) : !m ? (
                     <div className="farm-empty-card">
@@ -525,25 +548,22 @@ function Slide({
                             src={m.imgUrl || fallbackByRarity(m.rarity)}
                             alt={m.name}
                             onError={(e) => {
-                                (e.currentTarget as HTMLImageElement).src = fallbackByRarity(m.rarity);
+                                (e.currentTarget as HTMLImageElement).src = fallbackByRarity(
+                                    m.rarity,
+                                );
                             }}
                         />
 
                         <div className={`farm-monster-name ${rarityClass}`}>{m.name}</div>
                         <div className="farm-monster-level">LVL {m.level}</div>
 
-                        {m.xpNext ? (
-                            <>
-                                <div className="farm-xpbar">
-                                    <div className="farm-xpfill" style={{ width: `${xpPct}%` }} />
-                                </div>
-                                <div className="farm-xptext">
-                                    XP {m.xp} / {m.xpNext}
-                                </div>
-                            </>
-                        ) : (
-                            <div className="farm-xpmax">MAX LEVEL</div>
-                        )}
+                        {/* ✅ XP всегда показываем (unlimited) */}
+                        <div className="farm-xpbar">
+                            <div className="farm-xpfill" style={{ width: `${xpPct}%` }} />
+                        </div>
+                        <div className="farm-xptext">
+                            XP {m.xp} / {m.xpNext ?? '—'}
+                        </div>
 
                         <div className="farm-tap-hint">
                             {busy
@@ -552,7 +572,7 @@ function Slide({
                                     ? '👆 Tap to feed (-1 🍖)'
                                     : meat < 1
                                         ? 'Нет мяса 🍖'
-                                        : `Fed ${slot.fedCountToday}/5`}
+                                        : 'Нажми чтобы кормить'}
                         </div>
                     </>
                 )}
@@ -591,7 +611,9 @@ function MonsterPicker({
                         <div className="picker-empty">
                             <div className="picker-empty-emoji">🫥</div>
                             <div className="picker-empty-title">No monsters yet</div>
-                            <div className="picker-empty-sub">Play the game and catch some monsters first.</div>
+                            <div className="picker-empty-sub">
+                                Play the game and catch some monsters first.
+                            </div>
                         </div>
                     ) : (
                         monsters.map((m) => (
@@ -601,7 +623,11 @@ function MonsterPicker({
                                 disabled={busy || (m.count ?? 0) <= 0}
                                 onClick={() => onPick(m.userMonsterId)}
                             >
-                                <img className="picker-img" src={m.imgUrl || fallbackByRarity(m.rarity)} alt={m.name} />
+                                <img
+                                    className="picker-img"
+                                    src={m.imgUrl || fallbackByRarity(m.rarity)}
+                                    alt={m.name}
+                                />
                                 <div className="picker-mid">
                                     <div className="picker-name">{m.name}</div>
                                     <div className="picker-sub">
