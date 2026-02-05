@@ -555,6 +555,18 @@
     from { opacity: 0; transform: scale(0.55); }
     to   { opacity: 1; transform: scale(1.05); }
 }
+.farm-assign-btn{
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: 16px;
+    background: linear-gradient(180deg, var(--btn1), var(--btn2));
+    font-weight: 950;
+    font-size: 13px;
+    color: #1a1400;
+    text-align: center;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
 
 
 /* ===== globally nicer buttons on iOS ===== */

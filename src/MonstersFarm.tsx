@@ -535,8 +535,7 @@ function Slide({
                         <div className="farm-empty-title">Empty slot</div>
                         <div className="farm-empty-sub">Choose a monster from collection</div>
 
-                        <button
-                            type="button"
+                        <div
                             className="farm-assign-btn"
                             onClick={(e) => {
                                 e.stopPropagation();
@@ -544,7 +543,7 @@ function Slide({
                             }}
                         >
                             ➕ Assign monster
-                        </button>
+                        </div>
                     </div>
                 ) : (
                     <>
