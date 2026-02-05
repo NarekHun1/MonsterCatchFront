@@ -25,7 +25,7 @@ type CollectionMonster = {
     count: number;
     level: number;
     xp: number;
-    xpNext: number | null; // backend может вернуть number всегда, но оставим null-safe
+    xpNext: number | null;
 };
 
 function fallbackByRarity(rarity?: string) {
@@ -55,6 +55,9 @@ export default function MonstersFarm({ token, onBack }: Props) {
     const [collection, setCollection] = useState<CollectionMonster[]>([]);
     const [pickerSlotIndex, setPickerSlotIndex] = useState<number | null>(null);
 
+    // ✅ tap effect trigger
+    const [tapFx, setTapFx] = useState<number>(0);
+
     const railRef = useRef<HTMLDivElement | null>(null);
 
     const tg = (window as any).Telegram?.WebApp;
@@ -83,7 +86,6 @@ export default function MonstersFarm({ token, onBack }: Props) {
             const nextSlots: FarmSlot[] = data.slots ?? [];
             setSlots(nextSlots);
 
-            // ✅ meat from backend
             setMeat(Number(data.meat ?? 0));
 
             setError(null);
@@ -113,6 +115,7 @@ export default function MonstersFarm({ token, onBack }: Props) {
             setPickerSlotIndex(slotIndex);
             await loadCollection();
             setShowPicker(true);
+            haptic('light');
         } catch (e: any) {
             tg?.showAlert?.(e?.message || 'Failed to load collection');
         } finally {
@@ -189,11 +192,15 @@ export default function MonstersFarm({ token, onBack }: Props) {
         haptic('light');
     };
 
-    // ✅ feed by slot index (UNLIMITED - no daily cap)
+    // ✅ feed by slot index (UNLIMITED)
     async function feedSlot(slotIndex: number) {
         try {
-            setBusy(true);
+            if (busy) return;
+
+            // trigger effect immediately (no "loading" text)
+            setTapFx(Date.now());
             haptic('medium');
+            setBusy(true);
 
             const res = await apiFetch('/monsters/farm/feed', token, {
                 method: 'POST',
@@ -205,8 +212,7 @@ export default function MonstersFarm({ token, onBack }: Props) {
 
             if (typeof data.meatLeft === 'number') setMeat(data.meatLeft);
 
-            // optional: optimistically update XP without reloading all farm
-            // but оставим твой основной flow:
+            // keep your main flow (reload farm)
             await loadFarm(true);
         } catch (e: any) {
             tg?.showAlert?.(e?.message || 'Feed failed');
@@ -220,6 +226,8 @@ export default function MonstersFarm({ token, onBack }: Props) {
         if (activeSlot.isUnlocked) return;
 
         try {
+            if (busy) return;
+
             setBusy(true);
             haptic('medium');
 
@@ -242,7 +250,6 @@ export default function MonstersFarm({ token, onBack }: Props) {
     const activeMonster = activeSlot?.monster ?? null;
     const canUnlock = !!activeSlot && !activeSlot.isUnlocked && !busy;
 
-    // ✅ unlimited feeding check: only meat + monster + unlocked
     const canFeedActive =
         !!activeSlot?.isUnlocked && !!activeMonster && meat >= 1 && !busy;
 
@@ -353,6 +360,7 @@ export default function MonstersFarm({ token, onBack }: Props) {
                         isActive={idx === activeIndex}
                         busy={busy}
                         meat={meat}
+                        tapFx={tapFx}
                         onAssign={() => {
                             setActiveIndex(idx);
                             openPicker(slot.slotIndex);
@@ -360,7 +368,6 @@ export default function MonstersFarm({ token, onBack }: Props) {
                         onClick={() => {
                             setActiveIndex(idx);
 
-                            // tap-to-feed (only if monster exists)
                             if (!slot.isUnlocked) return;
                             if (!slot.monster) return;
                             if (meat < 1) {
@@ -416,11 +423,7 @@ export default function MonstersFarm({ token, onBack }: Props) {
                 </div>
 
                 {activeSlot && !activeSlot.isUnlocked ? (
-                    <button
-                        className="farm-primary"
-                        disabled={!canUnlock}
-                        onClick={unlockActive}
-                    >
+                    <button className="farm-primary" disabled={!canUnlock} onClick={unlockActive}>
                         🔓 Unlock · {activeSlot.unlockPrice} 🪙
                     </button>
                 ) : activeSlot?.isUnlocked && !activeSlot?.monster ? (
@@ -451,7 +454,6 @@ export default function MonstersFarm({ token, onBack }: Props) {
                 monsters={collection}
                 onClose={() => setShowPicker(false)}
                 onPick={(userMonsterId) => {
-                    // ✅ важный фикс: slotIndex может быть 0 теоретически, проверяем по null
                     if (pickerSlotIndex == null) {
                         tg?.showAlert?.('Slot is not selected');
                         return;
@@ -470,6 +472,7 @@ function Slide({
                    onAssign,
                    busy,
                    meat,
+                   tapFx,
                }: {
     slot: FarmSlot;
     isActive: boolean;
@@ -477,6 +480,7 @@ function Slide({
     onAssign: () => void;
     busy: boolean;
     meat: number;
+    tapFx: number;
 }) {
     const m = slot.monster;
 
@@ -496,6 +500,9 @@ function Slide({
                 }`}
                 onClick={onClick}
             >
+                {/* ✅ tap effect */}
+                {isActive && <div key={tapFx} className="farm-tap-flash" />}
+
                 <div className="farm-card-top">
                     <div className="farm-chip">#{slot.slotIndex}</div>
                     {m ? (
@@ -507,7 +514,7 @@ function Slide({
                     )}
                 </div>
 
-                {/* ✅ MEAT BADGE: всегда видно на активной карточке */}
+                {/* ✅ Meat badge */}
                 {isActive && (
                     <div className="farm-meat-badge" title="Meat">
                         🍖 {meat}
@@ -546,16 +553,13 @@ function Slide({
                             src={m.imgUrl || fallbackByRarity(m.rarity)}
                             alt={m.name}
                             onError={(e) => {
-                                (e.currentTarget as HTMLImageElement).src = fallbackByRarity(
-                                    m.rarity,
-                                );
+                                (e.currentTarget as HTMLImageElement).src = fallbackByRarity(m.rarity);
                             }}
                         />
 
                         <div className={`farm-monster-name ${rarityClass}`}>{m.name}</div>
                         <div className="farm-monster-level">LVL {m.level}</div>
 
-                        {/* ✅ XP всегда показываем (unlimited) */}
                         <div className="farm-xpbar">
                             <div className="farm-xpfill" style={{ width: `${xpPct}%` }} />
                         </div>
@@ -564,13 +568,11 @@ function Slide({
                         </div>
 
                         <div className="farm-tap-hint">
-                            {busy
-                                ? '...'
-                                : isFeedable
-                                    ? '👆 Tap to feed (-1 🍖)'
-                                    : meat < 1
-                                        ? 'Нет мяса 🍖'
-                                        : 'Нажми чтобы кормить'}
+                            {isFeedable
+                                ? '👆 Нажми чтобы кормить (-1 🍖)'
+                                : meat < 1
+                                    ? 'Нет мяса 🍖'
+                                    : 'Нажми чтобы кормить'}
                         </div>
                     </>
                 )}
@@ -632,7 +634,7 @@ function MonsterPicker({
                                         LVL {m.level} · x{m.count} · {m.rarity}
                                     </div>
                                 </div>
-                                <div className="picker-cta">{busy ? '...' : 'Select'}</div>
+                                <div className="picker-cta">Select</div>
                             </button>
                         ))
                     )}
