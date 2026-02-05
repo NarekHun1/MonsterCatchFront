@@ -408,9 +408,7 @@ export default function MonstersFarm({ token, onBack }: Props) {
 
                     {activeSlot?.isUnlocked && activeMonster ? (
                         <div className="farm-bottom-sub">
-                            LVL {activeMonster.level} · XP {activeMonster.xp} /{' '}
-                            {activeMonster.xpNext ?? '—'}
-                            {canFeedActive ? ' · Tap monster to feed' : ''}
+                            👆 Нажми на монстра чтобы кормить (-1 🍖)
                         </div>
                     ) : (
                         <div className="farm-bottom-sub">Swipe left / right</div>
