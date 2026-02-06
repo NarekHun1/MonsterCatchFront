@@ -28,6 +28,7 @@ type CollectionMonster = {
     xpNext: number | null;
 };
 
+
 function fallbackByRarity(rarity?: string) {
     switch (rarity) {
         case 'LEGENDARY':
@@ -42,6 +43,17 @@ function fallbackByRarity(rarity?: string) {
 }
 
 export default function MonstersFarm({ token, onBack }: Props) {
+    type HuntStatusUI = 'IDLE' | 'RUNNING' | 'READY';
+    type HuntInfo = {
+        status: HuntStatusUI;
+        endsAt: string | null;
+        secondsLeft: number;
+        feedCountForHunt: number;   
+        canStart: boolean;
+        canClaim: boolean;
+    };
+
+    const [hunt, setHunt] = useState<HuntInfo | null>(null);
     const [slots, setSlots] = useState<FarmSlot[]>([]);
     const [meat, setMeat] = useState<number>(0);
 
@@ -78,6 +90,13 @@ export default function MonstersFarm({ token, onBack }: Props) {
         return slots[idx] ?? null;
     }, [slots, activeIndex, hasSlots]);
 
+    const activeMonster = activeSlot?.monster ?? null;
+
+    const activeMonsterId = useMemo(() => {
+        const id = (activeMonster as any)?.userMonsterId;
+        return typeof id === 'number' ? id : null;
+    }, [activeMonster]);
+
     async function loadFarm(keepIndex = true) {
         try {
             const res = await apiFetch('/monsters/farm', token);
@@ -98,6 +117,20 @@ export default function MonstersFarm({ token, onBack }: Props) {
             setError(e?.message || 'Failed to load farm');
             setInitialLoaded(true);
         }
+    }
+    async function loadHuntStatus(userMonsterId: number) {
+        const res = await apiFetch(`/monsters/hunt/status?userMonsterId=${userMonsterId}`, token);
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.message || 'Failed to load hunt status');
+
+        setHunt({
+            status: data.status,
+            endsAt: data.endsAt ? String(data.endsAt) : null,
+            secondsLeft: Number(data.secondsLeft ?? 0),
+            feedCountForHunt: Number(data.feedCountForHunt ?? 0),
+            canStart: !!data.canStart,
+            canClaim: !!data.canClaim,
+        });
     }
 
     async function loadCollection() {
@@ -145,11 +178,99 @@ export default function MonstersFarm({ token, onBack }: Props) {
             setBusy(false);
         }
     }
+    useEffect(() => {
+        if (!activeMonsterId) {
+            setHunt(null);
+            return;
+        }
+
+        loadHuntStatus(activeMonsterId).catch(() => setHunt(null));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [activeMonsterId]);
+
+    useEffect(() => {
+        if (!hunt) return;
+        if (hunt.status !== 'RUNNING') return;
+
+        const t = setInterval(() => {
+            setHunt((prev) => {
+                if (!prev) return prev;
+                const next = Math.max(0, prev.secondsLeft - 1);
+                const status: HuntStatusUI = next === 0 ? 'READY' : 'RUNNING';
+                return { ...prev, secondsLeft: next, status, canClaim: next === 0 };
+            });
+        }, 1000);
+
+        return () => clearInterval(t);
+    }, [hunt?.status]);
+
 
     useEffect(() => {
         loadFarm(false);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+    function formatLeft(sec: number) {
+        const h = Math.floor(sec / 3600);
+        const m = Math.floor((sec % 3600) / 60);
+        const s = sec % 60;
+        const pad = (n: number) => String(n).padStart(2, '0');
+        return `${pad(h)}:${pad(m)}:${pad(s)}`;
+    }
+
+    async function startHunt(userMonsterId: number) {
+        try {
+            if (busy) return;
+            setBusy(true);
+            haptic('medium');
+
+            const res = await apiFetch('/monsters/hunt/start', token, {
+                method: 'POST',
+                body: JSON.stringify({ userMonsterId }),
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(data.message || 'Start hunt failed');
+
+            await loadHuntStatus(userMonsterId);
+        } catch (e: any) {
+            tg?.showAlert?.(e?.message || 'Start hunt failed');
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    async function claimHunt(userMonsterId: number) {
+        try {
+            if (busy) return;
+            setBusy(true);
+            haptic('heavy');
+
+            const res = await apiFetch('/monsters/hunt/claim', token, {
+                method: 'POST',
+                body: JSON.stringify({ userMonsterId }),
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(data.message || 'Claim hunt failed');
+
+            const r = data.reward || {};
+            const msg =
+                `Награда:\n` +
+                `${r.stars ? `⭐ ${r.stars}\n` : ''}` +
+                `${r.meat ? `🍖 ${r.meat}\n` : ''}` +
+                `${r.coins ? `🪙 ${r.coins}\n` : ''}` +
+                `${r.tickets ? `🎟 ${r.tickets}\n` : ''}` +
+                (!r.stars && !r.meat && !r.coins && !r.tickets ? '😶 Ничего' : '');
+
+            tg?.showAlert?.(msg);
+
+            // обновим ферму и статус охоты
+            await loadFarm(true);
+            await loadHuntStatus(userMonsterId);
+        } catch (e: any) {
+            tg?.showAlert?.(e?.message || 'Claim hunt failed');
+        } finally {
+            setBusy(false);
+        }
+    }
 
     // ===== Scroll → determine active index (snap)
     const onRailScroll = () => {
@@ -191,6 +312,7 @@ export default function MonstersFarm({ token, onBack }: Props) {
         setActiveIndex(clamped);
         haptic('light');
     };
+
 
     // ✅ feed by slot index (UNLIMITED)
     async function feedSlot(slotIndex: number) {
@@ -246,10 +368,11 @@ export default function MonstersFarm({ token, onBack }: Props) {
         }
     }
 
-    const activeMonster = activeSlot?.monster ?? null;
     const canUnlock = !!activeSlot && !activeSlot.isUnlocked && !busy;
 
-    const canFeedActive = !!activeSlot?.isUnlocked && !!activeMonster && meat >= 1 && !busy;
+    const huntBlocksFeed = hunt?.status === 'RUNNING' && (hunt?.secondsLeft ?? 0) > 0;
+    const canFeedActive =
+        !!activeSlot?.isUnlocked && !!activeMonster && meat >= 1 && !busy && !huntBlocksFeed;
 
     // ✅ вместо Loading… показываем просто пустой фон/скелет (но НЕ текст Loading)
     if (!initialLoaded) {
@@ -372,6 +495,11 @@ export default function MonstersFarm({ token, onBack }: Props) {
                             }
                             if (busy) return;
 
+                            if (huntBlocksFeed) {
+                                tg?.showAlert?.('Монстр на охоте ⏳');
+                                return;
+                            }
+
                             feedSlot(slot.slotIndex);
                         }}
                     />
@@ -398,6 +526,46 @@ export default function MonstersFarm({ token, onBack }: Props) {
             {/* ===== Bottom bar ===== */}
             <div className="farm-bottom">
                 <div className="farm-bottom-left">
+                    {activeSlot?.isUnlocked && activeMonster && (
+                        <div className="farm-hunt-row">
+                            <div className="farm-hunt-info">
+                                {activeMonster.level < 5 ? (
+                                    <span>🏹 Hunt unlock: LVL 5</span>
+                                ) : hunt?.status === 'RUNNING' ? (
+                                    <span>🏹 On hunt · ⏳ {formatLeft(hunt.secondsLeft)}</span>
+                                ) : hunt?.status === 'READY' ? (
+                                    <span>🏹 Hunt finished · 🎁 Claim reward</span>
+                                ) : (
+                                    <span>🏹 Feed for hunt: {hunt?.feedCountForHunt ?? 0}/100</span>
+                                )}
+                            </div>
+
+                            <div className="farm-hunt-actions">
+                                {activeMonster.level >= 5 && hunt?.status === 'IDLE' && (
+                                    <button
+                                        type="button"
+                                        className="farm-mini"
+                                        disabled={busy || !hunt?.canStart}
+                                        onClick={() => activeMonsterId && startHunt(activeMonsterId)}
+                                    >
+                                        🏹 Start
+                                    </button>
+                                )}
+
+                                {activeMonster.level >= 5 && hunt?.status === 'READY' && (
+                                    <button
+                                        type="button"
+                                        className="farm-mini farm-mini--gold"
+                                        disabled={busy || !hunt?.canClaim}
+                                        onClick={() => activeMonsterId && claimHunt(activeMonsterId)}
+                                    >
+                                        🎁 Claim
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
                     <div className="farm-bottom-name">
                         {activeSlot?.isUnlocked
                             ? activeMonster
@@ -421,7 +589,7 @@ export default function MonstersFarm({ token, onBack }: Props) {
                     <button
                         type="button"
                         className="farm-primary"
-                        disabled={busy || !activeSlot?.isUnlocked}
+                        disabled={busy || !hunt?.canStart || !activeMonsterId}
                         onClick={() => activeSlot && openPicker(activeSlot.slotIndex)}
                     >
                         ➕ Assign

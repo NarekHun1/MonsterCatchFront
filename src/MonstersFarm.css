@@ -573,3 +573,133 @@
 button{
     font-family: inherit;
 }
+/* ───────────────── Hunt block ───────────────── */
+
+.farm-hunt-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+
+    background: linear-gradient(
+            135deg,
+            rgba(255,255,255,0.08),
+            rgba(255,255,255,0.03)
+    );
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow:
+            0 8px 20px rgba(0,0,0,0.35),
+            inset 0 0 0 1px rgba(255,255,255,0.04);
+    backdrop-filter: blur(10px);
+}
+
+.farm-hunt-info {
+    font-size: 13px;
+    line-height: 1.3;
+    color: rgba(255,255,255,0.92);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+    max-width: 70%;
+}
+.farm-hunt-row span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.farm-hunt-row span:has(⏳),
+.farm-hunt-running {
+    color: #ffd36a;
+    font-weight: 600;
+    text-shadow:
+            0 0 6px rgba(255,211,106,0.6),
+            0 0 14px rgba(255,211,106,0.3);
+}
+.farm-hunt-feed {
+    color: #9be7ff;
+    font-weight: 500;
+    text-shadow:
+            0 0 6px rgba(155,231,255,0.4);
+}
+.farm-hunt-ready {
+    color: #9dff9d;
+    font-weight: 700;
+    text-shadow:
+            0 0 6px rgba(157,255,157,0.7),
+            0 0 14px rgba(157,255,157,0.4);
+    animation: hunt-ready-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes hunt-ready-pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
+}
+.farm-hunt-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* базовая mini */
+.farm-mini {
+    height: 32px;
+    padding: 0 14px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+
+    background: linear-gradient(135deg, #5c7cff, #7aa2ff);
+    box-shadow:
+            0 6px 16px rgba(92,124,255,0.45),
+            inset 0 0 0 1px rgba(255,255,255,0.18);
+
+    transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+}
+
+.farm-mini:hover {
+    transform: translateY(-1px);
+    box-shadow:
+            0 10px 22px rgba(92,124,255,0.6);
+}
+
+.farm-mini:disabled {
+    opacity: 0.45;
+    cursor: default;
+    transform: none;
+    box-shadow: none;
+}
+
+/* 🎁 Claim – gold */
+.farm-mini--gold {
+    background: linear-gradient(135deg, #ffd36a, #ffb703);
+    color: #3a2a00;
+    box-shadow:
+            0 8px 20px rgba(255,183,3,0.55),
+            inset 0 0 0 1px rgba(255,255,255,0.25);
+}
+
+.farm-mini--gold:hover {
+    box-shadow:
+            0 12px 26px rgba(255,183,3,0.75);
+}
+.farm-hunt-locked {
+    color: rgba(255,255,255,0.55);
+    font-size: 12px;
+}
+.farm-hunt-row[data-status="RUNNING"] {
+    box-shadow:
+            0 0 0 1px rgba(255,211,106,0.25),
+            0 10px 30px rgba(255,211,106,0.15);
+}
+
+.farm-hunt-row[data-status="READY"] {
+    box-shadow:
+            0 0 0 1px rgba(157,255,157,0.35),
+            0 10px 30px rgba(157,255,157,0.25);
+}
