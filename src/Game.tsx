@@ -6,6 +6,7 @@ import commonImg from './assets/monsters/common.svg';
 import rareImg from './assets/monsters/rare.svg';
 import epicImg from './assets/monsters/epic.svg';
 import legendaryImg from './assets/monsters/legendary.svg';
+import melasImg from './assets/monsters/meat.svg';
 import catchSfx from './assets/sfx/catch.wav';
 
 interface GameProps {
@@ -19,7 +20,7 @@ interface GameProps {
 
 type GameStatus = 'idle' | 'running' | 'finished';
 type GamePhase = 'intro' | 'playing';
-type MonsterRarity = 'common' | 'rare' | 'epic' | 'legendary';
+type MonsterRarity = 'common' | 'rare' | 'epic' | 'legendary' | 'meet';
 
 interface MonsterDef {
     img: string; // ✅ SVG файл
@@ -40,6 +41,9 @@ const MONSTERS: MonsterDef[] = [
     { img: rareImg, rarity: 'rare', score: 3, weight: 25 },
     { img: epicImg, rarity: 'epic', score: 5, weight: 10 },
     { img: legendaryImg, rarity: 'legendary', score: 10, weight: 5 },
+
+    // ✅ MEAT monster (MELAS/MEAT)
+    { img: melasImg, rarity: 'meet', score: 1, weight: 8 },
 ];
 
 function pickRandomMonster(): MonsterDef {
@@ -59,7 +63,14 @@ function randomPosition() {
     return { x, y };
 }
 
-export function Game({ token, onBack, onStarsChange, onStatsChange, t, tournamentId }: GameProps) {
+export function Game({
+                         token,
+                         onBack,
+                         onStarsChange,
+                         onStatsChange,
+                         t,
+                         tournamentId,
+                     }: GameProps) {
     const [phase, setPhase] = useState<GamePhase>('intro');
     const [status, setStatus] = useState<GameStatus>('idle');
     const [gameId, setGameId] = useState<number | null>(null);
@@ -71,6 +82,9 @@ export function Game({ token, onBack, onStarsChange, onStatsChange, t, tournamen
     const [epicCount, setEpicCount] = useState<number>(0);
     const [error, setError] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
+
+    // ✅ meat counter (only when 'meet' monster is caught)
+    const [melasCount, setMelasCount] = useState<number>(0);
 
     const [monster, setMonster] = useState<MonsterDef>(MONSTERS[0]);
     const [monsterPos, setMonsterPos] = useState<{ x: number; y: number }>({
@@ -128,7 +142,7 @@ export function Game({ token, onBack, onStarsChange, onStatsChange, t, tournamen
         }, 100);
     }, []);
 
-    // ✅/game/finish
+    // ✅ /game/finish
     const finishGame = useCallback(async () => {
         if (!gameId || finishSentRef.current) return;
         finishSentRef.current = true;
@@ -144,6 +158,7 @@ export function Game({ token, onBack, onStarsChange, onStatsChange, t, tournamen
                     score,
                     clicks,
                     epicCount,
+                    melasCount, // ✅ отправляем
                 }),
             });
 
@@ -160,7 +175,10 @@ export function Game({ token, onBack, onStarsChange, onStatsChange, t, tournamen
                 onStarsChange?.((data as any).totalStars);
             }
 
-            if (typeof (data as any).level === 'number' && typeof (data as any).xp === 'number') {
+            if (
+                typeof (data as any).level === 'number' &&
+                typeof (data as any).xp === 'number'
+            ) {
                 onStatsChange?.({
                     stars: (data as any).totalStars,
                     level: (data as any).level,
@@ -181,7 +199,10 @@ export function Game({ token, onBack, onStarsChange, onStatsChange, t, tournamen
                 const tData = await tRes.json().catch(() => ({}));
 
                 if (!tRes.ok) {
-                    console.error('Tournament submit failed:', (tData as any)?.message || tData);
+                    console.error(
+                        'Tournament submit failed:',
+                        (tData as any)?.message || tData,
+                    );
                 } else {
                     console.log('✅ Tournament score submitted:', tData);
                 }
@@ -199,8 +220,9 @@ export function Game({ token, onBack, onStarsChange, onStatsChange, t, tournamen
         score,
         clicks,
         epicCount,
+        melasCount, // ✅ ОБЯЗАТЕЛЬНО
         token,
-        tournamentId, // 🔥 ВАЖНО
+        tournamentId,
         onStarsChange,
         onStatsChange,
     ]);
@@ -237,6 +259,7 @@ export function Game({ token, onBack, onStarsChange, onStatsChange, t, tournamen
             setScore(0);
             setClicks(0);
             setEpicCount(0);
+            setMelasCount(0); // ✅ reset
 
             setStatus('running');
             setPhase('playing');
@@ -274,7 +297,6 @@ export function Game({ token, onBack, onStarsChange, onStatsChange, t, tournamen
     const handleCatch = () => {
         if (status !== 'running') return;
 
-        // ✅ play sound on click
         void playCatchSound();
 
         setIsHit(true);
@@ -282,9 +304,15 @@ export function Game({ token, onBack, onStarsChange, onStatsChange, t, tournamen
 
         setClicks((c) => c + 1);
 
+        // ✅ meat monster counter (ВАЖНО: rarity === 'meet', НЕ 'melas')
+        if (monster.rarity === 'meet') {
+            setMelasCount((m) => m + 1);
+        }
+
         if (monster.rarity === 'epic') {
             setEpicCount((e) => e + 1);
         }
+
         setScore((s) => s + monster.score);
 
         const hitId = Date.now() + Math.random();
@@ -299,7 +327,8 @@ export function Game({ token, onBack, onStarsChange, onStatsChange, t, tournamen
     };
 
     const secondsLeft = Math.ceil(remainingMs / 1000);
-    const progress = totalMs > 0 ? Math.max(0, Math.min(1, remainingMs / totalMs)) : 0;
+    const progress =
+        totalMs > 0 ? Math.max(0, Math.min(1, remainingMs / totalMs)) : 0;
 
     return (
         <div className="game-fullscreen">
@@ -324,11 +353,15 @@ export function Game({ token, onBack, onStarsChange, onStatsChange, t, tournamen
                         </div>
                         <div className="game-hud-item">
                             <span className="game-hud-label">{t('best')}</span>
-                            <span className="game-hud-value">{bestScore !== null ? bestScore : '—'}</span>
+                            <span className="game-hud-value">
+                {bestScore !== null ? bestScore : '—'}
+              </span>
                         </div>
                         <div className="game-hud-item">
                             <span className="game-hud-label">{t('time')}</span>
-                            <span className="game-hud-value">{status === 'running' ? `${secondsLeft}s` : '—'}</span>
+                            <span className="game-hud-value">
+                {status === 'running' ? `${secondsLeft}s` : '—'}
+              </span>
                         </div>
                     </div>
                 )}
@@ -337,7 +370,10 @@ export function Game({ token, onBack, onStarsChange, onStatsChange, t, tournamen
             {/* Таймер — только в игре */}
             {phase === 'playing' && (
                 <div className="game-timer-bar game-timer-bar--overlay">
-                    <div className="game-timer-fill" style={{ transform: `scaleX(${progress})` }} />
+                    <div
+                        className="game-timer-fill"
+                        style={{ transform: `scaleX(${progress})` }}
+                    />
                 </div>
             )}
 
@@ -362,7 +398,11 @@ export function Game({ token, onBack, onStarsChange, onStatsChange, t, tournamen
                         ))}
                     </div>
 
-                    <button className="game-start-btn" onClick={() => void startGame()} disabled={loading}>
+                    <button
+                        className="game-start-btn"
+                        onClick={() => void startGame()}
+                        disabled={loading}
+                    >
                         {loading ? t('loading') : t('startGame')}
                     </button>
                 </div>
