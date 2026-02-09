@@ -28,7 +28,6 @@ type CollectionMonster = {
     xpNext: number | null;
 };
 
-
 function fallbackByRarity(rarity?: string) {
     switch (rarity) {
         case 'LEGENDARY':
@@ -48,32 +47,10 @@ export default function MonstersFarm({ token, onBack }: Props) {
         status: HuntStatusUI;
         endsAt: string | null;
         secondsLeft: number;
-        feedCountForHunt: number;   
+        feedCountForHunt: number;
         canStart: boolean;
         canClaim: boolean;
     };
-
-    const [hunt, setHunt] = useState<HuntInfo | null>(null);
-    const [slots, setSlots] = useState<FarmSlot[]>([]);
-    const [meat, setMeat] = useState<number>(0);
-
-    const [activeIndex, setActiveIndex] = useState(0);
-
-    // ❌ НЕ показываем full-screen loading вообще
-    const [initialLoaded, setInitialLoaded] = useState(false);
-
-    const [busy, setBusy] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-
-    // ✅ collection picker
-    const [showPicker, setShowPicker] = useState(false);
-    const [collection, setCollection] = useState<CollectionMonster[]>([]);
-    const [pickerSlotIndex, setPickerSlotIndex] = useState<number | null>(null);
-
-    // ✅ tap flash trigger
-    const [tapFx, setTapFx] = useState(0);
-
-    const railRef = useRef<HTMLDivElement | null>(null);
 
     const tg = (window as any).Telegram?.WebApp;
     const haptic = (type: 'light' | 'medium' | 'heavy' = 'light') => {
@@ -81,6 +58,28 @@ export default function MonstersFarm({ token, onBack }: Props) {
             tg?.HapticFeedback?.impactOccurred?.(type);
         } catch {}
     };
+
+    const railRef = useRef<HTMLDivElement | null>(null);
+
+    const [hunt, setHunt] = useState<HuntInfo | null>(null);
+    const [slots, setSlots] = useState<FarmSlot[]>([]);
+    const [meat, setMeat] = useState<number>(0);
+
+    const [activeIndex, setActiveIndex] = useState(0);
+
+    // no full-screen loading label; show skeleton
+    const [initialLoaded, setInitialLoaded] = useState(false);
+
+    const [busy, setBusy] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    // picker
+    const [showPicker, setShowPicker] = useState(false);
+    const [collection, setCollection] = useState<CollectionMonster[]>([]);
+    const [pickerSlotIndex, setPickerSlotIndex] = useState<number | null>(null);
+
+    // tap flash trigger
+    const [tapFx, setTapFx] = useState(0);
 
     const hasSlots = slots.length > 0;
 
@@ -97,11 +96,22 @@ export default function MonstersFarm({ token, onBack }: Props) {
         return typeof id === 'number' ? id : null;
     }, [activeMonster]);
 
+    const canUnlock = !!activeSlot && !activeSlot.isUnlocked && !busy;
+
+    const huntBlocksFeed = hunt?.status === 'RUNNING' && (hunt?.secondsLeft ?? 0) > 0;
+    const canFeedActive =
+        !!activeSlot?.isUnlocked && !!activeMonster && meat >= 1 && !busy && !huntBlocksFeed;
+
+    const showHuntPanel =
+        !!activeSlot?.isUnlocked &&
+        !!activeMonster &&
+        activeMonster.level >= 5 &&
+        (hunt?.status === 'RUNNING' || hunt?.status === 'READY' || !!hunt?.canStart);
+
     async function loadFarm(keepIndex = true) {
         try {
             const res = await apiFetch('/monsters/farm', token);
             const data = await res.json().catch(() => ({}));
-
             if (!res.ok) throw new Error(data.message || 'Failed to load farm');
 
             const nextSlots: FarmSlot[] = data.slots ?? [];
@@ -118,6 +128,7 @@ export default function MonstersFarm({ token, onBack }: Props) {
             setInitialLoaded(true);
         }
     }
+
     async function loadHuntStatus(userMonsterId: number) {
         const res = await apiFetch(`/monsters/hunt/status?userMonsterId=${userMonsterId}`, token);
         const data = await res.json().catch(() => ({}));
@@ -168,9 +179,8 @@ export default function MonstersFarm({ token, onBack }: Props) {
             setShowPicker(false);
             setPickerSlotIndex(null);
 
-            // ✅ тихо обновим слот/мясо (без Loading)
+            // quiet refresh
             await loadFarm(true);
-
             haptic('light');
         } catch (e: any) {
             tg?.showAlert?.(e?.message || 'Assign failed');
@@ -178,12 +188,12 @@ export default function MonstersFarm({ token, onBack }: Props) {
             setBusy(false);
         }
     }
+
     useEffect(() => {
         if (!activeMonsterId) {
             setHunt(null);
             return;
         }
-
         loadHuntStatus(activeMonsterId).catch(() => setHunt(null));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [activeMonsterId]);
@@ -204,11 +214,11 @@ export default function MonstersFarm({ token, onBack }: Props) {
         return () => clearInterval(t);
     }, [hunt?.status]);
 
-
     useEffect(() => {
         loadFarm(false);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
     function formatLeft(sec: number) {
         const h = Math.floor(sec / 3600);
         const m = Math.floor((sec % 3600) / 60);
@@ -262,7 +272,6 @@ export default function MonstersFarm({ token, onBack }: Props) {
 
             tg?.showAlert?.(msg);
 
-            // обновим ферму и статус охоты
             await loadFarm(true);
             await loadHuntStatus(userMonsterId);
         } catch (e: any) {
@@ -272,7 +281,6 @@ export default function MonstersFarm({ token, onBack }: Props) {
         }
     }
 
-    // ===== Scroll → determine active index (snap)
     const onRailScroll = () => {
         const rail = railRef.current;
         if (!rail) return;
@@ -299,7 +307,6 @@ export default function MonstersFarm({ token, onBack }: Props) {
         setActiveIndex(bestIdx);
     };
 
-    // ===== Scroll to specific slot
     const goToIndex = (idx: number) => {
         const rail = railRef.current;
         if (!rail) return;
@@ -313,8 +320,6 @@ export default function MonstersFarm({ token, onBack }: Props) {
         haptic('light');
     };
 
-
-    // ✅ feed by slot index (UNLIMITED)
     async function feedSlot(slotIndex: number) {
         try {
             if (busy) return;
@@ -322,7 +327,7 @@ export default function MonstersFarm({ token, onBack }: Props) {
             setBusy(true);
             haptic('medium');
 
-            // ✅ эффект вместо Loading
+            // tap FX instead of loading
             setTapFx(Date.now());
 
             const res = await apiFetch('/monsters/farm/feed', token, {
@@ -335,7 +340,6 @@ export default function MonstersFarm({ token, onBack }: Props) {
 
             if (typeof data.meatLeft === 'number') setMeat(data.meatLeft);
 
-            // ✅ без full-screen loading
             await loadFarm(true);
         } catch (e: any) {
             tg?.showAlert?.(e?.message || 'Feed failed');
@@ -368,13 +372,7 @@ export default function MonstersFarm({ token, onBack }: Props) {
         }
     }
 
-    const canUnlock = !!activeSlot && !activeSlot.isUnlocked && !busy;
-
-    const huntBlocksFeed = hunt?.status === 'RUNNING' && (hunt?.secondsLeft ?? 0) > 0;
-    const canFeedActive =
-        !!activeSlot?.isUnlocked && !!activeMonster && meat >= 1 && !busy && !huntBlocksFeed;
-
-    // ✅ вместо Loading… показываем просто пустой фон/скелет (но НЕ текст Loading)
+    // ===== Skeleton (no "Loading..." text)
     if (!initialLoaded) {
         return (
             <div className="monsters-farm">
@@ -386,14 +384,17 @@ export default function MonstersFarm({ token, onBack }: Props) {
                     ) : (
                         <div />
                     )}
-                    <div className="farm-title">🐲 Monsters</div>
+                    <div className="farm-title">Monsters</div>
                     <button type="button" className="farm-refresh" onClick={() => loadFarm(true)}>
                         ⟳
                     </button>
                 </div>
 
-                {/* пустой экран без Loading */}
-                <div style={{ height: 220 }} />
+                <div className="farm-skeleton">
+                    <div className="sk-card" />
+                    <div className="sk-dots" />
+                    <div className="sk-bottom" />
+                </div>
             </div>
         );
     }
@@ -409,7 +410,7 @@ export default function MonstersFarm({ token, onBack }: Props) {
                     ) : (
                         <div />
                     )}
-                    <div className="farm-title">🐲 Monsters</div>
+                    <div className="farm-title">Monsters</div>
                     <button type="button" className="farm-refresh" onClick={() => loadFarm(true)}>
                         ⟳
                     </button>
@@ -437,7 +438,7 @@ export default function MonstersFarm({ token, onBack }: Props) {
                     ) : (
                         <div />
                     )}
-                    <div className="farm-title">🐲 Monsters</div>
+                    <div className="farm-title">Monsters</div>
                     <button type="button" className="farm-refresh" onClick={() => loadFarm(true)}>
                         ⟳
                     </button>
@@ -451,6 +452,19 @@ export default function MonstersFarm({ token, onBack }: Props) {
         );
     }
 
+    const bottomStatus =
+        !activeSlot?.isUnlocked
+            ? 'LOCKED'
+            : !activeMonster
+                ? 'EMPTY'
+                : huntBlocksFeed
+                    ? 'HUNTING'
+                    : meat < 1
+                        ? 'NO_MEAT'
+                        : canFeedActive
+                            ? 'READY_FEED'
+                            : 'IDLE';
+
     return (
         <div className="monsters-farm">
             <div className="farm-top">
@@ -462,7 +476,7 @@ export default function MonstersFarm({ token, onBack }: Props) {
                     <div />
                 )}
 
-                <div className="farm-title">🐲 Monsters</div>
+                <div className="farm-title">Monsters</div>
 
                 <button type="button" className="farm-refresh" onClick={() => loadFarm(true)}>
                     ⟳
@@ -479,6 +493,8 @@ export default function MonstersFarm({ token, onBack }: Props) {
                         busy={busy}
                         meat={meat}
                         tapFx={tapFx}
+                        showCornerHunt={idx === activeIndex && showHuntPanel && (hunt?.status === 'IDLE' && !!hunt?.canStart)}
+                        cornerHuntText="HUNT READY"
                         onAssign={() => {
                             setActiveIndex(idx);
                             openPicker(slot.slotIndex);
@@ -509,8 +525,7 @@ export default function MonstersFarm({ token, onBack }: Props) {
             {/* ===== Dots ===== */}
             <div className="farm-dots">
                 {slots.map((s, i) => {
-                    const cls =
-                        i === activeIndex ? 'dot dot--active' : s.isUnlocked ? 'dot' : 'dot dot--locked';
+                    const cls = i === activeIndex ? 'dot dot--active' : s.isUnlocked ? 'dot' : 'dot dot--locked';
                     return (
                         <button
                             type="button"
@@ -524,42 +539,40 @@ export default function MonstersFarm({ token, onBack }: Props) {
             </div>
 
             {/* ===== Bottom bar ===== */}
-            <div className="farm-bottom">
+            <div className="farm-bottom" data-status={bottomStatus}>
                 <div className="farm-bottom-left">
-                    {activeSlot?.isUnlocked && activeMonster && (
-                        <div className="farm-hunt-row">
+                    {showHuntPanel && (
+                        <div className="farm-hunt-row" data-status={hunt?.status || 'IDLE'}>
                             <div className="farm-hunt-info">
-                                {activeMonster.level < 5 ? (
-                                    <span>🏹 Hunt unlock: LVL 5</span>
-                                ) : hunt?.status === 'RUNNING' ? (
-                                    <span>🏹 On hunt · ⏳ {formatLeft(hunt.secondsLeft)}</span>
+                                {hunt?.status === 'RUNNING' ? (
+                                    <span className="farm-hunt-running">🏹 On hunt · ⏳ {formatLeft(hunt.secondsLeft)}</span>
                                 ) : hunt?.status === 'READY' ? (
-                                    <span>🏹 Hunt finished · 🎁 Claim reward</span>
+                                    <span className="farm-hunt-ready">🏹 Finished · 🎁 Claim reward</span>
                                 ) : (
-                                    <span>🏹 Feed for hunt: {hunt?.feedCountForHunt ?? 0}/100</span>
+                                    <span className="farm-hunt-feed">🏹 Ready to start</span>
                                 )}
                             </div>
 
                             <div className="farm-hunt-actions">
-                                {activeMonster.level >= 5 && hunt?.status === 'IDLE' && (
+                                {hunt?.status === 'IDLE' && (
                                     <button
                                         type="button"
                                         className="farm-mini"
                                         disabled={busy || !hunt?.canStart}
                                         onClick={() => activeMonsterId && startHunt(activeMonsterId)}
                                     >
-                                        🏹 Start
+                                        Start
                                     </button>
                                 )}
 
-                                {activeMonster.level >= 5 && hunt?.status === 'READY' && (
+                                {hunt?.status === 'READY' && (
                                     <button
                                         type="button"
                                         className="farm-mini farm-mini--gold"
                                         disabled={busy || !hunt?.canClaim}
                                         onClick={() => activeMonsterId && claimHunt(activeMonsterId)}
                                     >
-                                        🎁 Claim
+                                        Claim
                                     </button>
                                 )}
                             </div>
@@ -570,44 +583,68 @@ export default function MonstersFarm({ token, onBack }: Props) {
                         {activeSlot?.isUnlocked
                             ? activeMonster
                                 ? activeMonster.name
-                                : `Slot #${activeSlot.slotIndex} (Empty)`
-                            : `Slot #${activeSlot?.slotIndex} (Locked)`}
+                                : `Slot #${activeSlot.slotIndex}`
+                            : `Slot #${activeSlot?.slotIndex}`}
                     </div>
 
-                    {activeSlot?.isUnlocked && activeMonster ? (
-                        <div className="farm-bottom-sub">👆 Нажми на монстра чтобы кормить (-1 🍖)</div>
-                    ) : (
-                        <div className="farm-bottom-sub">Swipe left / right</div>
+                    {/* ✅ one clean status line, no spam */}
+                    <div className="farm-bottom-sub">
+                        {!activeSlot?.isUnlocked
+                            ? `Locked · ${activeSlot?.unlockPrice ?? 0} 🪙`
+                            : !activeMonster
+                                ? 'Empty slot · Assign a monster'
+                                : huntBlocksFeed
+                                    ? 'On hunt · feeding disabled'
+                                    : meat < 1
+                                        ? 'No meat 🍖'
+                                        : 'Tap monster card to feed'}
+                    </div>
+
+                    {/* small inline pill */}
+                    {activeSlot?.isUnlocked && activeMonster && (
+                        <div className="farm-inline-pills">
+                            <div className="pill">
+                                <span className="pill-ico">🍖</span>
+                                <span className="pill-val">{meat}</span>
+                            </div>
+
+                            {typeof activeMonster.level === 'number' && (
+                                <div className="pill pill--soft">
+                                    <span className="pill-ico">LVL</span>
+                                    <span className="pill-val">{activeMonster.level}</span>
+                                </div>
+                            )}
+                        </div>
                     )}
                 </div>
 
+                {/* right action */}
                 {activeSlot && !activeSlot.isUnlocked ? (
                     <button type="button" className="farm-primary" disabled={!canUnlock} onClick={unlockActive}>
-                        🔓 Unlock · {activeSlot.unlockPrice} 🪙
+                        Unlock
                     </button>
                 ) : activeSlot?.isUnlocked && !activeSlot?.monster ? (
                     <button
                         type="button"
                         className="farm-primary"
-                        disabled={busy || !hunt?.canStart || !activeMonsterId}
+                        disabled={busy}
                         onClick={() => activeSlot && openPicker(activeSlot.slotIndex)}
                     >
-                        ➕ Assign
+                        Assign
                     </button>
                 ) : (
-                    <div className="farm-hint">
-                        {activeSlot?.monster
-                            ? canFeedActive
-                                ? '👆 Нажми на монстра чтобы кормить (-1 🍖)'
-                                : meat < 1
-                                    ? 'Нет мяса 🍖'
-                                    : 'Нажми на монстра'
-                            : 'Назначение монстра — следующий шаг'}
-                    </div>
+                    <button
+                        type="button"
+                        className="farm-ghost"
+                        disabled
+                        aria-label="hint"
+                        title="Tap monster card"
+                    >
+                        {busy ? '…' : canFeedActive ? 'Feed' : meat < 1 ? 'Need meat' : huntBlocksFeed ? 'Hunt' : 'Ready'}
+                    </button>
                 )}
             </div>
 
-            {/* ✅ Picker modal */}
             <MonsterPicker
                 open={showPicker}
                 busy={busy}
@@ -633,6 +670,8 @@ function Slide({
                    busy,
                    meat,
                    tapFx,
+                   showCornerHunt,
+                   cornerHuntText,
                }: {
     slot: FarmSlot;
     isActive: boolean;
@@ -641,10 +680,13 @@ function Slide({
     busy: boolean;
     meat: number;
     tapFx: number;
+    showCornerHunt?: boolean;
+    cornerHuntText?: string;
 }) {
     const m = slot.monster;
 
-    const rarityClass = m ? `rarity-${String(m.rarity).toLowerCase()}` : '';
+    const rarityKey = m ? String(m.rarity).toLowerCase() : 'common';
+    const rarityClass = m ? `rarity-${rarityKey}` : '';
     const xpNext = m?.xpNext ?? 0;
     const xpPct = xpNext > 0 ? Math.max(0, Math.min(100, (m!.xp / xpNext) * 100)) : 0;
 
@@ -659,7 +701,10 @@ function Slide({
                 }`}
                 onClick={onClick}
             >
-                {/* ✅ tap flash effect (only on active card) */}
+                {/* subtle background */}
+                <div className="farm-card-bg" />
+
+                {/* tap FX only for active */}
                 {isActive && <div key={tapFx} className="farm-tap-flash" />}
 
                 <div className="farm-card-top">
@@ -667,9 +712,10 @@ function Slide({
                     {m ? <div className={`farm-chip farm-chip--rarity ${rarityClass}`}>{m.rarity}</div> : <div />}
                 </div>
 
-                {isActive && (
-                    <div className="farm-meat-badge" title="Meat">
-                        🍖 {meat}
+                {showCornerHunt && (
+                    <div className="farm-corner-tag" title="Hunt available">
+                        <span className="ct-ico">🏹</span>
+                        <span className="ct-txt">{cornerHuntText || 'HUNT READY'}</span>
                     </div>
                 )}
 
@@ -677,15 +723,14 @@ function Slide({
                     <div className="farm-locked">
                         <div className="farm-locked-emoji">🔒</div>
                         <div className="farm-locked-title">Locked</div>
-                        <div className="farm-locked-sub">Unlock price: {slot.unlockPrice} 🪙</div>
+                        <div className="farm-locked-sub">Unlock: {slot.unlockPrice} 🪙</div>
                     </div>
                 ) : !m ? (
                     <div className="farm-empty-card">
                         <div className="farm-empty-emoji">➕</div>
                         <div className="farm-empty-title">Empty slot</div>
-                        <div className="farm-empty-sub">Choose a monster from collection</div>
+                        <div className="farm-empty-sub">Select a monster from collection</div>
 
-                        {/* ✅ НЕ button (чтобы не было button внутри button) */}
                         <div
                             className="farm-assign-btn"
                             onClick={(e) => {
@@ -695,7 +740,7 @@ function Slide({
                             role="button"
                             tabIndex={0}
                         >
-                            ➕ Assign monster
+                            Assign monster
                         </div>
                     </div>
                 ) : (
@@ -709,16 +754,23 @@ function Slide({
                             }}
                         />
 
-                        <div className={`farm-monster-name ${rarityClass}`}>{m.name}</div>
-                        <div className="farm-monster-level">LVL {m.level}</div>
+                        <div className="farm-name-wrap">
+                            <div className={`farm-monster-name ${rarityClass}`}>{m.name}</div>
+                            <div className="farm-monster-level">LVL {m.level}</div>
+                        </div>
 
                         <div className="farm-xpbar">
                             <div className="farm-xpfill" style={{ width: `${xpPct}%` }} />
+                            <div className="farm-xpglow" />
                         </div>
-                        <div className="farm-xptext">XP {m.xp} / {m.xpNext ?? '—'}</div>
+                        <div className="farm-xptext">
+                            XP {m.xp} / {m.xpNext ?? '—'}
+                        </div>
 
-                        <div className="farm-tap-hint">
-                            {busy ? '…' : isFeedable ? '👆 Tap to feed (-1 🍖)' : meat < 1 ? 'Нет мяса 🍖' : '👆 Tap'}
+                        <div className="farm-card-footer">
+                            <div className={`farm-status-pill ${busy ? 'is-busy' : isFeedable ? 'is-good' : meat < 1 ? 'is-warn' : 'is-idle'}`}>
+                                {busy ? '…' : isFeedable ? 'Tap to feed' : meat < 1 ? 'Need meat 🍖' : 'Tap'}
+                            </div>
                         </div>
                     </>
                 )}
@@ -746,7 +798,7 @@ function MonsterPicker({
         <div className="picker-overlay" onClick={onClose}>
             <div className="picker-card" onClick={(e) => e.stopPropagation()}>
                 <div className="picker-top">
-                    <div className="picker-title">🐲 My Monsters</div>
+                    <div className="picker-title">My Monsters</div>
                     <button type="button" className="picker-close" onClick={onClose}>
                         ✕
                     </button>
@@ -757,7 +809,7 @@ function MonsterPicker({
                         <div className="picker-empty">
                             <div className="picker-empty-emoji">🫥</div>
                             <div className="picker-empty-title">No monsters yet</div>
-                            <div className="picker-empty-sub">Play the game and catch some monsters first.</div>
+                            <div className="picker-empty-sub">Play and catch some monsters first.</div>
                         </div>
                     ) : (
                         monsters.map((m) => (
