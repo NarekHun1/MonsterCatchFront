@@ -1,0 +1,240 @@
+.market-root{
+    padding: 14px;
+    position: relative;
+}
+
+.market-top{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:12px;
+}
+
+.market-back{
+    width:42px;
+    height:42px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.06);
+    color:#fff;
+}
+
+.market-title{
+    font-weight:900;
+    letter-spacing:.6px;
+    font-size:14px;
+    opacity:.95;
+    flex:1;
+}
+
+.market-balance{
+    display:flex;
+    gap:8px;
+}
+.pill{
+    padding:8px 10px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.06);
+    font-weight:800;
+    font-size:12px;
+}
+
+.market-panel{
+    border:1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.06);
+    border-radius:18px;
+    padding:14px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.35);
+    margin-bottom:12px;
+}
+
+.market-h1{
+    font-weight:900;
+    font-size:16px;
+    margin-bottom:6px;
+}
+.market-muted{
+    opacity:.75;
+    font-size:13px;
+}
+
+.market-error{
+    margin:10px 0;
+    padding:10px 12px;
+    border-radius:14px;
+    border:1px solid rgba(255,100,100,.35);
+    background: rgba(255,80,80,.10);
+}
+
+.market-actions{
+    display:flex;
+    gap:10px;
+    margin-bottom:12px;
+}
+
+.market-btn{
+    border:1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.06);
+    color:#fff;
+    border-radius:14px;
+    padding:12px 12px;
+    font-weight:900;
+    cursor:pointer;
+    flex:1;
+}
+
+.market-btn:disabled{
+    opacity:.55;
+    cursor:not-allowed;
+}
+
+.market-btn--primary{
+    background: linear-gradient(135deg, rgba(120,80,255,.35), rgba(70,220,255,.22));
+    border-color: rgba(160,130,255,.40);
+}
+
+.market-grid{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-top:12px;
+}
+
+.market-card{
+    border:1px solid rgba(255,255,255,.10);
+    background: rgba(0,0,0,.18);
+    border-radius:16px;
+    padding:12px;
+}
+
+.market-card-top{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+}
+
+.market-monster{
+    display:flex;
+    gap:10px;
+    align-items:center;
+}
+
+.market-img{
+    width:46px;
+    height:46px;
+    border-radius:12px;
+    object-fit:cover;
+    border:1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06);
+}
+
+.market-monster-name{
+    font-weight:900;
+    font-size:14px;
+}
+.market-lvl{
+    opacity:.75;
+    font-weight:800;
+    font-size:12px;
+    margin-left:6px;
+}
+.market-monster-sub{
+    opacity:.70;
+    font-size:12px;
+    margin-top:2px;
+}
+
+.market-price{
+    font-weight:1000;
+    white-space:nowrap;
+    font-size:14px;
+}
+
+.market-card-actions{
+    margin-top:10px;
+    display:flex;
+    gap:10px;
+}
+
+.market-btn--buy{
+    background: linear-gradient(135deg, rgba(50,255,170,.22), rgba(70,220,255,.14));
+    border-color: rgba(90,255,200,.32);
+}
+
+.market-empty{
+    margin-top:10px;
+    opacity:.75;
+    font-weight:800;
+}
+
+.market-note{
+    margin-top:10px;
+    opacity:.70;
+    font-size:12px;
+}
+
+/* modal */
+.market-modal-overlay{
+    position:fixed;
+    inset:0;
+    background: rgba(0,0,0,.55);
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    z-index:9999;
+    padding: 14px;
+}
+
+.market-modal{
+    width:100%;
+    max-width:560px;
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,.12);
+    background: rgba(20,20,35,.92);
+    padding:14px;
+    box-shadow: 0 40px 120px rgba(0,0,0,.55);
+}
+
+.market-modal-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:10px;
+}
+
+.market-x{
+    width:40px;
+    height:40px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.06);
+    color:#fff;
+}
+
+.market-row{
+    display:flex;
+    gap:10px;
+}
+
+.market-field{
+    margin-top:10px;
+    flex:1;
+}
+
+.market-label{
+    opacity:.75;
+    font-size:12px;
+    margin-bottom:6px;
+    font-weight:800;
+}
+
+.market-input, .market-select{
+    width:100%;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.06);
+    color:#fff;
+    padding:12px;
+    outline:none;
+}

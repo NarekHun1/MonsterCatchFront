@@ -21,13 +21,11 @@
     import LevelsMap from './match3/LevelsMap.tsx';
     import Match3Level from './match3/Match3Level.tsx';
     import MonstersFarm from "./MonstersFarm.tsx";
+    import { Market } from './Market';
 
 
 
-
-
-
-    type Page = 'menu' | 'game' | 'leaderboard' | 'invite' | 'tournament' | 'wallet' | 'cashcup'| 'roulette' | 'quests'| 'match3'| 'monsters';
+    type Page = 'menu' | 'game' | 'leaderboard' | 'invite' | 'tournament' | 'wallet' | 'cashcup'| 'roulette' | 'quests'| 'match3'| 'monsters'|'market';
 
     interface MeResponse {
         id: number;
@@ -1121,6 +1119,20 @@
                                     </div>
 
                                 )}
+                                {currentPage === 'market' && token && (
+                                    <Market
+                                        token={token}
+                                        t={t}
+                                        onBack={() => setCurrentPage('menu')}
+                                        onMeRefresh={async () => {
+                                            const meRes = await apiFetch('/users/me', token);
+                                            const meData = await meRes.json().catch(() => ({}));
+                                            if (meRes.ok) {
+                                                setMe((prev) => (prev ? { ...prev, ...meData } : meData));
+                                            }
+                                        }}
+                                    />
+                                )}
 
                                 {currentPage === 'game' && token && (
                                     <Game
@@ -1302,7 +1314,7 @@
                             }
                             questsDot={questsDot}
                             eggsBadge={0}
-                            onShop={() => setCurrentPage('menu')}
+                            onShop={() => setCurrentPage('market')}
                             onQuests={async () => {
                                 await refreshQuestsDot();
                                 setCurrentPage('quests');
