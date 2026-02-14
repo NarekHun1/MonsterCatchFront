@@ -1,22 +1,22 @@
 import './BottomNav.css';
 
-type NavKey = 'shop' | 'quests' | 'demon' | 'friends' | 'tournaments';
+type NavKey = 'shop' | 'quests' | 'farm' | 'friends' | 'tournaments';
 
 export function BottomNav({
                               active,
                               eggsBadge,
                               onShop,
                               onQuests,
-                              onDemon,
+                              onFarm,
                               onFriends,
                               onTournaments,
                               questsDot,
                           }: {
     active: NavKey;
-    eggsBadge?: number; // если хочешь бейдж, например 25
+    eggsBadge?: number;
     onShop: () => void;
     onQuests: () => void;
-    onDemon: () => void;
+    onFarm: () => void;           // ✅ вместо onDemon
     onFriends: () => void;
     onTournaments: () => void;
     questsDot?: boolean;
@@ -44,13 +44,13 @@ export function BottomNav({
                     <div className="bn-txt">ЗАДАНИЯ</div>
                 </button>
 
-                {/* Центр (Демон) */}
+                {/* 🔥 Центр теперь FARM */}
                 <button
-                    className={`bn-center ${active === 'demon' ? 'is-active' : ''}`}
-                    onClick={onDemon}
+                    className={`bn-center ${active === 'farm' ? 'is-active' : ''}`}
+                    onClick={onFarm}
                 >
-                    <div className="bn-center-ico">😈</div>
-                    <div className="bn-center-txt">ДЕМОН</div>
+                    <div className="bn-center-ico">🌾</div>
+                    <div className="bn-center-txt">FARM</div>
                 </button>
 
                 <button

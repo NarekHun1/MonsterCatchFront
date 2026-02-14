@@ -965,16 +965,6 @@
                                                     Match-3 · уровни · награды
                                                 </div>
                                             </button>
-                                            <button
-                                                className="menu-card"
-                                                onClick={() => setCurrentPage('monsters')}
-                                            >
-                                                <div className="menu-icon">🐲</div>
-                                                <div className="menu-card-title">Monsters</div>
-                                                <div className="menu-card-text">
-                                                    Ферма · кормление · уровни монстров
-                                                </div>
-                                            </button>
 
                                             <button
                                                 className="menu-btn menu-btn--secondary"
@@ -1307,19 +1297,19 @@
                                 currentPage === 'tournament' ? 'tournaments'
                                     : currentPage === 'invite' ? 'friends'
                                         : currentPage === 'quests' ? 'quests'
-                                            : currentPage === 'menu' ? 'shop'
+                                            : currentPage === 'monsters' ? 'farm'
                                                 : 'shop'
                             }
                             questsDot={questsDot}
-                            eggsBadge={0} // поставь число если хочешь бейдж
+                            eggsBadge={0}
                             onShop={() => setCurrentPage('menu')}
                             onQuests={async () => {
-                                await refreshQuestsDot(); // обновляем статус
-                                setCurrentPage('quests'); // потом заходим
+                                await refreshQuestsDot();
+                                setCurrentPage('quests');
                             }}
-                            onDemon={() => {
-                                setCurrentPage('menu');
-                                setShowHero(true); // откроет твоего HeroViewer демона
+                            onFarm={() => {
+                                setCurrentPage('monsters'); // ✅ Monster Farm
+                                setShowHero(false);         // на всякий (если было открыто)
                             }}
                             onFriends={() => setCurrentPage('invite')}
                             onTournaments={() => setCurrentPage('tournament')}
