@@ -1602,3 +1602,110 @@ button {
     padding: 6px;
     z-index: 1000;
 }
+
+
+/* ───────── EVENT AD ───────── */
+.event-ad-overlay{
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: rgba(0,0,0,.72);
+    backdrop-filter: blur(10px);
+}
+
+.event-ad-card{
+    width: min(420px, 100%);
+    border-radius: 18px;
+    padding: 16px 16px 14px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(18,18,22,.92);
+    box-shadow: 0 20px 60px rgba(0,0,0,.55);
+}
+
+.event-ad-card::before{
+    content:"";
+    position:absolute;
+    inset:-120px -120px auto auto;
+    width: 280px;
+    height: 280px;
+    background: radial-gradient(circle, rgba(255,196,0,.35), transparent 70%);
+    transform: rotate(25deg);
+    pointer-events:none;
+}
+
+.event-ad-close{
+    position:absolute;
+    right: 10px;
+    top: 10px;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06);
+    color: #fff;
+}
+
+.event-ad-badge{
+    display:inline-flex;
+    align-items:center;
+    gap: 8px;
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: .6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(255,196,0,.14);
+    border: 1px solid rgba(255,196,0,.22);
+    margin-bottom: 10px;
+}
+
+.event-ad-title{
+    color:#fff;
+    font-size: 18px;
+    font-weight: 900;
+    line-height: 1.2;
+    margin-bottom: 10px;
+}
+
+.event-ad-sub{
+    color: rgba(255,255,255,.86);
+    font-size: 14px;
+    line-height: 1.35;
+    margin-bottom: 14px;
+}
+
+.event-ad-actions{
+    display:flex;
+    gap: 10px;
+}
+
+.event-ad-btn{
+    flex: 1;
+    height: 44px;
+    border-radius: 12px;
+    font-weight: 800;
+    border: 1px solid rgba(255,255,255,.12);
+}
+
+.event-ad-btn--primary{
+    color:#111;
+    background: linear-gradient(135deg, #ffd24a, #ffb300);
+    border: 0;
+}
+
+.event-ad-btn--ghost{
+    color:#fff;
+    background: rgba(255,255,255,.06);
+}
+
+.event-ad-foot{
+    margin-top: 10px;
+    font-size: 12px;
+    color: rgba(255,255,255,.55);
+}

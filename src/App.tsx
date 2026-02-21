@@ -22,7 +22,7 @@
     import Match3Level from './match3/Match3Level.tsx';
     import MonstersFarm from "./MonstersFarm.tsx";
     import { Market } from './Market';
-
+    import { EventTournamentCard } from './EventTournamentCard';
 
 
     type Page = 'menu' | 'game' | 'leaderboard' | 'invite' | 'tournament' | 'wallet' | 'cashcup'| 'roulette' | 'quests'| 'match3'| 'monsters'|'market';
@@ -402,7 +402,7 @@
         const [showLangMenu, setShowLangMenu] = useState(false);
         const [questsDot, setQuestsDot] = useState(false);
         const [match3Level, setMatch3Level] = useState<number | null>(null);
-
+        const [showEventAd, setShowEventAd] = useState(false);
 
         const t = (key: string) => translations[lang][key] || key;
 
@@ -418,6 +418,19 @@
             }
         }, []);
 
+        useEffect(() => {
+            if (isBooting) return;
+
+            // показываем 1 раз в день
+            const key = 'mc_event_ad_last_seen';
+            const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+
+            const last = localStorage.getItem(key);
+            if (last !== today) {
+                setShowEventAd(true);
+                localStorage.setItem(key, today);
+            }
+        }, [isBooting]);
 
         // 👇 состояние для магазина монет
         const [showCoinShop, setShowCoinShop] = useState(false);
@@ -1202,6 +1215,21 @@
                                                 setCurrentPage('game');
                                             }}
                                         />
+                                        {/* ✅ EVENT TOURNAMENT — ВНИЗУ */}
+                                        <EventTournamentCard
+                                            slug="big-march-2026"
+                                            token={token}
+                                            t={t}
+                                            onCoinsChange={(coins) => {
+                                                // если хочешь синхронизировать монеты в хедере сразу
+                                                setMe((prev) => (prev ? { ...prev, coins } : prev));
+                                            }}
+                                            onStartGame={(tournamentId) => {
+                                                setTournamentGameId(tournamentId);
+                                                setTournamentType(null);
+                                                setCurrentPage('game');
+                                            }}
+                                        />
 
                                     </div>
                                 )}
@@ -1327,7 +1355,53 @@
                             onTournaments={() => setCurrentPage('tournament')}
                         />
                     )}
+                    {showEventAd && (
+                        <div className="event-ad-overlay" onClick={() => setShowEventAd(false)}>
+                            <div className="event-ad-card" onClick={(e) => e.stopPropagation()}>
+                                <button
+                                    className="event-ad-close"
+                                    onClick={() => setShowEventAd(false)}
+                                    aria-label="close"
+                                >
+                                    ✕
+                                </button>
 
+                                <div className="event-ad-badge">🔥 BIG EVENT</div>
+
+                                <div className="event-ad-title">
+                                    Играй Big Tournament до <b>1 марта</b>!
+                                </div>
+
+                                <div className="event-ad-sub">
+                                    🏆 Призовой фонд: <b>10 000 coins</b> <br />
+                                    🐯 Стань лучшим — забери награду
+                                </div>
+
+                                <div className="event-ad-actions">
+                                    <button
+                                        className="event-ad-btn event-ad-btn--primary"
+                                        onClick={() => {
+                                            setShowEventAd(false);
+                                            setCurrentPage('tournament'); // кидаем в турниры
+                                        }}
+                                    >
+                                        🎮 Играть
+                                    </button>
+
+                                    <button
+                                        className="event-ad-btn event-ad-btn--ghost"
+                                        onClick={() => setShowEventAd(false)}
+                                    >
+                                        Позже
+                                    </button>
+                                </div>
+
+                                <div className="event-ad-foot">
+                                    *Успей войти до дедлайна
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </main>
             </div>
         );

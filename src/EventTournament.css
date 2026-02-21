@@ -1,0 +1,230 @@
+/* ───────────────────────────────────────────── */
+/* EVENT TOURNAMENT — FULL SEPARATE STYLE */
+/* ───────────────────────────────────────────── */
+
+.evt-card {
+    background: linear-gradient(180deg, #151c2f 0%, #0f1424 100%);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 24px;
+    color: #ffffff;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+
+/* subtle animated glow background */
+.evt-card::before {
+    content: "";
+    position: absolute;
+    inset: -40%;
+    background: radial-gradient(circle at 20% 20%, rgba(255, 180, 0, 0.15), transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(0, 200, 255, 0.12), transparent 60%);
+    animation: evtGlow 8s linear infinite;
+    z-index: 0;
+}
+
+@keyframes evtGlow {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.evt-card > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* HEADER */
+.evt-title {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 14px;
+    letter-spacing: 0.5px;
+}
+
+/* INFO ROW */
+.evt-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 14px;
+    opacity: 0.95;
+}
+
+.evt-row strong {
+    font-weight: 700;
+}
+
+/* STATUS BADGES */
+.evt-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.evt-active {
+    background: rgba(0, 255, 120, 0.15);
+    color: #00ff88;
+    border: 1px solid rgba(0, 255, 120, 0.35);
+}
+
+.evt-planned {
+    background: rgba(255, 200, 0, 0.15);
+    color: #ffcc00;
+    border: 1px solid rgba(255, 200, 0, 0.35);
+}
+
+.evt-finished {
+    background: rgba(255, 0, 80, 0.15);
+    color: #ff4d6d;
+    border: 1px solid rgba(255, 0, 80, 0.35);
+}
+
+.evt-timer {
+    margin-top: 4px;
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+/* ACTIONS */
+.evt-actions {
+    margin-top: 18px;
+}
+
+/* JOIN CARD */
+.evt-join {
+    background: linear-gradient(180deg, #1e2742, #141c32);
+    border-radius: 18px;
+    padding: 16px;
+    cursor: pointer;
+    transition: 0.25s;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: center;
+}
+
+.evt-join:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255, 215, 0, 0.5);
+    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.25);
+}
+
+.evt-join.locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.evt-join-icon {
+    font-size: 30px;
+    margin-bottom: 8px;
+}
+
+.evt-join-title {
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.evt-join-sub {
+    font-size: 13px;
+    opacity: 0.8;
+}
+
+/* PLAY BUTTON */
+.evt-play {
+    width: 100%;
+    padding: 14px;
+    border-radius: 16px;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 700;
+    background: linear-gradient(90deg, #ffd700, #ffb300);
+    color: #000;
+    transition: 0.25s;
+}
+
+.evt-play:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(255, 200, 0, 0.45);
+}
+
+/* HINT */
+.evt-hint {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #ff8080;
+    text-align: center;
+}
+
+/* CLOSED */
+.evt-closed {
+    margin-top: 12px;
+    text-align: center;
+    opacity: 0.7;
+}
+
+/* LEADERBOARD */
+.evt-leaderboard {
+    margin-top: 24px;
+}
+
+.evt-lb-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.evt-lb-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.evt-lb-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px 14px;
+    border-radius: 14px;
+    transition: 0.2s;
+}
+
+.evt-lb-row:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.evt-lb-rank {
+    font-weight: 700;
+    width: 40px;
+}
+
+.evt-lb-name {
+    flex: 1;
+    font-size: 14px;
+}
+
+.evt-lb-score {
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.evt-empty {
+    opacity: 0.7;
+    font-size: 13px;
+    text-align: center;
+    margin-top: 8px;
+}
+
+/* ERROR */
+.evt-error {
+    background: rgba(255, 0, 80, 0.1);
+    border: 1px solid rgba(255, 0, 80, 0.3);
+    padding: 14px;
+    border-radius: 14px;
+    margin-top: 10px;
+}
