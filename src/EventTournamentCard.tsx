@@ -62,6 +62,12 @@ export function EventTournamentCard({
             if (!res.ok) throw new Error(json.message || 'Failed to load event tournament');
 
             setData(json as EventTournamentData);
+            // ✅ если уже joined — больше никогда не показывать рекламу
+            try {
+                if ((json as EventTournamentData).joined) {
+                    localStorage.setItem(`mc_event_done_${slug}`, '1');
+                }
+            } catch {}
             onCoinsChange?.((json as EventTournamentData).coins ?? 0);
         } catch (e: any) {
             setError(e.message || 'Ошибка загрузки турнира');
@@ -131,6 +137,9 @@ export function EventTournamentCard({
             if (!res.ok) throw new Error(json.message || 'Ошибка входа');
 
             await load();
+            try {
+                localStorage.setItem(`mc_event_done_${slug}`, '1');
+            } catch {}
         } catch (e: any) {
             setError(e.message);
         } finally {
@@ -213,6 +222,7 @@ export function EventTournamentCard({
                                     return;
                                 }
                                 handleJoin();
+
                             }}
                         >
                             <div className="entry-glow" />

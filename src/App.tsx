@@ -406,6 +406,25 @@
 
         const t = (key: string) => translations[lang][key] || key;
 
+// ───────────────── EVENT AD CONTROL ─────────────────
+
+        const EVENT_SLUG = 'big-march-2026';
+
+        const eventDoneKey = (slug: string) => `mc_event_done_${slug}`;
+
+        const isEventDone = (slug: string) => {
+            try {
+                return localStorage.getItem(eventDoneKey(slug)) === '1';
+            } catch {
+                return false;
+            }
+        };
+
+        const markEventDone = (slug: string) => {
+            try {
+                localStorage.setItem(eventDoneKey(slug), '1');
+            } catch {}
+        };
 
         useEffect(() => {
             const tgLang =
@@ -417,19 +436,19 @@
                 setLang('ru');
             }
         }, []);
-
         useEffect(() => {
             if (isBooting) return;
 
-            // показываем 1 раз в день
-            const key = 'mc_event_ad_last_seen';
-            const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+            // ✅ если юзер уже участвовал/играл Big March — НЕ показываем никогда
+            if (isEventDone(EVENT_SLUG)) return;
 
-            const last = localStorage.getItem(key);
-            if (last !== today) {
-                setShowEventAd(true);
-                localStorage.setItem(key, today);
-            }
+            // дальше твоя логика "раз в день"
+            const today = new Date().toISOString().slice(0, 10);
+            const lastSeen = localStorage.getItem('mc_event_ad_last_seen');
+            if (lastSeen === today) return;
+
+            setShowEventAd(true);
+            localStorage.setItem('mc_event_ad_last_seen', today);
         }, [isBooting]);
 
         // 👇 состояние для магазина монет
@@ -1220,11 +1239,11 @@
                                             slug="big-march-2026"
                                             token={token}
                                             t={t}
-                                            onCoinsChange={(coins) => {
-                                                // если хочешь синхронизировать монеты в хедере сразу
-                                                setMe((prev) => (prev ? { ...prev, coins } : prev));
-                                            }}
+                                            onCoinsChange={(coins) =>
+                                                setMe((prev) => (prev ? { ...prev, coins } : prev))
+                                            }
                                             onStartGame={(tournamentId) => {
+                                                markEventDone('big-march-2026'); // 🔥 вот тут
                                                 setTournamentGameId(tournamentId);
                                                 setTournamentType(null);
                                                 setCurrentPage('game');
