@@ -4,7 +4,7 @@ import './BottomNav.css'
 import ShopIcon from './assets/icons/shop.svg?react'
 import MonsterIcon from './assets/icons/farm.svg?react' // можешь заменить на monster.svg
 import FriendsIcon from './assets/icons/friends.svg?react'
-import TournamentIcon from './assets/icons/leaders.svg?react'
+import TournamentIcon from './assets/icons/tournaments.svg?react'
 import QuestsIcon from './assets/icons/tasks.svg?react'
 
 export type NavKey = 'shop' | 'quests' | 'farm' | 'monster' | 'friends' | 'tournaments'
