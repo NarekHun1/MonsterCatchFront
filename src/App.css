@@ -1423,7 +1423,7 @@ button{ font-family: inherit; }
    ========================================== */
 
 :root{
-    --header-air: 22px; /* воздух сверху: 16-30px */
+    --header-air: 30px; /* воздух сверху: 16-30px */
 }
 
 .app-header{
