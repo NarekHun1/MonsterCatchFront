@@ -1417,5 +1417,30 @@ button{ font-family: inherit; }
     padding-top: calc(14px + env(safe-area-inset-top)) !important;
 }
 
+/* ==========================================
+   HEADER: больше высоты сверху + контент ниже
+   (без сдвига app-shell)
+   ========================================== */
 
+:root{
+    --header-air: 22px; /* воздух сверху: 16-30px */
+}
+
+.app-header{
+    top: 0 !important;
+
+    /* делаем шапку "выше" визуально */
+    padding-top: calc(14px + env(safe-area-inset-top) + var(--header-air)) !important;
+
+    /* чтобы низ шапки не уезжал слишком вниз — чуть уменьшим низ */
+    padding-bottom: 14px !important;
+
+    /* height можно оставить как есть, но если хочешь прям больше — включи: */
+    height: 220px !important;
+}
+
+/* опционально: чуть ниже заголовок внутри чипа */
+.chip-title{
+    margin-top: 2px;
+}
 /* ВАЖНО: app-shell НЕ трогаем — остаётся как было */
