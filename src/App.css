@@ -1380,3 +1380,15 @@ button{ font-family: inherit; }
     background: rgba(10, 15, 30, 0.74) !important;
     border: 1px solid rgba(255,255,255,0.08) !important;
 }
+/* ===== header down (force) ===== */
+.app-header{
+    position: fixed !important;
+    top: var(--header-offset) !important;
+    left: 0 !important;
+    right: 0 !important;
+}
+
+/* чтобы контент не заезжал под header */
+.app-shell{
+    margin-top: calc(var(--header-height) + var(--header-offset)) !important;
+}
