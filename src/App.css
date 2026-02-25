@@ -1712,3 +1712,189 @@ button {
 .app-shell{
     padding-bottom: calc(env(safe-area-inset-bottom) + 120px);
 }
+/* =========================
+   MONEY MENU UI PATCH
+   ========================= */
+
+:root{
+    --card-bg: rgba(17, 24, 39, 0.82);
+    --card-brd: rgba(255,255,255,0.10);
+    --soft: rgba(255,255,255,0.06);
+    --txt: rgba(255,255,255,0.92);
+    --muted: rgba(255,255,255,0.62);
+}
+
+/* общий контейнер меню */
+.panel.panel-menu{
+    background: linear-gradient(180deg, rgba(10, 15, 30, 0.92), rgba(10, 15, 30, 0.82));
+    border: 1px solid rgba(255,255,255,0.10);
+    box-shadow:
+            0 24px 70px rgba(0,0,0,0.55),
+            inset 0 0 0 1px rgba(255,255,255,0.04);
+}
+
+/* заголовок + описание */
+.panel-title{
+    font-weight: 900;
+    letter-spacing: .2px;
+}
+.panel-muted{
+    color: rgba(255,255,255,0.62);
+}
+
+/* --- Главная кнопка PLAY чуть дороже --- */
+.play-main-btn{
+    border-radius: 22px;
+    height: 66px;
+    box-shadow:
+            0 18px 44px rgba(0,255,180,0.35),
+            0 6px 18px rgba(0,0,0,0.35),
+            inset 0 0 12px rgba(255,255,255,0.22);
+}
+.play-main-btn:active{ transform: scale(0.985); }
+
+/* --- Actions section (buy coins + cashcup + roulette) --- */
+.menu-actions{
+    gap: 12px;
+}
+.buy-coins-card,
+.cashcup-card,
+.menu-card--gold{
+    border-radius: 22px;
+}
+
+/* --- GRID: ровные красивые карточки --- */
+.menu-grid{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 10px;
+}
+
+/* универсальная карточка */
+.menu-card{
+    position: relative;
+    overflow: hidden;
+    border-radius: 18px;
+    padding: 14px 14px 12px;
+    min-height: 112px;
+
+    background:
+            radial-gradient(120px 90px at 15% 10%, rgba(56,189,248,0.26), transparent 65%),
+            radial-gradient(140px 120px at 90% 110%, rgba(167,139,250,0.22), transparent 60%),
+            linear-gradient(180deg, rgba(17, 24, 39, 0.86), rgba(2, 6, 23, 0.92));
+    border: 1px solid rgba(255,255,255,0.10);
+
+    box-shadow:
+            0 14px 30px rgba(0,0,0,0.45),
+            inset 0 0 0 1px rgba(255,255,255,0.04);
+
+    transition: transform .14s ease, box-shadow .14s ease, filter .14s ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.menu-card::before{
+    content:"";
+    position:absolute;
+    inset:-60%;
+    background: radial-gradient(circle, rgba(255,255,255,0.16), transparent 55%);
+    transform: translateX(-25%);
+    opacity: .55;
+    pointer-events:none;
+}
+
+.menu-card::after{
+    content:"";
+    position:absolute;
+    top:-70%;
+    left:-45%;
+    width: 55%;
+    height: 230%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.22), transparent);
+    transform: rotate(18deg);
+    opacity: .0;
+    pointer-events:none;
+}
+
+.menu-card:hover{
+    transform: translateY(-2px);
+    box-shadow:
+            0 22px 46px rgba(0,0,0,0.55),
+            inset 0 0 0 1px rgba(255,255,255,0.08);
+}
+.menu-card:active{
+    transform: translateY(0) scale(0.985);
+    filter: brightness(1.03);
+}
+.menu-card:active::after{
+    opacity: .8;
+    animation: menuShine 650ms ease-out 1;
+}
+
+@keyframes menuShine{
+    0%{ left:-45%; opacity:.0; }
+    20%{ opacity:.9; }
+    100%{ left:145%; opacity:.0; }
+}
+
+/* иконка сверху */
+.menu-icon{
+    font-size: 30px;
+    line-height: 1;
+    filter: drop-shadow(0 10px 18px rgba(0,0,0,0.55));
+}
+
+/* текст */
+.menu-card-title{
+    margin-top: 6px;
+    font-size: 14px;
+    font-weight: 900;
+    color: rgba(255,255,255,0.95);
+    letter-spacing: .2px;
+}
+.menu-card-text{
+    font-size: 12px;
+    color: rgba(255,255,255,0.66);
+    line-height: 1.25;
+}
+
+/* --- усиление “важных” карточек отдельными классами (по желанию) --- */
+/* Если хочешь: добавь className="menu-card menu-card--wallet" и т.п. */
+.menu-card--wallet{
+    background:
+            radial-gradient(140px 100px at 20% 10%, rgba(34,197,94,0.22), transparent 70%),
+            linear-gradient(180deg, rgba(17,24,39,0.88), rgba(2,6,23,0.92));
+}
+.menu-card--quests{
+    background:
+            radial-gradient(140px 100px at 20% 10%, rgba(59,130,246,0.22), transparent 70%),
+            linear-gradient(180deg, rgba(17,24,39,0.88), rgba(2,6,23,0.92));
+}
+.menu-card--tournaments{
+    background:
+            radial-gradient(160px 120px at 20% 10%, rgba(245,158,11,0.22), transparent 70%),
+            linear-gradient(180deg, rgba(17,24,39,0.88), rgba(2,6,23,0.92));
+}
+
+/* --- Buttons (menu-btn) сделать как “glass pill” --- */
+.menu-btn{
+    border-radius: 18px;
+    height: 52px;
+    font-weight: 900;
+    letter-spacing: .3px;
+    box-shadow:
+            0 14px 34px rgba(79,70,229,0.35),
+            inset 0 0 0 1px rgba(255,255,255,0.08);
+}
+.menu-btn--secondary{
+    background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+    border: 1px solid rgba(255,255,255,0.10);
+    box-shadow:
+            0 14px 34px rgba(0,0,0,0.35),
+            inset 0 0 0 1px rgba(255,255,255,0.04);
+}
+
+/* --- стабилизация layout в TG (особенно iOS) --- */
+.app-shell{
+    padding-bottom: calc(env(safe-area-inset-bottom) + 140px);
+}
