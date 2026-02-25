@@ -1,0 +1,304 @@
+/* ==========================================
+   Monster Catch — Wallet.css (Premium TON UI)
+   ========================================== */
+
+.wallet-root{
+    position: relative;
+}
+
+/* Title */
+.wallet-title{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 2px 0 12px;
+}
+.wallet-title-emoji{
+    width: 38px;
+    height: 38px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.10);
+    box-shadow: 0 14px 34px rgba(0,0,0,0.35);
+    font-size: 18px;
+}
+.wallet-subtitle{
+    font-size: 12px;
+    color: rgba(255,255,255,0.62);
+}
+
+/* Generic card */
+.wallet-card{
+    padding: 14px 14px 14px;
+    border-radius: 18px;
+    background:
+            radial-gradient(140px 110px at 10% 10%, rgba(56,189,248,0.16), transparent 65%),
+            radial-gradient(170px 140px at 90% 120%, rgba(167,139,250,0.12), transparent 60%),
+            linear-gradient(180deg, rgba(17,24,39,0.78), rgba(2,6,23,0.86));
+    border: 1px solid rgba(255,255,255,0.10);
+    box-shadow:
+            0 20px 55px rgba(0,0,0,0.50),
+            inset 0 0 0 1px rgba(255,255,255,0.04);
+    margin-top: 12px;
+}
+
+.wallet-card-head{
+    margin-bottom: 10px;
+}
+.wallet-card-title{
+    font-size: 15px;
+    font-weight: 950;
+    letter-spacing: .2px;
+    color: rgba(255,255,255,0.95);
+}
+.wallet-card-desc{
+    margin-top: 3px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.62);
+}
+
+/* Balance card */
+.wallet-balance-card{
+    position: relative;
+    padding: 16px 16px;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.10);
+    background:
+            radial-gradient(220px 160px at 10% 0%, rgba(34,197,94,0.18), transparent 65%),
+            radial-gradient(240px 180px at 100% 120%, rgba(56,189,248,0.14), transparent 60%),
+            linear-gradient(135deg, rgba(10,15,30,0.92), rgba(2,6,23,0.92));
+    box-shadow:
+            0 22px 65px rgba(0,0,0,0.55),
+            inset 0 0 0 1px rgba(255,255,255,0.04);
+}
+
+.wallet-balance-card::before{
+    content:"";
+    position:absolute;
+    inset:-50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.14), transparent 55%);
+    transform: translateX(-20%);
+    opacity: .55;
+    pointer-events:none;
+}
+
+.wallet-balance-card{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap: 12px;
+}
+.wallet-balance-label{
+    font-size: 12px;
+    color: rgba(255,255,255,0.62);
+}
+.wallet-balance-coins{
+    margin-top: 6px;
+    font-size: 28px;
+    font-weight: 1000;
+    letter-spacing: .2px;
+    color: rgba(255,255,255,0.96);
+}
+.wallet-balance-coins span{
+    filter: drop-shadow(0 10px 18px rgba(0,0,0,0.55));
+}
+.wallet-balance-hint{
+    margin-top: 6px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.62);
+}
+
+.wallet-badge{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 26px;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 950;
+    letter-spacing: .12em;
+    color: rgba(0,0,0,0.85);
+    background: linear-gradient(135deg, rgba(255,210,74,1), rgba(255,179,0,1));
+    box-shadow: 0 10px 24px rgba(255,183,3,0.20);
+}
+
+/* TonConnect button wrapper (keeps it centered) */
+.wallet-ton-btn{
+    margin-top: 8px;
+    display: flex;
+    justify-content: center;
+}
+
+/* Address pill */
+.wallet-addr{
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.10);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 10px;
+}
+
+.wallet-addr-label{
+    font-size: 12px;
+    color: rgba(255,255,255,0.62);
+}
+.wallet-addr-value{
+    font-size: 12px;
+    font-weight: 900;
+    color: rgba(255,255,255,0.90);
+}
+.wallet-addr-empty{
+    font-size: 12px;
+    color: rgba(255,255,255,0.62);
+}
+
+/* Form */
+.wallet-form{
+    margin-top: 8px;
+}
+.wallet-label{
+    display:block;
+    font-size: 12px;
+    color: rgba(255,255,255,0.70);
+    margin-bottom: 6px;
+    font-weight: 800;
+}
+
+.wallet-input{
+    width: 100%;
+    height: 44px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(0,0,0,0.22);
+    color: rgba(255,255,255,0.92);
+    outline: none;
+    padding: 0 12px;
+    font-size: 14px;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+}
+.wallet-input::placeholder{
+    color: rgba(255,255,255,0.40);
+}
+.wallet-input:focus{
+    border-color: rgba(56,189,248,0.30);
+    box-shadow: 0 0 0 3px rgba(56,189,248,0.10);
+}
+
+/* Hint */
+.wallet-mini-hint{
+    margin-top: 8px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.55);
+}
+
+/* Success text (if you have it in App.css fine, but keep here too) */
+.panel-success{
+    margin: 8px 0 0;
+    font-size: 12px;
+    color: rgba(187,247,208,0.95);
+    background: rgba(34,197,94,0.10);
+    border: 1px solid rgba(34,197,94,0.18);
+    padding: 8px 10px;
+    border-radius: 12px;
+}
+
+/* History */
+.wallet-history{
+    display:flex;
+    flex-direction:column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.wallet-history-item{
+    padding: 12px 12px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.10);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+}
+
+.wh-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+.wh-title{
+    font-size: 13px;
+    font-weight: 950;
+    color: rgba(255,255,255,0.92);
+}
+.wh-row{
+    font-size: 12px;
+    color: rgba(255,255,255,0.78);
+    margin-top: 4px;
+}
+.wh-muted{
+    color: rgba(255,255,255,0.55);
+}
+
+/* Status badges */
+.wallet-status{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    height: 22px;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 1000;
+    letter-spacing: .08em;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.86);
+    text-transform: uppercase;
+}
+
+.wallet-status--pending{
+    border-color: rgba(250,204,21,0.22);
+    background: rgba(250,204,21,0.10);
+    color: rgba(253,230,138,0.98);
+}
+.wallet-status--approved{
+    border-color: rgba(56,189,248,0.25);
+    background: rgba(56,189,248,0.12);
+    color: rgba(186,230,253,0.98);
+}
+.wallet-status--paid{
+    border-color: rgba(34,197,94,0.22);
+    background: rgba(34,197,94,0.10);
+    color: rgba(187,247,208,0.98);
+}
+.wallet-status--rejected{
+    border-color: rgba(248,113,113,0.26);
+    background: rgba(248,113,113,0.10);
+    color: rgba(254,202,202,0.98);
+}
+
+/* Back button (if you don't have it already) */
+.back-btn{
+    border: 0;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.10);
+    color: rgba(255,255,255,0.90);
+    padding: 10px 12px;
+    border-radius: 14px;
+    font-weight: 900;
+    cursor: pointer;
+    margin-bottom: 10px;
+    box-shadow: 0 14px 34px rgba(0,0,0,0.35);
+}
+.back-btn:active{
+    transform: scale(0.99);
+}
