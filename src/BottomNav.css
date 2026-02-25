@@ -1,22 +1,23 @@
 /* =========================================
-   PREMIUM GAME BOTTOM NAV (CLEANER / LIGHTER)
-   - less fat, more аккуратно
-   - active: мягкий neon
-   - center FARM: main, но без "кирпича"
+   PREMIUM GAME BOTTOM NAV (FINAL WORKING)
+   - 5 items always fit (repeat(5, minmax(0, 1fr)))
+   - center slightly emphasized but not wider
+   - SVG always visible (currentColor force)
+   - labels auto-hide on narrow screens
    ========================================= */
 
 :root{
     --bn-bg: rgba(14,14,18,0.88);
     --bn-border: rgba(255,255,255,0.10);
+
     --bn-item-bg: rgba(255,255,255,0.045);
     --bn-item-border: rgba(255,255,255,0.07);
 
     --bn-text: rgba(255,255,255,0.82);
-    --bn-text-soft: rgba(255,255,255,0.72);
-
     --bn-neon: #ADFF00;
 }
 
+/* wrapper */
 .bottomnav{
     position: fixed;
     left: 0;
@@ -29,7 +30,7 @@
     padding: 0 12px calc(env(safe-area-inset-bottom) + 10px) 12px;
 }
 
-/* мягкий fade (ниже высота и меньше контраста) */
+/* мягкий fade */
 .bottomnav::before{
     content:"";
     position:absolute;
@@ -38,7 +39,7 @@
     bottom:0;
     height:72px;
     pointer-events:none;
-    opacity: .55;
+    opacity:.55;
     background: linear-gradient(
             to top,
             rgba(0,0,0,0.62),
@@ -55,11 +56,11 @@
     width:100%;
 
     display:grid;
-    grid-template-columns: 1fr 1fr 1.18fr 1fr 1fr;
+    grid-template-columns: repeat(5, minmax(0, 1fr)); /* 🔥 всегда 5 */
     align-items:center;
 
-    gap:8px;
-    padding:8px 8px;
+    gap:6px;
+    padding:8px 6px;
 
     background: var(--bn-bg);
     border: 1px solid var(--bn-border);
@@ -74,6 +75,11 @@
 /* =========================================
    ITEMS
    ========================================= */
+
+.bn-item,
+.bn-center{
+    min-width:0; /* 🔥 важно для grid */
+}
 
 .bn-item{
     height:46px;
@@ -113,17 +119,18 @@
     position:relative;
 }
 
-/* label (делаем менее жирным) */
+/* label */
 .bn-txt{
     font-size:9.5px;
     line-height:1;
-    font-weight:700; /* было 800 */
+    font-weight:700;
     letter-spacing:0.02em;
 
+    max-width:100%;
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
-    max-width:100%;
+
     opacity:0.90;
 }
 
@@ -136,12 +143,19 @@
     height:26px;
     display:block;
 
-    color: rgba(255,255,255,0.90);
+    color: rgba(255,255,255,0.92);
     filter: drop-shadow(0 0 8px rgba(0,0,0,0.45));
     transition: all .18s ease;
 }
 
-/* ACTIVE ITEM (более тонко) */
+/* 🔥 принудительно красим пути/линии (чтобы не исчезали) */
+.bn-svg *,
+.bn-center-svg *{
+    fill: currentColor !important;
+    stroke: currentColor !important;
+}
+
+/* ACTIVE */
 .bn-item.is-active{
     background: rgba(173,255,0,0.10);
     border-color: rgba(173,255,0,0.22);
@@ -213,12 +227,12 @@
 }
 
 /* =========================================
-   CENTER (FARM) — главный, но не "огромный"
+   CENTER (FARM) — чуть сильнее, но НЕ шире
    ========================================= */
 
 .bn-center{
-    height:50px;
-    border-radius:16px;
+    height:46px;              /* 🔥 такой же как остальные */
+    border-radius:14px;       /* 🔥 такой же */
 
     display:flex;
     flex-direction:column;
@@ -242,12 +256,11 @@
 
 .bn-center:active{ transform: scale(0.985); }
 
-/* более тонкое свечение */
 .bn-center::before{
     content:"";
     position:absolute;
     inset:-2px;
-    border-radius:18px;
+    border-radius:16px;
     background: radial-gradient(circle at 50% 0%,
     rgba(173,255,0,0.18),
     rgba(173,255,0,0.00) 68%);
@@ -256,8 +269,8 @@
 }
 
 .bn-center-svg{
-    width:30px;
-    height:30px;
+    width:28px;
+    height:28px;
     display:block;
 
     color: var(--bn-neon);
@@ -268,21 +281,17 @@
 
     transition: transform .18s ease, filter .18s ease;
 }
-/* 🔥 принудительно красим пути/линии */
-.bn-svg *{
-    fill: currentColor !important;
-    stroke: currentColor !important;
-}
-.bn-center-svg *{
-    fill: currentColor !important;
-    stroke: currentColor !important;
-}
+
 .bn-center-txt{
     font-size:9.5px;
-    font-weight:800; /* было 900 */
+    font-weight:800;
     letter-spacing:0.02em;
     line-height:1;
+
+    max-width:100%;
     white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
 
     opacity: 0.98;
     position: relative;
@@ -303,28 +312,34 @@
    REDUCE MOTION
    ========================================= */
 @media (prefers-reduced-motion: reduce){
-    .bn-dot{ animation: none; }
-    .bn-item, .bn-center{ transition: none; }
+    .bn-dot{ animation:none; }
+    .bn-item, .bn-center{ transition:none; }
 }
 
-/* EXTRA SMALL SCREENS */
-@media (max-width:340px){
+/* =========================================
+   SMALL SCREENS: hide labels (чтобы 5 точно влезли)
+   ========================================= */
+@media (max-width: 380px){
+    .bn-txt,
+    .bn-center-txt{
+        display:none;
+    }
+
+    .bn-ico{ height:28px; }
+    .bn-item, .bn-center{ height:48px; }
+
+    .bn-svg{ width:26px; height:26px; }
+    .bn-center-svg{ width:30px; height:30px; }
+}
+
+/* EXTRA SMALL */
+@media (max-width: 340px){
     .bottomnav{
         padding: 0 10px calc(env(safe-area-inset-bottom) + 8px) 10px;
     }
 
     .bottomnav-inner{
-        height:56px;
-        gap:6px;
-        padding:8px 7px;
-        grid-template-columns: 1fr 1fr 1.14fr 1fr 1fr;
+        gap:5px;
+        padding:8px 5px;
     }
-
-    .bn-item{ height:45px; }
-    .bn-svg{ width:21px; height:21px; }
-    .bn-txt{ font-size:9px; }
-
-    .bn-center{ height:49px; }
-    .bn-center-svg{ width:23px; height:23px; }
-    .bn-center-txt{ font-size:9px; }
 }
