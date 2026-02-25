@@ -21,8 +21,25 @@
 
     --shadow1: 0 24px 70px rgba(0,0,0,0.55);
     --shadow2: 0 14px 30px rgba(0,0,0,0.45);
+    --header-offset: 100px;  /* насколько спустить header вниз */
+    --header-height: 200px; /* текущая высота header (у тебя в patch = 200px) */
+}
+.app-header{
+    background: #060a16 !important;  /* полностью непрозрачный */
+    backdrop-filter: none !important;
+}
+/* ===== header down (force) ===== */
+.app-header{
+    position: fixed !important;
+    top: var(--header-offset) !important;
+    left: 0 !important;
+    right: 0 !important;
 }
 
+/* чтобы контент не заезжал под header */
+.app-shell{
+    margin-top: calc(var(--header-height) + var(--header-offset)) !important;
+}
 *,
 *::before,
 *::after { box-sizing: border-box; }
@@ -64,7 +81,7 @@ body { margin: 0; background: radial-gradient(circle at top, #1e293b, var(--bg1)
     right: 0;
 
     width: 100%;
-    height: 220px;
+    height: 300px;
 
     padding: 16px 18px 22px;
     background: rgba(10, 15, 30, 0.94);
@@ -1212,3 +1229,382 @@ body { margin: 0; background: radial-gradient(circle at top, #1e293b, var(--bg1)
 
 /* global */
 button{ font-family: inherit; }
+/* ==========================================
+   PREMIUM POLISH PATCH (drop-in)
+   вставь в самый низ App.css
+   ========================================== */
+
+/* 1) Header: glass, depth, nicer spacing */
+.app-header{
+    height: 200px !important;
+    padding: 14px 16px 18px !important;
+
+    background:
+            radial-gradient(120% 120% at 50% 0%, rgba(56,189,248,0.14), transparent 55%),
+            radial-gradient(120% 140% at 100% 0%, rgba(167,139,250,0.12), transparent 60%),
+            linear-gradient(180deg, rgba(6,10,22,0.92), rgba(6,10,22,0.74)) !important;
+
+    border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+    backdrop-filter: blur(14px) !important;
+    box-shadow: 0 18px 60px rgba(0,0,0,0.55) !important;
+}
+
+/* чтобы контент не залезал под header */
+.app-shell{
+    margin-top: 190px !important;
+}
+
+/* 2) User chip: more premium */
+.app-userchip{
+    border-radius: 22px !important;
+    padding: 12px 12px !important;
+    background:
+            radial-gradient(140px 110px at 12% 10%, rgba(56,189,248,0.18), transparent 68%),
+            radial-gradient(170px 140px at 90% 120%, rgba(249,115,22,0.10), transparent 60%),
+            linear-gradient(180deg, rgba(17,24,39,0.74), rgba(2,6,23,0.80)) !important;
+
+    border: 1px solid rgba(255,255,255,0.10) !important;
+    box-shadow:
+            0 22px 60px rgba(0,0,0,0.55),
+            inset 0 0 0 1px rgba(255,255,255,0.04) !important;
+}
+
+/* pills: tighter, nicer glow */
+.user-pill{
+    padding: 6px 10px !important;
+    border: 1px solid rgba(255,255,255,0.10) !important;
+    background: rgba(255,255,255,0.06) !important;
+}
+.user-pill--stars{
+    box-shadow: 0 0 20px rgba(56,189,248,0.22) !important;
+}
+.user-pill--tickets{
+    box-shadow: 0 0 18px rgba(167,139,250,0.18) !important;
+}
+
+/* 3) Menu grid cards: “real app” depth + sheen */
+.menu-grid{
+    gap: 14px !important;
+    margin-top: 12px !important;
+}
+
+.menu-card{
+    border-radius: 20px !important;
+    min-height: 132px !important;
+    padding: 16px 16px 14px !important;
+
+    background:
+            radial-gradient(150px 120px at 14% 10%, rgba(56,189,248,0.22), transparent 70%),
+            radial-gradient(180px 150px at 100% 120%, rgba(167,139,250,0.18), transparent 65%),
+            linear-gradient(180deg, rgba(17,24,39,0.82), rgba(2,6,23,0.92)) !important;
+
+    border: 1px solid rgba(255,255,255,0.10) !important;
+
+    box-shadow:
+            0 18px 46px rgba(0,0,0,0.55),
+            inset 0 0 0 1px rgba(255,255,255,0.04) !important;
+}
+
+.menu-card::before{
+    opacity: 0.55 !important;
+}
+
+.menu-card::after{
+    opacity: 0 !important;
+}
+.menu-card:active::after{
+    opacity: .9 !important;
+    animation: menuShine 650ms ease-out 1 !important;
+}
+
+/* icon a bit bigger */
+.menu-icon{
+    font-size: 34px !important;
+    filter: drop-shadow(0 12px 22px rgba(0,0,0,0.55)) !important;
+}
+
+/* better typography */
+.menu-card-title{
+    font-size: 16px !important;
+    font-weight: 950 !important;
+    letter-spacing: .2px !important;
+}
+.menu-card-text{
+    font-size: 13px !important;
+    line-height: 1.25 !important;
+    color: rgba(255,255,255,0.66) !important;
+}
+
+/* 4) Different “accents” per card (add these classNames in JSX) */
+.menu-card--wallet{
+    background:
+            radial-gradient(180px 140px at 20% 10%, rgba(34,197,94,0.22), transparent 70%),
+            linear-gradient(180deg, rgba(17,24,39,0.82), rgba(2,6,23,0.92)) !important;
+}
+.menu-card--quests{
+    background:
+            radial-gradient(180px 140px at 20% 10%, rgba(59,130,246,0.22), transparent 70%),
+            linear-gradient(180deg, rgba(17,24,39,0.82), rgba(2,6,23,0.92)) !important;
+}
+.menu-card--solo{
+    background:
+            radial-gradient(190px 150px at 20% 10%, rgba(168,85,247,0.22), transparent 70%),
+            linear-gradient(180deg, rgba(17,24,39,0.82), rgba(2,6,23,0.92)) !important;
+}
+.menu-card--crush{
+    background:
+            radial-gradient(190px 150px at 20% 10%, rgba(236,72,153,0.22), transparent 70%),
+            linear-gradient(180deg, rgba(17,24,39,0.82), rgba(2,6,23,0.92)) !important;
+}
+.menu-card--invite{
+    background:
+            radial-gradient(190px 150px at 20% 10%, rgba(14,165,233,0.22), transparent 70%),
+            linear-gradient(180deg, rgba(17,24,39,0.82), rgba(2,6,23,0.92)) !important;
+}
+.menu-card--leaders{
+    background:
+            radial-gradient(210px 160px at 20% 10%, rgba(250,204,21,0.22), transparent 72%),
+            linear-gradient(180deg, rgba(17,24,39,0.82), rgba(2,6,23,0.92)) !important;
+}
+
+/* 5) Make header buttons look like iOS glass */
+.header-wallet-btn{
+    border-radius: 16px !important;
+    background: rgba(255,255,255,0.08) !important;
+    border: 1px solid rgba(255,255,255,0.10) !important;
+    box-shadow: 0 14px 36px rgba(0,0,0,0.45) !important;
+}
+.lang-glass-btn{
+    background: rgba(255,255,255,0.06) !important;
+    border: 1px solid rgba(255,255,255,0.10) !important;
+}
+
+/* 6) Small: remove “too grey” feel */
+.panel{
+    background: rgba(10, 15, 30, 0.74) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+}
+/* ===== header down (force) ===== */
+.app-header{
+    position: fixed !important;
+    top: var(--header-offset) !important;
+    left: 0 !important;
+    right: 0 !important;
+}
+/* ===== FIX: ничего не видно за header ===== */
+.app-header{
+    position: fixed !important;
+    top: 0 !important;
+    left: 0; right: 0;
+
+    /* делаем фон НЕпрозрачным */
+    background: #060a16 !important; /* плотный тёмный */
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+}
+
+/* если где-то всё равно просвечивает из-за градиентов — ставим “подложку” */
+.app-header::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background: #060a16;   /* 100% opaque */
+    z-index:-1;
+}
+.app-shell{
+    margin-top: 200px !important; /* или сколько у тебя height */
+}
+/* ===== HEADER: NO SEE-THROUGH (opaque base + pretty overlay) ===== */
+.app-header{
+    position: fixed !important;
+    top: 0 !important;
+    left: 0; right: 0;
+    z-index: 9999 !important;
+
+    /* ✅ 100% непрозрачная база */
+    background: #060a16 !important;
+
+    /* blur можно оставить, но он не должен делать прозрачность */
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+}
+
+/* ✅ красивый слой СВЕРХУ, но он не “прозрачит” контент под хедером */
+.app-header::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+
+    /* тут твои блики/градиенты */
+    background:
+            radial-gradient(120% 120% at 50% 0%, rgba(56,189,248,0.14), transparent 55%),
+            radial-gradient(120% 140% at 100% 0%, rgba(167,139,250,0.12), transparent 60%),
+            linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.00));
+}
+
+/* чтобы контент начинался ниже */
+.app-shell{
+    margin-top: 200px !important; /* = height header */
+}
+/* чтобы контент не заезжал под header */
+.app-shell{
+    margin-top: calc(var(--header-height) + var(--header-offset)) !important;
+}
+/* ==========================================
+   FINAL HEADER CONTROL (single source of truth)
+   ========================================== */
+
+:root{
+    --header-offset: 100px;   /* насколько спустить вниз */
+    --header-height: 200px;   /* высота хедера */
+}
+
+/* header вниз + непрозрачный (ничего не видно сзади) */
+.app-header{
+    position: fixed !important;
+    top: var(--header-offset) !important;
+    left: 0 !important;
+    right: 0 !important;
+
+    height: var(--header-height) !important;
+    z-index: 9999 !important;
+
+    background: #060a16 !important; /* полностью непрозрачный */
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+
+    /* чтобы ::after позиционировался внутри */
+    isolation: isolate;
+}
+
+/* красивый “премиум” слой сверху (не просвечивает контент) */
+.app-header::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    background:
+            radial-gradient(120% 120% at 50% 0%, rgba(56,189,248,0.14), transparent 55%),
+            radial-gradient(120% 140% at 100% 0%, rgba(167,139,250,0.12), transparent 60%),
+            linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.00));
+}
+
+/* контент ниже хедера */
+.app-shell{
+    margin-top: calc(var(--header-height) + var(--header-offset)) !important;
+}
+/* ===== FINAL: header down + reserve space for content ===== */
+
+:root{
+    --tg-topbar: 0px;         /* будет выставляться из JS */
+    --header-offset: 12px;
+    --header-height: 168px;   /* можешь оставить 200px если надо */
+    --shell-gap: 16px;
+
+    --bottomnav-height: 84px; /* твой BottomNav по факту */
+}
+
+/* header */
+.app-header{
+    position: fixed !important;
+    top: calc(env(safe-area-inset-top) + var(--tg-topbar) + var(--header-offset)) !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: var(--header-height) !important;
+    z-index: 50 !important;
+
+    background: #060a16 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* резервируем место под header + top chrome телеги */
+.app-root{
+    padding-top: calc(
+            env(safe-area-inset-top)
+            + var(--tg-topbar)
+            + var(--header-offset)
+            + var(--header-height)
+            + var(--shell-gap)
+    ) !important;
+
+    padding-bottom: calc(
+            env(safe-area-inset-bottom)
+            + var(--bottomnav-height)
+            + 12px
+    ) !important;
+}
+
+/* оболочка */
+.app-shell{
+    margin: var(--shell-gap) !important;
+}
+
+/* 🔥 РЕЗЕРВ сверху под header, чтобы контент НЕ мог оказаться выше */
+.app-root{
+    padding-top: calc(env(safe-area-inset-top) + var(--header-offset) + var(--header-height)) !important;
+}
+
+/* возвращаем shell в нормальный поток (без огромных margin-top) */
+.app-shell{
+    margin: 16px 16px 16px !important;
+}
+/* ==========================================
+   FINAL LAYOUT PATCH (single source of truth)
+   put THIS at the very bottom of App.css
+   ========================================== */
+
+:root{
+    --tg-topbar: 0px;          /* set from JS */
+    --header-height: 200px;    /* твой финальный header */
+    --header-offset: -10px;    /* ⬅️ Monster Catch ВЫШЕ (минус = вверх) */
+    --shell-gap: 16px;
+
+    --bottomnav-height: 84px;  /* высота BottomNav */
+    --content-push: 26px;      /* ⬅️ ВЕСЬ САЙТ НИЖЕ */
+}
+
+/* header - fixed, correct in Telegram iOS */
+.app-header{
+    position: fixed !important;
+    top: calc(env(safe-area-inset-top) + var(--tg-topbar) + var(--header-offset)) !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: var(--header-height) !important;
+    z-index: 1000 !important;
+
+    /* непрозрачный, чтобы ничего не просвечивало */
+    background: #060a16 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* reserve space for header + telegram chrome + extra push */
+.app-root{
+    padding-top: calc(
+            env(safe-area-inset-top)
+            + var(--tg-topbar)
+            + var(--header-height)
+            + var(--shell-gap)
+            + var(--content-push)
+    ) !important;
+
+    padding-bottom: calc(
+            env(safe-area-inset-bottom)
+            + var(--bottomnav-height)
+            + 12px
+    ) !important;
+}
+
+/* IMPORTANT: kill all old margin-top hacks */
+.app-shell{
+    margin: var(--shell-gap) 16px 16px !important; /* top/left-right/bottom */
+}
+
+/* if game page hides header, remove reserved space */
+.app-shell.game-active{
+    margin-top: 0 !important;
+}
