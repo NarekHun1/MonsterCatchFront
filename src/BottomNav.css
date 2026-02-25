@@ -1,10 +1,21 @@
 /* =========================================
-   PREMIUM GAME BOTTOM NAV (FINAL, SVG CLEAN)
-   - icons ALWAYS visible
-   - active: neon green
-   - center FARM: main button
-   - supports dot + badge
+   PREMIUM GAME BOTTOM NAV (CLEANER / LIGHTER)
+   - less fat, more аккуратно
+   - active: мягкий neon
+   - center FARM: main, но без "кирпича"
    ========================================= */
+
+:root{
+    --bn-bg: rgba(14,14,18,0.88);
+    --bn-border: rgba(255,255,255,0.10);
+    --bn-item-bg: rgba(255,255,255,0.045);
+    --bn-item-border: rgba(255,255,255,0.07);
+
+    --bn-text: rgba(255,255,255,0.82);
+    --bn-text-soft: rgba(255,255,255,0.72);
+
+    --bn-neon: #ADFF00;
+}
 
 .bottomnav{
     position: fixed;
@@ -18,20 +29,20 @@
     padding: 0 12px calc(env(safe-area-inset-bottom) + 10px) 12px;
 }
 
-/* soft fade behind bar (not dirty) */
+/* мягкий fade (ниже высота и меньше контраста) */
 .bottomnav::before{
     content:"";
     position:absolute;
     left:0;
     right:0;
     bottom:0;
-    height:90px;
+    height:72px;
     pointer-events:none;
-    opacity: .6;
+    opacity: .55;
     background: linear-gradient(
             to top,
-            rgba(0,0,0,0.78),
-            rgba(0,0,0,0.34) 55%,
+            rgba(0,0,0,0.62),
+            rgba(0,0,0,0.22) 55%,
             rgba(0,0,0,0.0)
     );
 }
@@ -40,24 +51,24 @@
 .bottomnav-inner{
     pointer-events:auto;
 
-    height:64px;
+    height:58px;
     width:100%;
 
     display:grid;
-    grid-template-columns: 1fr 1fr 1.25fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1.18fr 1fr 1fr;
     align-items:center;
 
     gap:8px;
-    padding:10px 10px;
+    padding:8px 8px;
 
-    background: rgba(14,14,18,0.92);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 20px;
+    background: var(--bn-bg);
+    border: 1px solid var(--bn-border);
+    border-radius: 18px;
 
-    backdrop-filter: blur(18px);
+    backdrop-filter: blur(16px);
     box-shadow:
-            0 18px 45px rgba(0,0,0,0.60),
-            inset 0 1px 0 rgba(255,255,255,0.06);
+            0 14px 36px rgba(0,0,0,0.55),
+            inset 0 1px 0 rgba(255,255,255,0.05);
 }
 
 /* =========================================
@@ -65,19 +76,19 @@
    ========================================= */
 
 .bn-item{
-    height:52px;
-    border-radius:16px;
+    height:46px;
+    border-radius:14px;
 
     display:flex;
     flex-direction:column;
     align-items:center;
     justify-content:center;
-    gap:4px;
+    gap:3px;
 
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: var(--bn-item-bg);
+    border: 1px solid var(--bn-item-border);
 
-    color: rgba(255,255,255,0.82);
+    color: var(--bn-text);
     cursor:pointer;
 
     user-select:none;
@@ -91,62 +102,63 @@
             box-shadow .18s ease;
 }
 
-.bn-item:active{
-    transform: scale(0.98);
-}
+.bn-item:active{ transform: scale(0.985); }
 
 /* icon wrapper */
 .bn-ico{
-    height:26px;
+    height:22px;
     display:flex;
     align-items:center;
     justify-content:center;
     position:relative;
 }
 
-/* label */
+/* label (делаем менее жирным) */
 .bn-txt{
-    font-size:10px;
+    font-size:9.5px;
     line-height:1;
-    font-weight:800;
+    font-weight:700; /* было 800 */
     letter-spacing:0.02em;
 
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
     max-width:100%;
-    opacity:0.92;
+    opacity:0.90;
 }
 
 /* =========================================
-   SVG ICONS (needs currentColor)
+   SVG ICONS
    ========================================= */
 
 .bn-svg{
-    width:26px;
-    height:26px;
+    width:22px;
+    height:22px;
     display:block;
 
-    color: rgba(255,255,255,0.92);
-    filter: drop-shadow(0 0 10px rgba(0,0,0,0.55));
+    color: rgba(255,255,255,0.90);
+    filter: drop-shadow(0 0 8px rgba(0,0,0,0.45));
     transition: all .18s ease;
 }
 
-/* ACTIVE ITEM */
+/* ACTIVE ITEM (более тонко) */
 .bn-item.is-active{
-    background: rgba(173,255,0,0.12);
-    border-color: rgba(173,255,0,0.26);
-    box-shadow:
-            inset 0 0 0 1px rgba(173,255,0,0.10);
+    background: rgba(173,255,0,0.10);
+    border-color: rgba(173,255,0,0.22);
+    box-shadow: inset 0 0 0 1px rgba(173,255,0,0.08);
 }
 
 .bn-item.is-active .bn-svg{
-    color:#ADFF00;
-    filter: drop-shadow(0 0 14px rgba(173,255,0,0.65));
+    color: var(--bn-neon);
+    filter: drop-shadow(0 0 10px rgba(173,255,0,0.55));
+}
+
+.bn-item.is-active .bn-txt{
+    color: rgba(255,255,255,0.92);
 }
 
 /* =========================================
-   DOT / BADGE (quests)
+   DOT / BADGE
    ========================================= */
 
 .bn-ico--eggs{
@@ -158,30 +170,30 @@
 
 .bn-dot{
     position:absolute;
-    top:-4px;
-    right:-6px;
+    top:-3px;
+    right:-5px;
 
-    width:10px;
-    height:10px;
+    width:9px;
+    height:9px;
     border-radius:999px;
 
     background:#ff3b30;
     border:2px solid rgba(14,14,18,0.92);
-    box-shadow:0 10px 22px rgba(255,59,48,0.45);
+    box-shadow:0 8px 16px rgba(255,59,48,0.35);
 
-    animation: bnDotPulse 1.25s ease-in-out infinite;
+    animation: bnDotPulse 1.35s ease-in-out infinite;
 }
 
 @keyframes bnDotPulse{
     0%   { transform: scale(1); }
-    50%  { transform: scale(1.15); }
+    50%  { transform: scale(1.12); }
     100% { transform: scale(1); }
 }
 
 .bn-badge{
     position:absolute;
     top:-7px;
-    right:-10px;
+    right:-9px;
 
     min-width:18px;
     height:14px;
@@ -195,64 +207,61 @@
     background:#ff3b30;
     color:#fff;
     font-size:9px;
-    font-weight:900;
+    font-weight:800;
 
-    box-shadow:0 8px 18px rgba(255,59,48,0.35);
+    box-shadow:0 7px 16px rgba(255,59,48,0.28);
 }
 
 /* =========================================
-   CENTER (FARM)
+   CENTER (FARM) — главный, но не "огромный"
    ========================================= */
 
 .bn-center{
-    height:56px;
-    border-radius:18px;
+    height:50px;
+    border-radius:16px;
 
     display:flex;
     flex-direction:column;
     align-items:center;
     justify-content:center;
-    gap:4px;
+    gap:3px;
 
     position: relative;
 
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.055);
+    border: 1px solid rgba(255,255,255,0.11);
     color:#fff;
 
     cursor:pointer;
     user-select:none;
     -webkit-tap-highlight-color:transparent;
 
-    box-shadow: 0 18px 45px rgba(0,0,0,0.55);
+    box-shadow: 0 14px 34px rgba(0,0,0,0.50);
     transition: transform .12s ease, background .18s ease, border-color .18s ease;
 }
 
-.bn-center:active{
-    transform: scale(0.98);
-}
+.bn-center:active{ transform: scale(0.985); }
 
-/* neon ring behind */
+/* более тонкое свечение */
 .bn-center::before{
     content:"";
     position:absolute;
     inset:-2px;
-    border-radius:20px;
+    border-radius:18px;
     background: radial-gradient(circle at 50% 0%,
-    rgba(173,255,0,0.24),
-    rgba(173,255,0,0.00) 65%);
+    rgba(173,255,0,0.18),
+    rgba(173,255,0,0.00) 68%);
     opacity: 0.95;
     z-index: 0;
 }
 
-/* center icon */
 .bn-center-svg{
-    width:28px;
-    height:28px;
+    width:24px;
+    height:24px;
     display:block;
 
-    color:#ADFF00;
-    filter: drop-shadow(0 0 16px rgba(173,255,0,0.70));
+    color: var(--bn-neon);
+    filter: drop-shadow(0 0 12px rgba(173,255,0,0.55));
 
     position: relative;
     z-index: 1;
@@ -261,8 +270,8 @@
 }
 
 .bn-center-txt{
-    font-size:10px;
-    font-weight:900;
+    font-size:9.5px;
+    font-weight:800; /* было 900 */
     letter-spacing:0.02em;
     line-height:1;
     white-space:nowrap;
@@ -273,36 +282,41 @@
 }
 
 .bn-center.is-active{
-    background: rgba(173,255,0,0.10);
-    border-color: rgba(173,255,0,0.25);
+    background: rgba(173,255,0,0.09);
+    border-color: rgba(173,255,0,0.20);
 }
 
 .bn-center.is-active .bn-center-svg{
-    transform: scale(1.06);
-    filter: drop-shadow(0 0 18px rgba(173,255,0,0.80));
+    transform: scale(1.04);
+    filter: drop-shadow(0 0 14px rgba(173,255,0,0.65));
 }
 
 /* =========================================
-   EXTRA SMALL SCREENS
+   REDUCE MOTION
    ========================================= */
+@media (prefers-reduced-motion: reduce){
+    .bn-dot{ animation: none; }
+    .bn-item, .bn-center{ transition: none; }
+}
+
+/* EXTRA SMALL SCREENS */
 @media (max-width:340px){
     .bottomnav{
         padding: 0 10px calc(env(safe-area-inset-bottom) + 8px) 10px;
     }
 
     .bottomnav-inner{
-        height:62px;
+        height:56px;
         gap:6px;
-        padding:10px 8px;
-        grid-template-columns: 1fr 1fr 1.2fr 1fr 1fr;
+        padding:8px 7px;
+        grid-template-columns: 1fr 1fr 1.14fr 1fr 1fr;
     }
 
-    .bn-item{ height:50px; }
+    .bn-item{ height:45px; }
+    .bn-svg{ width:21px; height:21px; }
+    .bn-txt{ font-size:9px; }
 
-    .bn-svg{ width:25px; height:25px; }
-    .bn-txt{ font-size:9.5px; }
-
-    .bn-center{ height:54px; }
-    .bn-center-svg{ width:27px; height:27px; }
-    .bn-center-txt{ font-size:9.5px; }
+    .bn-center{ height:49px; }
+    .bn-center-svg{ width:23px; height:23px; }
+    .bn-center-txt{ font-size:9px; }
 }
