@@ -1,74 +1,101 @@
-import './BottomNav.css';
+import './BottomNav.css'
 
-type NavKey = 'shop' | 'quests' | 'farm' | 'friends' | 'tournaments';
+import ShopIcon from './assets/icons/shop.svg?react'
+import FarmIcon from './assets/icons/farm.svg?react'
+import FriendsIcon from './assets/icons/friends.svg?react'
+import TournamentIcon from './assets/icons/leaders.svg?react'
+import QuestsIcon from './assets/icons/tasks.svg?react'
+
+type NavKey = 'shop' | 'quests' | 'farm' | 'friends' | 'tournaments'
+
+interface Props {
+    active: NavKey
+    eggsBadge?: number
+    questsDot?: boolean
+    onShop: () => void
+    onQuests: () => void
+    onFarm: () => void
+    onFriends: () => void
+    onTournaments: () => void
+}
 
 export function BottomNav({
                               active,
                               eggsBadge,
+                              questsDot,
                               onShop,
                               onQuests,
                               onFarm,
                               onFriends,
                               onTournaments,
-                              questsDot,
-                          }: {
-    active: NavKey;
-    eggsBadge?: number;
-    onShop: () => void;
-    onQuests: () => void;
-    onFarm: () => void;           // ✅ вместо onDemon
-    onFriends: () => void;
-    onTournaments: () => void;
-    questsDot?: boolean;
-}) {
+                          }: Props) {
     return (
         <nav className="bottomnav" role="navigation" aria-label="Bottom navigation">
             <div className="bottomnav-inner">
+
+                {/* SHOP */}
                 <button
                     className={`bn-item ${active === 'shop' ? 'is-active' : ''}`}
                     onClick={onShop}
                 >
-                    <div className="bn-ico">📈</div>
+                    <div className="bn-ico">
+                        <ShopIcon className="bn-svg" />
+                    </div>
                     <div className="bn-txt">РЫНОК</div>
                 </button>
 
+                {/* QUESTS */}
                 <button
                     className={`bn-item ${active === 'quests' ? 'is-active' : ''}`}
                     onClick={onQuests}
                 >
                     <div className="bn-ico bn-ico--eggs">
-                        📝
+                        <QuestsIcon className="bn-svg" />
+
                         {questsDot && <span className="bn-dot" />}
-                        {!!eggsBadge && <span className="bn-badge">{eggsBadge}</span>}
+
+                        {!!eggsBadge && (
+                            <span className="bn-badge">
+                {eggsBadge > 99 ? '99+' : eggsBadge}
+              </span>
+                        )}
                     </div>
                     <div className="bn-txt">ЗАДАНИЯ</div>
                 </button>
 
-                {/* 🔥 Центр теперь FARM */}
+                {/* CENTER FARM */}
                 <button
                     className={`bn-center ${active === 'farm' ? 'is-active' : ''}`}
                     onClick={onFarm}
                 >
-                    <div className="bn-center-ico">🌾</div>
+                    <div className="bn-center-glow" />
+                    <FarmIcon className="bn-center-svg" />
                     <div className="bn-center-txt">FARM</div>
                 </button>
 
+                {/* FRIENDS */}
                 <button
                     className={`bn-item ${active === 'friends' ? 'is-active' : ''}`}
                     onClick={onFriends}
                 >
-                    <div className="bn-ico">👥</div>
+                    <div className="bn-ico">
+                        <FriendsIcon className="bn-svg" />
+                    </div>
                     <div className="bn-txt">ДРУЗЬЯ</div>
                 </button>
 
+                {/* TOURNAMENTS */}
                 <button
                     className={`bn-item ${active === 'tournaments' ? 'is-active' : ''}`}
                     onClick={onTournaments}
                 >
-                    <div className="bn-ico">🎯</div>
+                    <div className="bn-ico">
+                        <TournamentIcon className="bn-svg" />
+                    </div>
                     <div className="bn-txt">ТУРНИРЫ</div>
                 </button>
+
             </div>
         </nav>
-    );
+    )
 }

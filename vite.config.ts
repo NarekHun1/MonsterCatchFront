@@ -1,10 +1,14 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import svgr from 'vite-plugin-svgr';
 import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
 import { NodeModulesPolyfillPlugin } from '@esbuild-plugins/node-modules-polyfill';
 
 export default defineConfig({
-    plugins: [react()],
+    plugins: [
+        react(),
+        svgr(), // ✅ добавили
+    ],
     resolve: {
         alias: {
             buffer: 'buffer',
@@ -19,7 +23,7 @@ export default defineConfig({
                 NodeGlobalsPolyfillPlugin({
                     buffer: true,
                 }),
-                NodeModulesPolyfillPlugin()
+                NodeModulesPolyfillPlugin(),
             ],
         },
     },
