@@ -1,1787 +1,491 @@
-.app-shell {
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    max-width: 520px;
+/* ==========================================
+   Monster Catch — App.css (Premium Money UI)
+   ✅ one-source-of-truth, no duplicates
+   ========================================== */
 
-    /* 👇 Сдвигаем всё содержимое ниже хедера */
-    margin: 200px 16px 16px;
-    /*       ↑↑↑ это расстояние от низа хедера до карточки
-               можно пробовать 110 / 120 / 130 */
-
-    padding: 16px 16px 12px;
-    border-radius: 24px;
-    background: rgba(15, 23, 42, 0.94);
-    box-shadow:
-            0 20px 40px rgba(15, 23, 42, 0.9),
-            0 0 0 1px rgba(148, 163, 184, 0.25);
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-
-}
-
-
-
-/* Когда игра активна — поднимаем контейнер вверх */
-.app-shell.game-active {
-    margin-top: 0 !important;
-    padding-top: 15px
-}
-:root {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text',
-    sans-serif;
+:root{
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
     color: #f9fafb;
-    background: radial-gradient(circle at top, #1e293b, #020617);
+
+    --txt: rgba(255,255,255,0.92);
+    --muted: rgba(255,255,255,0.62);
+    --soft: rgba(255,255,255,0.06);
+    --brd: rgba(255,255,255,0.10);
+
+    --bg1: #020617;
+    --bg2: #0b1227;
+    --bg3: #111827;
+
+    --glass: rgba(15, 23, 42, 0.78);
+    --glass2: rgba(10, 15, 30, 0.82);
+
+    --shadow1: 0 24px 70px rgba(0,0,0,0.55);
+    --shadow2: 0 14px 30px rgba(0,0,0,0.45);
 }
 
 *,
 *::before,
-*::after {
-    box-sizing: border-box;
-}
+*::after { box-sizing: border-box; }
 
-body {
-    margin: 0;
-}
+body { margin: 0; background: radial-gradient(circle at top, #1e293b, var(--bg1)); }
 
+/* ==========================================
+   ROOT / BACKGROUND
+   ========================================== */
 
-.app-root {
+.app-root{
     min-height: 100vh;
     display: flex;
-    align-items: stretch;
     justify-content: center;
-    background: radial-gradient(circle at top, #0f172a, #020617);
+    align-items: stretch;
+    background: radial-gradient(circle at top, #0f172a, var(--bg1));
     color: #e5e7eb;
 }
 
-.app-bg-glow {
+.app-bg-glow{
     position: fixed;
     inset: 0;
     pointer-events: none;
-    background: radial-gradient(circle at 20% 0%, rgba(56, 189, 248, 0.18), transparent 55%),
-    radial-gradient(circle at 80% 100%, rgba(249, 115, 22, 0.2), transparent 55%);
-    opacity: 0.9;
+    background:
+            radial-gradient(circle at 20% 0%, rgba(56, 189, 248, 0.18), transparent 55%),
+            radial-gradient(circle at 80% 100%, rgba(249, 115, 22, 0.20), transparent 55%);
+    opacity: .95;
     z-index: 0;
 }
 
-/* Header */
+/* ==========================================
+   HEADER
+   ========================================== */
 
-.app-header {
+.app-header{
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
 
     width: 100%;
-
-    /* отступы: поменьше сверху, побольше снизу */
-    padding: 16px 35px 32px;
-
-    background: rgba(15, 23, 42, 0.98);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
-    z-index: 1000;
-
-    display: flex;
-    justify-content: space-between;
-
-    /* ⬇ ВАЖНО: прижимаем содержимое к НИЗУ хедера */
-    align-items: flex-end;
-
-    gap: 12px;
-
     height: 220px;
-}
 
-
-
-.app-title {
-    margin: 0;
-    font-size: 24px;
-    letter-spacing: 0.04em;
-}
-
-.app-subtitle {
-    margin: 4px 0 0;
-    font-size: 12px;
-    color: #9ca3af;
-}
-
-.app-userchip {
-    position: relative;
-    padding: 8px 10px;
-    /*border-radius: 16px;*/
-    background: rgba(15, 23, 42, 0.95);
-    /*border: 1px solid rgba(148, 163, 184, 0.5);*/
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    min-width: 100%;
-    margin-top: 150px;
-    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.9);
-}
-
-/* Верхняя часть: аватар + имя */
-.user-main {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.user-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: radial-gradient(circle at 30% 0%, #facc15, #f97316);
-    font-size: 18px;
-}
-
-.user-meta {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.1;
-}
-
-.user-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: #f9fafb;
-}
-
-.user-id-small {
-    font-size: 11px;
-    color: #9ca3af;
-    opacity: 0.8;
-}
-
-/* Нижняя часть: пилюльки со статами */
-.user-stats-row {
-    display: flex;
-    gap: 6px;
-}
-
-.user-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 2px 8px;
-    border-radius: 999px;
-    background: rgba(148, 163, 184, 0.18);
-    font-size: 11px;
-    font-weight: 500;
-    color: #e5e7eb;
-}
-.user-pill--stars {
-    background: rgba(56, 189, 248, 0.18);
-    box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
-}
-
-
-.user-pill-icon {
-    font-size: 12px;
-}
-
-.user-pill-value {
-    min-width: 20px;
-    text-align: right;
-}
-
-.user-pill--coins {
-    background: rgba(250, 204, 21, 0.18);
-}
-
-/* Tabs */
-
-.menu-nav {
-    display: flex;
-    gap: 6px;
-    background: rgba(15, 23, 42, 0.9);
-    padding: 4px;
-    border-radius: 999px;
-    border: 1px solid rgba(55, 65, 81, 0.7);
-}
-
-.menu-tab {
-    flex: 1;
-    border: none;
-    background: transparent;
-    color: #9ca3af;
-    font-size: 12px;
-    padding: 6px 8px;
-    border-radius: 999px;
-    cursor: pointer;
-    transition:
-            background 0.18s ease,
-            color 0.18s ease,
-            transform 0.12s ease;
-}
-
-.menu-tab--active {
-    background: radial-gradient(circle at top, #22c55e, #16a34a);
-    color: #e5e7eb;
-    transform: translateY(-1px);
-}
-
-/* Panels */
-
-.app-content {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 4px;
-}
-
-.panel {
-    padding: 12px 12px 14px;
-    border-radius: 18px;
-    background: rgba(15, 23, 42, 0.95);
-    border: 1px solid rgba(75, 85, 99, 0.8);
-    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.7);
-}
-
-.panel-title {
-    margin: 0 0 6px;
-    font-size: 16px;
-}
-
-.panel-muted {
-    margin: 0 0 10px;
-    font-size: 12px;
-    color: #9ca3af;
-}
-
-.panel-error {
-    margin: 0;
-    font-size: 12px;
-    color: #fecaca;
-}
-
-.panel-error-box {
-    border-color: rgba(248, 113, 113, 0.7);
-    background: linear-gradient(135deg, rgba(127, 29, 29, 0.95), rgba(15, 23, 42, 0.96));
-}
-
-/* Menu cards */
-
-.panel-menu {
-    padding-top: 10px;
-}
-
-.menu-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 10px;
-    margin-top: 6px;
-}
-.menu-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 14px; /* расстояние между карточкой и кнопкой */
-    margin-top: 16px;
-}
-
-.menu-card {
-    position: relative;
-    border: none;
-    border-radius: 16px;
-    padding: 10px 10px 12px;
-    background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.38), rgba(15, 23, 42, 1));
-    color: #e5e7eb;
-    text-align: left;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    box-shadow:
-            0 10px 20px rgba(15, 23, 42, 0.85),
-            0 0 0 1px rgba(148, 163, 184, 0.35);
-    transition:
-            transform 0.14s ease,
-            box-shadow 0.14s ease,
-            background 0.18s ease,
-            translate 0.14s ease;
-}
-
-.menu-card:hover {
-    transform: translateY(-2px);
-    box-shadow:
-            0 18px 30px rgba(15, 23, 42, 0.95),
-            0 0 0 1px rgba(148, 163, 184, 0.6);
-}
-
-.menu-card--disabled {
-    cursor: default;
-    opacity: 0.6;
-    background: radial-gradient(circle at top left, rgba(148, 163, 184, 0.25), rgba(15, 23, 42, 1));
-}
-
-/*play buttn*/
-.play-main-btn {
-    position: relative;
-    width: 100%;
-    height: 64px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-
-    border-radius: 24px;
-    border: none;
-    cursor: pointer;
-
-    background: linear-gradient(
-            135deg,
-            #00ff9d,
-            #00c3ff,
-            #00ff9d
-    );
-
-    box-shadow:
-            0 12px 30px rgba(0, 255, 180, 0.45),
-            inset 0 0 12px rgba(255,255,255,0.25);
-
-    font-weight: 900;
-    font-size: 20px;
-    color: #002f2a;
-
-    overflow: hidden;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.play-main-btn:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow:
-            0 18px 45px rgba(0, 255, 180, 0.6),
-            inset 0 0 18px rgba(255,255,255,0.35);
-}
-
-.play-main-btn:active {
-    transform: scale(0.96);
-}
-
-/* 🔥 ГЛОУ */
-.play-glow {
-    position: absolute;
-    inset: -40%;
-    background: radial-gradient(
-            circle,
-            rgba(255,255,255,0.35),
-            transparent 60%
-    );
-    animation: playGlowMove 3.5s linear infinite;
-}
-
-@keyframes playGlowMove {
-    0% { transform: translateX(-30%); }
-    100% { transform: translateX(30%); }
-}
-
-/* ✨ БЛИК */
-.play-shine {
-    position: absolute;
-    top: -60%;
-    left: -40%;
-    width: 40%;
-    height: 200%;
-    background: linear-gradient(
-            120deg,
-            transparent,
-            rgba(255,255,255,0.55),
-            transparent
-    );
-    transform: rotate(20deg);
-    animation: playShine 4s infinite;
-}
-
-@keyframes playShine {
-    0% { left: -40%; }
-    40% { left: 140%; }
-    100% { left: 140%; }
-}
-
-/* 🎮 ИКОНКА */
-.play-icon {
-    font-size: 26px;
-    filter: drop-shadow(0 0 6px rgba(255,255,255,0.7));
-}
-
-/* ТЕКСТ */
-.play-text {
-    position: relative;
-    z-index: 1;
-    letter-spacing: 1px;
-}
-
-/*BUY COINS*/
-.buy-coins-card {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-
-    padding: 18px 20px;
-    border-radius: 20px;
-
-    background: linear-gradient(
-            135deg,
-            #ffb703,
-            #ff8c00,
-            #ffb703
-    );
-
-    box-shadow:
-            0 10px 30px rgba(255, 183, 3, 0.35),
-            inset 0 0 10px rgba(255, 255, 255, 0.25);
-
-    cursor: pointer;
-    overflow: hidden;
-
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.buy-coins-card:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow:
-            0 14px 40px rgba(255, 183, 3, 0.5),
-            inset 0 0 14px rgba(255, 255, 255, 0.35);
-}
-
-.buy-coins-card:active {
-    transform: scale(0.98);
-}
-
-.buy-coins-glow {
-    position: absolute;
-    inset: -40%;
-    background: radial-gradient(
-            circle,
-            rgba(255,255,255,0.35),
-            transparent 60%
-    );
-    animation: glowMove 4s linear infinite;
-}
-
-@keyframes glowMove {
-    0% { transform: translateX(-30%); }
-    100% { transform: translateX(30%); }
-}
-
-.buy-coins-icon {
-    font-size: 34px;
-    filter: drop-shadow(0 0 6px rgba(255,255,255,0.7));
-}
-
-.buy-coins-content {
-    position: relative;
-    z-index: 1;
-}
-
-.buy-coins-title {
-    font-size: 18px;
-    font-weight: 900;
-    color: #2b1600;
-}
-
-.buy-coins-subtitle {
-    font-size: 14px;
-    font-weight: 700;
-    color: #3a1e00;
-    opacity: 0.95;
-}
-
-.buy-coins-note {
-    font-size: 12px;
-    margin-top: 2px;
-    color: #4a2600;
-    opacity: 0.85;
-}
-
-
-
-.menu-badge {
-    position: absolute;
-    top: 8px;
-    right: 10px;
-    font-size: 10px;
-    padding: 2px 6px;
-    border-radius: 999px;
-    background: rgba(251, 191, 36, 0.9);
-    color: #111827;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-}
-
-/* ---- BEAUTIFUL LEADERBOARD ---- */
-
-.leaderboard-container {
-    margin-top: 10px;
-    padding: 16px;
-    border-radius: 20px;
-    background: rgba(15, 23, 42, 0.95);
-    border: 1px solid rgba(75, 85, 99, 0.7);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
-}
-
-.leaderboard-title {
-    font-size: 20px;
-    font-weight: 700;
-    margin-bottom: 12px;
-}
-
-.leaderboard-big-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    max-height: 420px;
-    overflow-y: auto;
-}
-
-.leaderboard-card {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 14px;
-    border-radius: 16px;
-    background: rgba(30, 41, 59, 0.9);
-    border: 1px solid rgba(100, 116, 139, 0.4);
-    transition: transform 0.15s ease, background 0.15s ease;
-}
-
-.leaderboard-card:hover {
-    transform: translateY(-2px);
-    background: rgba(45, 55, 75, 0.9);
-}
-
-.lb-place {
-    width: 32px;
-    font-size: 16px;
-    font-weight: 700;
-    text-align: center;
-    color: #a3bafd;
-}
-
-/* 🥇🥈🥉 — красивые медали для топ-3 */
-.lb-place-1 {
-    color: #ffdd55;
-    font-size: 20px;
-}
-.lb-place-2 {
-    color: #c0c0c0;
-    font-size: 20px;
-}
-.lb-place-3 {
-    color: #cd7f32;
-    font-size: 20px;
-}
-
-/* Аватарка */
-.lb-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 30% 0%, #facc15, #f97316);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-}
-
-/* Имя игрока */
-.lb-name {
-    flex: 1;
-    font-size: 15px;
-    font-weight: 600;
-}
-
-/* Очки */
-.lb-score {
-    font-size: 16px;
-    font-weight: bold;
-    color: #4ade80;
-}
-
-/* Footer */
-
-.app-footer {
-    margin-top: 4px;
-    padding-top: 4px;
-    border-top: 1px solid rgba(31, 41, 55, 0.9);
-    display: flex;
-    justify-content: space-between;
-    font-size: 10px;
-    color: #6b7280;
-}
-
-/* Buttons inside Game component (если они обычные) */
-
-button {
-    font-family: inherit;
-}
-.daily-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 6px;
-}
-
-.daily-item {
-    border-radius: 12px;
-    padding: 6px 8px 8px;
-    background: rgba(15, 23, 42, 0.95);
-    border: 1px solid rgba(55, 65, 81, 0.9);
-}
-
-.daily-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-}
-
-.daily-progress-text {
-    color: #9ca3af;
-}
-
-.daily-bar {
-    position: relative;
-    margin-top: 4px;
-    height: 4px;
-    border-radius: 999px;
-    background: rgba(31, 41, 55, 1);
-    overflow: hidden;
-}
-
-.daily-bar-fill {
-    position: absolute;
-    inset: 0;
-    transform-origin: left center;
-    transform: scaleX(0);
-    background: linear-gradient(90deg, #22c55e, #facc15, #f97316);
-    transition: transform 0.2s ease-out;
-}
-
-.daily-footer {
-    margin-top: 4px;
-    display: flex;
-    justify-content: space-between;
-    font-size: 11px;
-}
-
-.daily-reward {
-    color: #a5b4fc;
-}
-
-.daily-badge {
-    padding: 2px 6px;
-    border-radius: 999px;
-    background: rgba(34, 197, 94, 0.15);
-    color: #bbf7d0;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-}
-.user-stars {
-    font-size: 12px;
-    margin-top: 2px;
-    color: #fde68a;
-}
-/* магазин */
-
-.shop-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 6px;
-}
-
-.shop-item {
-    border-radius: 12px;
-    padding: 6px 8px;
-    background: rgba(15, 23, 42, 0.95);
-    border: 1px solid rgba(55, 65, 81, 0.9);
-    font-size: 12px;
-}
-
-.shop-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 2px;
-}
-
-.shop-title {
-    font-weight: 500;
-}
-
-.shop-level {
-    color: #9ca3af;
-}
-
-.shop-price {
-    color: #eab308;
-}
-
-.shop-buy-btn {
-    border: none;
-    border-radius: 999px;
-    padding: 4px 10px;
-    font-size: 12px;
-    cursor: pointer;
-    background: linear-gradient(135deg, #22c55e, #16a34a);
-    color: #ecfdf5;
-    box-shadow: 0 4px 10px rgba(22, 163, 74, 0.5);
-    transition:
-            transform 0.1s ease,
-            box-shadow 0.1s ease,
-            opacity 0.1s ease;
-}
-
-.shop-buy-btn:disabled {
-    opacity: 0.5;
-    cursor: default;
-    box-shadow: none;
-}
-
-.shop-buy-btn:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 16px rgba(22, 163, 74, 0.6);
-}
-
-/*time monster*/
-.reward-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.8);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 50;
-}
-
-.reward-card {
-    width: 260px;
-    border-radius: 20px;
-    padding: 16px 14px 14px;
-    background: radial-gradient(circle at top, rgba(56, 189, 248, 0.5), rgba(15, 23, 42, 0.98));
-    border: 1px solid rgba(59, 130, 246, 0.8);
-    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.95);
-    text-align: center;
-}
-
-.reward-emoji {
-    font-size: 40px;
-}
-
-.reward-title {
-    margin-top: 6px;
-    font-size: 18px;
-    font-weight: 600;
-}
-
-.reward-text {
-    margin-top: 4px;
-    font-size: 13px;
-    color: #e5e7eb;
-}
-
-.reward-level {
-    margin-top: 6px;
-    font-size: 12px;
-    color: #bfdbfe;
-}
-
-.reward-btn {
-    margin-top: 10px;
-    border: none;
-    border-radius: 999px;
-    padding: 8px 14px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    background: linear-gradient(135deg, #22c55e, #16a34a);
-    color: #ecfdf5;
-    box-shadow: 0 8px 16px rgba(22, 163, 74, 0.6);
-}
-/*собрать очки*/
-.daily-claim-btn {
-    border: none;
-    border-radius: 999px;
-    padding: 3px 10px;
-    font-size: 11px;
-    cursor: pointer;
-    background: linear-gradient(135deg, #22c55e, #16a34a);
-    color: #ecfdf5;
-    box-shadow: 0 4px 10px rgba(22, 163, 74, 0.5);
-}
-
-.daily-badge {
-    padding: 2px 6px;
-    border-radius: 999px;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    background: rgba(34, 197, 94, 0.15);
-    color: #bbf7d0;
-}
-
-.daily-badge--grey {
-    background: rgba(148, 163, 184, 0.15);
-    color: #e5e7eb;
-}
-
-.menu-btn {
-    width: 100%;
-    padding: 14px 16px;
-    border-radius: 16px;
-    border: none;
-    background: linear-gradient(135deg, #4f46e5, #7c3aed);
-    color: #f9fafb;
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 10px;
-    cursor: pointer;
-    box-shadow: 0 10px 25px rgba(79, 70, 229, 0.45);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: transform 0.08s ease-out, box-shadow 0.08s ease-out, opacity 0.15s;
-}
-
-.menu-btn:active {
-    transform: translateY(1px) scale(0.99);
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.6);
-}
-
-.menu-btn--secondary {
-    background: linear-gradient(135deg, #0f172a, #1e293b);
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.75);
-    color: #e5e7eb;
-}
-
-.menu-btn--secondary:active {
-    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.8);
-}
-/*hero booton */
-.hero-floating-bar {
-    position: fixed;
-    bottom: 16px;
-    left: 50%;
-    transform: translateX(-50%);
+    padding: 16px 18px 22px;
+    background: rgba(10, 15, 30, 0.94);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.55);
     z-index: 1000;
 
     display: flex;
-    align-items: center;
-    gap: 8px;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
 
-    padding: 8px 14px;
-    border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    background: radial-gradient(circle at top, rgba(255, 255, 255, 0.08), rgba(5, 8, 22, 0.95));
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
-
-    color: #fff;
-    cursor: pointer;
-    outline: none;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    backdrop-filter: blur(10px);
 }
 
-.hero-floating-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.12);
-    font-size: 20px;
-}
-
-.hero-floating-info {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
-
-.hero-floating-name {
-    font-size: 13px;
-    font-weight: 600;
-}
-
-.hero-floating-meta {
-    font-size: 11px;
-    opacity: 0.8;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.hero-floating-meta .dot {
-    opacity: 0.5;
-}
-
-.hero-modal-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 1001;
-    background: rgba(0, 0, 0, 0.6);
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.hero-modal-card {
-    background: #050816;
-    border-radius: 20px;
-    padding: 16px;
-    max-width: 360px;
-    width: calc(100% - 32px);
-    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.7);
-}
-
-.hero-modal-close {
-    margin-top: 12px;
-    width: 100%;
-    border-radius: 999px;
-    border: none;
-    padding: 10px 0;
-    font-size: 14px;
-    font-weight: 600;
-    background: linear-gradient(90deg, #ff8a3c, #ff4b7d);
-    color: #fff;
-    cursor: pointer;
-}
-/*hero*/
-/* Оверлей — на весь экран */
-.hero-modal-overlay {
-    position: fixed;
-    inset: 0; /* top:0 right:0 bottom:0 left:0 */
-    background: rgba(0, 0, 0, 0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 50;
-}
-
-/* Карточка модалки — тоже на весь экран */
-.hero-modal-card {
-    background: radial-gradient(circle at top, #1b1634, #050816);
-    width: 100%;
-    height: 100%;
-    max-width: none;
-    max-height: none;
-    border-radius: 0; /* чтобы без скруглений */
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-}
-
-/* Внутри модалки — контейнер под 3D героя */
-.hero-3d-wrapper {
-    flex: 1;              /* занимает всё доступное пространство */
-    width: 100%;
-    border-radius: 16px;
-    overflow: hidden;
-}
-
-/* Кнопка закрыть — прижать вверх */
-.hero-modal-close {
-    margin-top: 12px;
-    align-self: center;
-}
-
-.shop-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.65);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 999999;
-}
-
-.shop-popup {
-    background: #111;
-    padding: 22px;
-    width: 80%;
-    max-width: 360px;
-    border-radius: 14px;
-    text-align: center;
-}
-
-/* loading Page */
-
-.splash-root {
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(circle at top, #2b1338 0, #050510 55%, #000 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    box-sizing: border-box;
-}
-
-.splash-inner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    max-width: 320px;
-    width: 100%;
-    text-align: center;
-    color: #fff;
-}
-
-.splash-logo-circle {
-    width: 140px;
-    height: 140px;
-    border-radius: 50%;
-    overflow: hidden;
-    background: radial-gradient(circle at 30% 10%, #ffdd66, #ff7a3c 45%, #7b1fa2 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow:
-            0 0 30px rgba(255, 122, 60, 0.8),
-            0 0 80px rgba(123, 31, 162, 0.6);
-}
-
-.splash-logo-img {
-    width: 120px;       /* или другое значение */
-    height: 120px;
-    border-radius: 50%; /* превращает квадрат в круг */
-    object-fit: cover;  /* чтобы картинка не растягивалась */
-}
-
-
-.splash-title {
-    font-size: 26px;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin: 0;
-}
-
-.splash-subtitle {
-    font-size: 14px;
-    opacity: 0.8;
-    margin: 0 0 8px;
-}
-
-.splash-bar {
-    width: 100%;
-    height: 6px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.08);
-    overflow: hidden;
+.app-userchip{
     position: relative;
-}
-
-.splash-bar-fill {
-    position: absolute;
-    inset: 0;
-    transform-origin: left center;
-    animation: splash-loading 1.4s infinite ease-in-out;
-}
-
-.splash-bar-fill::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(90deg, #ffeb3b, #ff9800, #ff5722);
-}
-
-@keyframes splash-loading {
-    0% {
-        transform: scaleX(0.1);
-    }
-    40% {
-        transform: scaleX(0.7);
-    }
-    80% {
-        transform: scaleX(1);
-    }
-    100% {
-        transform: scaleX(1);
-    }
-}
-
-/*walet*/
-.wallet-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-}
-
-.wallet-back-btn {
-    background: transparent;
-    border: none;
-    color: #aaa;
-    font-size: 14px;
-    padding: 4px 0;
-}
-
-.wallet-balance {
-    background: radial-gradient(circle at top, #333 0, #111 60%);
-    border-radius: 16px;
-    padding: 14px 16px;
-    margin-bottom: 18px;
-}
-
-.wallet-balance-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 16px;
-    margin-bottom: 4px;
-}
-
-.wallet-balance-main {
-    font-weight: 700;
-}
-
-.wallet-balance-sub {
-    font-size: 12px;
-    color: #aaa;
-}
-
-.wallet-section {
-    margin-bottom: 22px;
-}
-
-.wallet-section-title {
-    font-size: 16px;
-    margin-bottom: 8px;
-}
-
-.wallet-label {
-    display: block;
-    font-size: 13px;
-    margin-bottom: 4px;
-}
-
-.wallet-input {
     width: 100%;
     padding: 10px 12px;
-    border-radius: 12px;
-    border: 1px solid #444;
-    background: #151515;
-    color: #fff;
-    font-size: 14px;
-    margin-bottom: 10px;
-}
-
-.wallet-small-btn {
-    font-size: 12px;
-    padding: 6px 10px;
-    border-radius: 999px;
-    border: 1px solid #444;
-    background: #222;
-    color: #ddd;
-    margin-bottom: 12px;
-}
-
-.wallet-withdraw-row {
+    background: linear-gradient(180deg, rgba(17, 24, 39, 0.78), rgba(2, 6, 23, 0.82));
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 18px;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
     gap: 8px;
-    margin-bottom: 10px;
+    box-shadow: 0 18px 44px rgba(0,0,0,0.45);
 }
 
-.wallet-radio-group {
-    display: flex;
-    gap: 6px;
-}
-
-.wallet-radio {
-    padding: 6px 10px;
-    border-radius: 999px;
-    border: 1px solid #444;
-    background: #181818;
-    font-size: 12px;
-}
-
-.wallet-radio--active {
-    border-color: #ffb347;
-    background: #302010;
-}
-
-.wallet-withdraw-hint {
-    font-size: 12px;
-    color: #ccc;
-}
-
-.wallet-message {
-    margin-top: 8px;
-    padding: 8px 10px;
-    font-size: 13px;
-    text-align: center;
-    background: #182618;
-    border-radius: 10px;
-}
-/*styl top mnue  */
-
-.menu-nav {
-    display: flex;
-    justify-content: space-around;
-    padding: 10px 0;
-    background: #111;
-}
-
-.menu-tab {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 14px;
-    display: flex;
-    flex-direction: column;   /* <- ВЕРТИКАЛЬНО */
-    align-items: center;       /* <- ПО ЦЕНТРУ */
-    justify-content: center;
-    gap: 4px;
-    padding: 6px 0;
-    flex: 1;
-}
-
-.menu-tab--active {
-    color: #49ff4a;
-    font-weight: bold;
-}
-
-.tab-icon {
-    font-size: 24px;  /* иконка сверху */
-    line-height: 1;
-}
-
-.tab-label {
-    font-size: 12px;  /* текст снизу */
-}
-/*header */
-
-.header-wallet-btn {
-    position: absolute;
-    right: 12px;     /* вправо */
-    bottom: 12px;    /* вниз — самый конец блока */
-    background: rgba(255, 255, 255, 0.08);
-    padding: 8px 10px;
-    border-radius: 12px;
-    font-size: 20px;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-
-.header-wallet-btn:hover {
-    background: rgba(255,255,255,0.18);
-    transform: scale(1.06);
-}
-
-.chip-title {
-    font-size: 20px;
-    font-weight: 700;
-    text-align: center;   /* ставим по центру */
-    width: 100%;
-    margin-bottom: 8px;
-    color: #fff;
-    opacity: 0.9;
-}
-
-/*turnemant */
-.tournament-page {
-    display: grid;
-    gap: 14px;
-}
-
-.tournament-card {
-    background: #121212;
-    border-radius: 16px;
-    padding: 14px;
-    color: #fff;
-}
-
-.tournament-card h3 {
-    margin-bottom: 10px;
-}
-
-.tc-row {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 6px;
-}
-
-.tc-timer {
-    margin: 10px 0;
-    font-weight: bold;
-    text-align: center;
-}
-
-.tc-actions {
-    margin-top: 10px;
-}
-
-.tc-btn {
-    width: 100%;
-    padding: 12px;
-    border-radius: 12px;
-    border: none;
-    font-weight: bold;
-}
-
-.tc-btn.join {
-    background: #22c55e;
-    color: #000;
-}
-
-.tc-btn.play {
-    background: #3b82f6;
-    color: #fff;
-}
-
-.tournament-card.error {
-    color: #f87171;
-}
-
-
-.user-pill--tickets {
-    background: linear-gradient(135deg, #6f5cff, #9b7cff);
-}
-
-/*Cash cup*/
-.cashcup-card {
-    position: relative;
-    border-radius: 22px;
-    padding: 18px;
-    background: linear-gradient(135deg, #1a0f00, #3b1f00);
-    color: #fff;
-    cursor: pointer;
-    overflow: hidden;
-    box-shadow:
-            0 0 30px rgba(255, 170, 0, 0.25),
-            inset 0 0 20px rgba(255, 200, 50, 0.15);
-    transform: translateZ(0);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.cashcup-card:hover {
-    transform: scale(1.04);
-    box-shadow:
-            0 0 45px rgba(255, 180, 0, 0.6),
-            inset 0 0 25px rgba(255, 220, 120, 0.3);
-}
-
-/* 🔥 аура */
-.cashcup-glow {
-    position: absolute;
-    inset: -40%;
-    background: radial-gradient(
-            circle,
-            rgba(255, 200, 80, 0.35),
-            transparent 60%
-    );
-    animation: cashcupPulse 2.5s infinite;
-    pointer-events: none;
-}
-
-@keyframes cashcupPulse {
-    0% { opacity: 0.4; transform: scale(0.9); }
-    50% { opacity: 0.9; transform: scale(1.1); }
-    100% { opacity: 0.4; transform: scale(0.9); }
-}
-
-/* HEADER */
-.cashcup-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.cashcup-badge {
-    background: #ff3b30;
-    color: #fff;
-    font-size: 11px;
-    padding: 4px 8px;
-    border-radius: 999px;
-    font-weight: 700;
-    box-shadow: 0 0 10px rgba(255, 60, 60, 0.8);
-}
-
-.cashcup-title {
-    font-size: 20px;
-    font-weight: 900;
-    letter-spacing: 1px;
-}
-
-/* BODY */
-.cashcup-body {
-    margin-top: 14px;
-}
-
-.cashcup-prize {
-    font-size: 13px;
-    opacity: 0.8;
-}
-
-.cashcup-amount {
-    font-size: 22px;
-    font-weight: 900;
-    color: #00ff9c; /* 💸 money green */
-    text-shadow:
-            0 0 10px rgba(0, 255, 160, 0.8),
-            0 0 20px rgba(0, 255, 160, 0.4);
-}
-
-
-.cashcup-info {
-    margin-top: 10px;
-    font-size: 13px;
-    opacity: 0.9;
-    line-height: 1.4;
-}
-
-/* FOOTER */
-.cashcup-footer {
-    margin-top: 14px;
-    padding-top: 10px;
-    border-top: 1px solid rgba(255,255,255,0.15);
-    text-align: right;
-    font-weight: 700;
-    color: #ffcf4a;
-}
-
-
-/*ruletka*/
-/* GOLD / ROULETTE CARD */
-.menu-card--gold {
-    position: relative;
-    overflow: hidden;
-
-    background: linear-gradient(
-            135deg,
-            #3f1d00,
-            #7c2d12,
-            #b45309
-    );
-
-    border-radius: 22px;
-    padding: 18px;
-
-    color: #fff;
-    cursor: pointer;
-
-    box-shadow:
-            0 18px 40px rgba(245, 158, 11, 0.45),
-            inset 0 0 0 1px rgba(255, 215, 0, 0.25);
-
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-/* hover / tap */
-.menu-card--gold:active {
-    transform: scale(0.97);
-    box-shadow:
-            0 10px 25px rgba(245, 158, 11, 0.35);
-}
-
-/* 🔥 glow */
-.menu-card--gold::before {
-    content: '';
-    position: absolute;
-    inset: -40%;
-    background: radial-gradient(
-            circle at 30% 40%,
-            rgba(255, 215, 0, 0.45),
-            transparent 60%
-    );
-    animation: goldGlow 3.5s infinite alternate;
-}
-
-@keyframes goldGlow {
-    from { opacity: 0.4; }
-    to   { opacity: 0.85; }
-}
-
-/* 🎰 ICON */
-.menu-card--gold .menu-icon {
-    font-size: 42px;
-    margin-bottom: 10px;
-
-    filter: drop-shadow(0 0 14px rgba(255, 215, 0, 0.8));
-}
-
-/* TITLE */
-.menu-card--gold .menu-card-title {
+.chip-title{
     font-size: 18px;
     font-weight: 900;
-    letter-spacing: 0.4px;
-    margin-bottom: 4px;
+    letter-spacing: .3px;
+    text-align: center;
+    opacity: .95;
 }
 
-/* TEXT */
-.menu-card--gold .menu-card-text {
-    font-size: 14px;
-    font-weight: 600;
-    opacity: 0.95;
+.user-main{
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-/* 💰 emphasize money */
-.menu-card--gold .menu-card-text span,
-.menu-card--gold .menu-card-text {
-    color: #fde68a;
+.user-avatar{
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 30% 0%, #facc15, #f97316);
+    font-size: 18px;
+    box-shadow: 0 10px 22px rgba(0,0,0,0.45);
 }
-/* 🟡 SOON BADGE */
-/*.menu-card--gold::after {*/
-/*    content: 'SOON';*/
-/*    position: absolute;*/
-/*    top: 12px;*/
-/*    right: 12px;*/
 
-/*    padding: 6px 10px;*/
-/*    font-size: 11px;*/
-/*    font-weight: 900;*/
-/*    letter-spacing: 1px;*/
+.user-meta{ display: flex; flex-direction: column; line-height: 1.05; }
 
-/*    color: #78350f;*/
-/*    background: linear-gradient(135deg, #fde68a, #facc15);*/
+.user-name{ font-size: 14px; font-weight: 800; color: var(--txt); }
+.user-id-small{ font-size: 11px; color: rgba(255,255,255,0.52); }
 
-/*    border-radius: 999px;*/
+/* pills row */
+.user-stats-row{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
 
-/*    box-shadow:*/
-/*            0 4px 12px rgba(250, 204, 21, 0.6),*/
-/*            inset 0 0 0 1px rgba(255, 255, 255, 0.6);*/
+.user-pill{
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.86);
+}
 
-/*    z-index: 2;*/
-/*}*/
-/* колонка справа */
-.header-actions-column {
+.user-pill--stars{
+    background: rgba(56, 189, 248, 0.14);
+    border-color: rgba(56,189,248,0.22);
+    box-shadow: 0 0 16px rgba(56,189,248,0.18);
+}
+.user-pill--coins{
+    background: rgba(250, 204, 21, 0.12);
+    border-color: rgba(250,204,21,0.18);
+}
+.user-pill--tickets{
+    background: rgba(167, 139, 250, 0.14);
+    border-color: rgba(167,139,250,0.20);
+}
+
+/* right column actions (wallet + lang) */
+.header-actions-column{
+    margin-left: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
 }
 
-/* кошелёк */
-.header-wallet-btn {
+.header-wallet-btn{
     width: 38px;
     height: 38px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.12);
+    border-radius: 14px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.10);
     backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
+    transition: transform .12s ease, background .12s ease;
 }
+.header-wallet-btn:hover{ background: rgba(255,255,255,0.12); transform: translateY(-1px); }
+.header-wallet-btn:active{ transform: scale(0.96); }
 
-/* 🌍 */
-.lang-glass-btn {
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
+.lang-glass-btn{
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
     background: rgba(255,255,255,0.06);
-    border: none;
+    border: 1px solid rgba(255,255,255,0.08);
     cursor: pointer;
     font-size: 14px;
-    opacity: 0.75;
+    opacity: .85;
 }
+.lang-glass-btn:active{ transform: scale(0.96); }
 
-.lang-glass-btn:hover {
-    opacity: 1;
-}
-
-/* dropdown */
-.lang-glass-menu {
+.lang-glass-menu{
     position: absolute;
-    top: calc(100% + 6px);
+    top: calc(100% + 8px);
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(15,15,25,0.96);
-    border-radius: 12px;
+    background: rgba(10,10,18,0.96);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 14px;
     padding: 6px;
     z-index: 1000;
+    width: 160px;
+    box-shadow: 0 18px 50px rgba(0,0,0,0.6);
+}
+.lang-glass-menu button{
+    width: 100%;
+    border: 0;
+    background: transparent;
+    color: rgba(255,255,255,0.86);
+    padding: 10px 10px;
+    border-radius: 10px;
+    text-align: left;
+    cursor: pointer;
+}
+.lang-glass-menu button.active{
+    background: rgba(255,255,255,0.08);
 }
 
+/* ==========================================
+   SHELL (card container)
+   ========================================== */
 
-/* ───────── EVENT AD ───────── */
-.event-ad-overlay{
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
+.app-shell{
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 520px;
+
+    margin: 200px 16px 16px;
+    padding: 16px 16px 12px;
+
+    border-radius: 24px;
+    background: rgba(15, 23, 42, 0.92);
+    border: 1px solid rgba(255,255,255,0.08);
+
+    box-shadow:
+            0 22px 55px rgba(0,0,0,0.55),
+            inset 0 0 0 1px rgba(255,255,255,0.04);
+
     display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 18px;
-    background: rgba(0,0,0,.72);
+    flex-direction: column;
+    gap: 12px;
+
+    /* safe area + bottom nav */
+    padding-bottom: calc(env(safe-area-inset-bottom) + 140px);
+}
+
+.app-shell.game-active{
+    margin-top: 0 !important;
+    padding-top: 15px;
+}
+
+/* ==========================================
+   TOP TABS (menu-nav)
+   ========================================== */
+
+.menu-nav{
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
     backdrop-filter: blur(10px);
 }
 
-.event-ad-card{
-    width: min(420px, 100%);
-    border-radius: 18px;
-    padding: 16px 16px 14px;
-    position: relative;
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,.10);
-    background: rgba(18,18,22,.92);
-    box-shadow: 0 20px 60px rgba(0,0,0,.55);
-}
-
-.event-ad-card::before{
-    content:"";
-    position:absolute;
-    inset:-120px -120px auto auto;
-    width: 280px;
-    height: 280px;
-    background: radial-gradient(circle, rgba(255,196,0,.35), transparent 70%);
-    transform: rotate(25deg);
-    pointer-events:none;
-}
-
-.event-ad-close{
-    position:absolute;
-    right: 10px;
-    top: 10px;
-    width: 34px;
-    height: 34px;
-    border-radius: 10px;
-    border: 1px solid rgba(255,255,255,.12);
-    background: rgba(255,255,255,.06);
-    color: #fff;
-}
-
-.event-ad-badge{
-    display:inline-flex;
-    align-items:center;
-    gap: 8px;
-    font-weight: 800;
-    font-size: 12px;
-    letter-spacing: .6px;
-    padding: 6px 10px;
-    border-radius: 999px;
-    background: rgba(255,196,0,.14);
-    border: 1px solid rgba(255,196,0,.22);
-    margin-bottom: 10px;
-}
-
-.event-ad-title{
-    color:#fff;
-    font-size: 18px;
-    font-weight: 900;
-    line-height: 1.2;
-    margin-bottom: 10px;
-}
-
-.event-ad-sub{
-    color: rgba(255,255,255,.86);
-    font-size: 14px;
-    line-height: 1.35;
-    margin-bottom: 14px;
-}
-
-.event-ad-actions{
-    display:flex;
-    gap: 10px;
-}
-
-.event-ad-btn{
+.menu-tab{
     flex: 1;
-    height: 44px;
-    border-radius: 12px;
-    font-weight: 800;
-    border: 1px solid rgba(255,255,255,.12);
-}
-
-.event-ad-btn--primary{
-    color:#111;
-    background: linear-gradient(135deg, #ffd24a, #ffb300);
     border: 0;
-}
-
-.event-ad-btn--ghost{
-    color:#fff;
-    background: rgba(255,255,255,.06);
-}
-
-.event-ad-foot{
-    margin-top: 10px;
+    background: transparent;
+    color: rgba(255,255,255,0.70);
     font-size: 12px;
-    color: rgba(255,255,255,.55);
-}
-.app-shell{
-    padding-bottom: calc(env(safe-area-inset-bottom) + 120px);
-}
-/* =========================
-   MONEY MENU UI PATCH
-   ========================= */
+    padding: 8px 8px;
+    border-radius: 999px;
+    cursor: pointer;
 
-:root{
-    --card-bg: rgba(17, 24, 39, 0.82);
-    --card-brd: rgba(255,255,255,0.10);
-    --soft: rgba(255,255,255,0.06);
-    --txt: rgba(255,255,255,0.92);
-    --muted: rgba(255,255,255,0.62);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+
+    transition: transform .12s ease, background .14s ease, color .14s ease;
+    -webkit-tap-highlight-color: transparent;
 }
 
-/* общий контейнер меню */
+.menu-tab--active{
+    background: linear-gradient(135deg, rgba(34,197,94,0.95), rgba(16,185,129,0.85));
+    color: rgba(0,0,0,0.86);
+    box-shadow: 0 12px 28px rgba(34,197,94,0.22);
+    transform: translateY(-1px);
+}
+
+.tab-icon{ font-size: 22px; line-height: 1; }
+.tab-label{ font-size: 11px; opacity: .95; }
+
+/* ==========================================
+   PANELS
+   ========================================== */
+
+.app-content{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.panel{
+    padding: 12px 12px 14px;
+    border-radius: 18px;
+    background: rgba(10, 15, 30, 0.78);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: var(--shadow2);
+}
+
 .panel.panel-menu{
-    background: linear-gradient(180deg, rgba(10, 15, 30, 0.92), rgba(10, 15, 30, 0.82));
+    background: linear-gradient(180deg, rgba(10, 15, 30, 0.92), rgba(10, 15, 30, 0.78));
     border: 1px solid rgba(255,255,255,0.10);
     box-shadow:
             0 24px 70px rgba(0,0,0,0.55),
             inset 0 0 0 1px rgba(255,255,255,0.04);
 }
 
-/* заголовок + описание */
 .panel-title{
+    margin: 0 0 6px;
+    font-size: 16px;
     font-weight: 900;
     letter-spacing: .2px;
 }
 .panel-muted{
-    color: rgba(255,255,255,0.62);
+    margin: 0 0 10px;
+    font-size: 12px;
+    color: var(--muted);
 }
 
-/* --- Главная кнопка PLAY чуть дороже --- */
+.panel-error{
+    margin: 0;
+    font-size: 12px;
+    color: #fecaca;
+}
+
+.panel-error-box{
+    border-color: rgba(248, 113, 113, 0.35);
+    background: linear-gradient(135deg, rgba(127, 29, 29, 0.62), rgba(10, 15, 30, 0.86));
+}
+
+/* ==========================================
+   PLAY BUTTON
+   ========================================== */
+
 .play-main-btn{
-    border-radius: 22px;
+    position: relative;
+    width: 100%;
     height: 66px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+
+    border-radius: 22px;
+    border: 0;
+    cursor: pointer;
+
+    background: linear-gradient(135deg, #00ff9d, #00c3ff, #00ff9d);
     box-shadow:
             0 18px 44px rgba(0,255,180,0.35),
             0 6px 18px rgba(0,0,0,0.35),
             inset 0 0 12px rgba(255,255,255,0.22);
+
+    font-weight: 900;
+    font-size: 20px;
+    color: #002f2a;
+
+    overflow: hidden;
+    transition: transform .14s ease, box-shadow .14s ease;
+    -webkit-tap-highlight-color: transparent;
 }
+.play-main-btn:hover{ transform: translateY(-2px) scale(1.01); }
 .play-main-btn:active{ transform: scale(0.985); }
 
-/* --- Actions section (buy coins + cashcup + roulette) --- */
-.menu-actions{
-    gap: 12px;
+.play-glow{
+    position: absolute;
+    inset: -40%;
+    background: radial-gradient(circle, rgba(255,255,255,0.33), transparent 60%);
+    animation: playGlowMove 3.5s linear infinite;
 }
-.buy-coins-card,
-.cashcup-card,
-.menu-card--gold{
-    border-radius: 22px;
-}
+@keyframes playGlowMove{ 0%{transform:translateX(-30%)} 100%{transform:translateX(30%)} }
 
-/* --- GRID: ровные красивые карточки --- */
+.play-shine{
+    position: absolute;
+    top: -60%;
+    left: -40%;
+    width: 40%;
+    height: 200%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.55), transparent);
+    transform: rotate(20deg);
+    animation: playShine 4s infinite;
+}
+@keyframes playShine{ 0%{left:-40%} 40%{left:140%} 100%{left:140%} }
+
+.play-icon{ font-size: 26px; filter: drop-shadow(0 0 6px rgba(255,255,255,0.65)); }
+.play-text{ position: relative; z-index: 1; letter-spacing: 1px; }
+
+/* ==========================================
+   BUY COINS CARD
+   ========================================== */
+
+.menu-actions{ display:flex; flex-direction:column; gap: 12px; margin-top: 16px; }
+
+.buy-coins-card{
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    padding: 18px 18px;
+    border-radius: 22px;
+
+    background: linear-gradient(135deg, #ffb703, #ff8c00, #ffb703);
+    box-shadow:
+            0 16px 40px rgba(255, 183, 3, 0.28),
+            inset 0 0 10px rgba(255,255,255,0.22);
+
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform .14s ease, box-shadow .14s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+.buy-coins-card:hover{ transform: translateY(-2px) scale(1.01); box-shadow: 0 20px 52px rgba(255,183,3,0.38); }
+.buy-coins-card:active{ transform: scale(0.985); }
+
+.buy-coins-glow{
+    position:absolute;
+    inset:-40%;
+    background: radial-gradient(circle, rgba(255,255,255,0.30), transparent 60%);
+    animation: glowMove 4s linear infinite;
+}
+@keyframes glowMove{ 0%{transform:translateX(-30%)} 100%{transform:translateX(30%)} }
+
+.buy-coins-icon{ font-size: 34px; filter: drop-shadow(0 0 6px rgba(255,255,255,0.65)); }
+
+.buy-coins-content{ position: relative; z-index: 1; }
+.buy-coins-title{ font-size: 18px; font-weight: 1000; color: #2b1600; }
+.buy-coins-subtitle{ font-size: 14px; font-weight: 800; color: #3a1e00; opacity: 0.95; }
+.buy-coins-note{ font-size: 12px; margin-top: 2px; color: #4a2600; opacity: 0.85; }
+
+/* ==========================================
+   MENU GRID (Premium)
+   ========================================== */
+
 .menu-grid{
+    display:grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
     margin-top: 10px;
 }
 
-/* универсальная карточка */
+/* universal menu card */
 .menu-card{
     position: relative;
     overflow: hidden;
+
+    border: 0;
     border-radius: 18px;
     padding: 14px 14px 12px;
-    min-height: 112px;
+    min-height: 116px;
+
+    text-align: left;
+    cursor: pointer;
+
+    display:flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 6px;
 
     background:
-            radial-gradient(120px 90px at 15% 10%, rgba(56,189,248,0.26), transparent 65%),
-            radial-gradient(140px 120px at 90% 110%, rgba(167,139,250,0.22), transparent 60%),
-            linear-gradient(180deg, rgba(17, 24, 39, 0.86), rgba(2, 6, 23, 0.92));
+            radial-gradient(120px 90px at 15% 10%, rgba(56,189,248,0.22), transparent 65%),
+            radial-gradient(140px 120px at 90% 110%, rgba(167,139,250,0.18), transparent 60%),
+            linear-gradient(180deg, rgba(17,24,39,0.86), rgba(2,6,23,0.92));
+
     border: 1px solid rgba(255,255,255,0.10);
 
     box-shadow:
@@ -1797,7 +501,7 @@ button {
     content:"";
     position:absolute;
     inset:-60%;
-    background: radial-gradient(circle, rgba(255,255,255,0.16), transparent 55%);
+    background: radial-gradient(circle, rgba(255,255,255,0.14), transparent 55%);
     transform: translateX(-25%);
     opacity: .55;
     pointer-events:none;
@@ -1812,7 +516,7 @@ button {
     height: 230%;
     background: linear-gradient(120deg, transparent, rgba(255,255,255,0.22), transparent);
     transform: rotate(18deg);
-    opacity: .0;
+    opacity: 0;
     pointer-events:none;
 }
 
@@ -1830,25 +534,27 @@ button {
     opacity: .8;
     animation: menuShine 650ms ease-out 1;
 }
-
 @keyframes menuShine{
-    0%{ left:-45%; opacity:.0; }
+    0%{ left:-45%; opacity:0; }
     20%{ opacity:.9; }
-    100%{ left:145%; opacity:.0; }
+    100%{ left:145%; opacity:0; }
 }
 
-/* иконка сверху */
+.menu-card--disabled{
+    cursor: default;
+    opacity: 0.6;
+    filter: saturate(0.7);
+}
+
+/* icon + text */
 .menu-icon{
     font-size: 30px;
     line-height: 1;
     filter: drop-shadow(0 10px 18px rgba(0,0,0,0.55));
 }
-
-/* текст */
 .menu-card-title{
-    margin-top: 6px;
     font-size: 14px;
-    font-weight: 900;
+    font-weight: 1000;
     color: rgba(255,255,255,0.95);
     letter-spacing: .2px;
 }
@@ -1858,34 +564,68 @@ button {
     line-height: 1.25;
 }
 
-/* --- усиление “важных” карточек отдельными классами (по желанию) --- */
-/* Если хочешь: добавь className="menu-card menu-card--wallet" и т.п. */
+/* optional per-card accents (if you add these classes) */
 .menu-card--wallet{
     background:
-            radial-gradient(140px 100px at 20% 10%, rgba(34,197,94,0.22), transparent 70%),
-            linear-gradient(180deg, rgba(17,24,39,0.88), rgba(2,6,23,0.92));
+            radial-gradient(150px 110px at 15% 10%, rgba(34,197,94,0.20), transparent 70%),
+            linear-gradient(180deg, rgba(17,24,39,0.86), rgba(2,6,23,0.92));
 }
 .menu-card--quests{
     background:
-            radial-gradient(140px 100px at 20% 10%, rgba(59,130,246,0.22), transparent 70%),
-            linear-gradient(180deg, rgba(17,24,39,0.88), rgba(2,6,23,0.92));
+            radial-gradient(150px 110px at 15% 10%, rgba(59,130,246,0.20), transparent 70%),
+            linear-gradient(180deg, rgba(17,24,39,0.86), rgba(2,6,23,0.92));
 }
-.menu-card--tournaments{
+.menu-card--game{
     background:
-            radial-gradient(160px 120px at 20% 10%, rgba(245,158,11,0.22), transparent 70%),
-            linear-gradient(180deg, rgba(17,24,39,0.88), rgba(2,6,23,0.92));
+            radial-gradient(150px 110px at 15% 10%, rgba(168,85,247,0.20), transparent 70%),
+            linear-gradient(180deg, rgba(17,24,39,0.86), rgba(2,6,23,0.92));
+}
+.menu-card--crush{
+    background:
+            radial-gradient(150px 110px at 15% 10%, rgba(236,72,153,0.22), transparent 70%),
+            linear-gradient(180deg, rgba(17,24,39,0.86), rgba(2,6,23,0.92));
+}
+.menu-card--invite{
+    background:
+            radial-gradient(150px 110px at 15% 10%, rgba(14,165,233,0.22), transparent 70%),
+            linear-gradient(180deg, rgba(17,24,39,0.86), rgba(2,6,23,0.92));
+}
+.menu-card--leaderboard{
+    background:
+            radial-gradient(170px 130px at 15% 10%, rgba(250,204,21,0.22), transparent 70%),
+            linear-gradient(180deg, rgba(17,24,39,0.86), rgba(2,6,23,0.92));
 }
 
-/* --- Buttons (menu-btn) сделать как “glass pill” --- */
+/* ==========================================
+   MENU BUTTONS
+   ========================================== */
+
 .menu-btn{
+    width: 100%;
+    padding: 14px 16px;
     border-radius: 18px;
-    height: 52px;
+    border: 0;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #f9fafb;
+    font-size: 16px;
     font-weight: 900;
-    letter-spacing: .3px;
+    margin-bottom: 10px;
+    cursor: pointer;
+
     box-shadow:
             0 14px 34px rgba(79,70,229,0.35),
             inset 0 0 0 1px rgba(255,255,255,0.08);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap: 8px;
+
+    transition: transform .10s ease, box-shadow .10s ease, opacity .15s ease;
+    -webkit-tap-highlight-color: transparent;
 }
+.menu-btn:active{ transform: translateY(1px) scale(0.99); }
+
 .menu-btn--secondary{
     background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
     border: 1px solid rgba(255,255,255,0.10);
@@ -1894,7 +634,581 @@ button {
             inset 0 0 0 1px rgba(255,255,255,0.04);
 }
 
-/* --- стабилизация layout в TG (особенно iOS) --- */
-.app-shell{
-    padding-bottom: calc(env(safe-area-inset-bottom) + 140px);
+/* ==========================================
+   LEADERBOARD
+   ========================================== */
+
+.leaderboard-container{
+    margin-top: 10px;
+    padding: 16px;
+    border-radius: 20px;
+    background: rgba(10, 15, 30, 0.82);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 18px 55px rgba(0,0,0,0.45);
 }
+.leaderboard-title{ font-size: 20px; font-weight: 900; margin-bottom: 12px; }
+
+.leaderboard-big-list{
+    display:flex;
+    flex-direction:column;
+    gap: 12px;
+    max-height: 420px;
+    overflow-y: auto;
+}
+
+.leaderboard-card{
+    display:flex;
+    align-items:center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: rgba(17, 24, 39, 0.78);
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: transform .14s ease, background .14s ease;
+}
+.leaderboard-card:hover{ transform: translateY(-2px); background: rgba(17,24,39,0.88); }
+
+.lb-place{ width: 32px; font-size: 16px; font-weight: 900; text-align:center; color: #a3bafd; }
+.lb-place-1{ color:#ffdd55; font-size: 20px; }
+.lb-place-2{ color:#c0c0c0; font-size: 20px; }
+.lb-place-3{ color:#cd7f32; font-size: 20px; }
+
+.lb-avatar{
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 0%, #facc15, #f97316);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size: 22px;
+}
+.lb-name{ flex: 1; font-size: 15px; font-weight: 800; }
+.lb-score{ font-size: 16px; font-weight: 1000; color:#4ade80; }
+
+/* ==========================================
+   DAILY / SHOP (kept close to your styles)
+   ========================================== */
+
+.daily-list{ display:flex; flex-direction:column; gap: 8px; margin-top: 6px; }
+
+.daily-item{
+    border-radius: 12px;
+    padding: 8px 10px 10px;
+    background: rgba(17, 24, 39, 0.72);
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.daily-row{ display:flex; justify-content:space-between; font-size: 12px; }
+.daily-progress-text{ color: rgba(255,255,255,0.55); }
+
+.daily-bar{
+    position: relative;
+    margin-top: 6px;
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.06);
+    overflow: hidden;
+}
+.daily-bar-fill{
+    position:absolute;
+    inset:0;
+    transform-origin: left center;
+    transform: scaleX(0);
+    background: linear-gradient(90deg, #22c55e, #facc15, #f97316);
+    transition: transform 0.2s ease-out;
+}
+.daily-footer{ margin-top: 8px; display:flex; justify-content:space-between; font-size: 11px; }
+.daily-reward{ color: #a5b4fc; }
+
+.daily-claim-btn{
+    border: 0;
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #ecfdf5;
+    box-shadow: 0 8px 16px rgba(22,163,74,0.22);
+}
+
+.daily-badge{
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    background: rgba(34,197,94,0.12);
+    color: rgba(187,247,208,0.95);
+    border: 1px solid rgba(34,197,94,0.18);
+}
+.daily-badge--grey{
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.75);
+}
+
+.shop-list{ display:flex; flex-direction:column; gap: 8px; margin-top: 6px; }
+
+.shop-item{
+    border-radius: 12px;
+    padding: 8px 10px;
+    background: rgba(17, 24, 39, 0.72);
+    border: 1px solid rgba(255,255,255,0.08);
+    font-size: 12px;
+}
+.shop-row{ display:flex; justify-content:space-between; align-items:center; margin-top: 4px; }
+.shop-level{ color: rgba(255,255,255,0.55); }
+.shop-price{ color:#eab308; }
+
+.shop-buy-btn{
+    border: 0;
+    border-radius: 999px;
+    padding: 8px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #ecfdf5;
+    box-shadow: 0 10px 22px rgba(22,163,74,0.22);
+}
+.shop-buy-btn:disabled{ opacity: .5; cursor: default; box-shadow:none; }
+
+/* ==========================================
+   REWARD POPUP
+   ========================================== */
+
+.reward-overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.62);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index: 50;
+    backdrop-filter: blur(10px);
+}
+.reward-card{
+    width: 280px;
+    border-radius: 20px;
+    padding: 16px 14px 14px;
+    background: radial-gradient(circle at top, rgba(56,189,248,0.35), rgba(10,15,30,0.95));
+    border: 1px solid rgba(59,130,246,0.22);
+    box-shadow: 0 24px 70px rgba(0,0,0,0.65);
+    text-align:center;
+}
+.reward-emoji{ font-size: 40px; }
+.reward-title{ margin-top: 6px; font-size: 18px; font-weight: 900; }
+.reward-text{ margin-top: 4px; font-size: 13px; color: rgba(255,255,255,0.80); }
+.reward-level{ margin-top: 6px; font-size: 12px; color: rgba(191,219,254,0.95); }
+.reward-btn{
+    margin-top: 10px;
+    border: 0;
+    border-radius: 999px;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: 900;
+    cursor: pointer;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #ecfdf5;
+    box-shadow: 0 16px 32px rgba(22,163,74,0.22);
+}
+
+/* ==========================================
+   SHOP POPUP
+   ========================================== */
+
+.shop-overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index: 999999;
+    backdrop-filter: blur(10px);
+}
+.shop-popup{
+    background: rgba(10, 15, 30, 0.95);
+    padding: 22px;
+    width: 80%;
+    max-width: 380px;
+    border-radius: 18px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.10);
+    box-shadow: 0 24px 70px rgba(0,0,0,0.65);
+}
+
+/* ==========================================
+   SPLASH
+   ========================================== */
+
+.splash-root{
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at top, #2b1338 0, #050510 55%, #000 100%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 24px;
+}
+.splash-inner{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap: 16px;
+    max-width: 320px;
+    width: 100%;
+    text-align:center;
+    color:#fff;
+}
+.splash-logo-circle{
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    overflow:hidden;
+    background: radial-gradient(circle at 30% 10%, #ffdd66, #ff7a3c 45%, #7b1fa2 100%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow: 0 0 30px rgba(255,122,60,0.8), 0 0 80px rgba(123,31,162,0.6);
+}
+.splash-logo-img{
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.splash-title{
+    font-size: 26px;
+    font-weight: 1000;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin: 0;
+}
+.splash-subtitle{
+    font-size: 14px;
+    opacity: .8;
+    margin: 0 0 8px;
+}
+.splash-bar{
+    width: 100%;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.08);
+    overflow:hidden;
+    position: relative;
+}
+.splash-bar-fill{
+    position:absolute;
+    inset:0;
+    transform-origin: left center;
+    animation: splash-loading 1.4s infinite ease-in-out;
+}
+.splash-bar-fill::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background: linear-gradient(90deg, #ffeb3b, #ff9800, #ff5722);
+}
+@keyframes splash-loading{
+    0%{ transform: scaleX(0.1); }
+    40%{ transform: scaleX(0.7); }
+    80%{ transform: scaleX(1); }
+    100%{ transform: scaleX(1); }
+}
+
+/* ==========================================
+   HERO FLOAT + MODAL
+   ========================================== */
+
+.hero-floating-bar{
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+
+    display:flex;
+    align-items:center;
+    gap: 10px;
+
+    padding: 10px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(10, 15, 30, 0.70);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 18px 44px rgba(0,0,0,0.55);
+
+    color:#fff;
+    cursor:pointer;
+    outline:none;
+    -webkit-tap-highlight-color: transparent;
+}
+.hero-floating-bar:active{ transform: translateX(-50%) scale(0.985); }
+
+.hero-floating-avatar{
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: rgba(255,255,255,0.10);
+    font-size: 20px;
+}
+
+.hero-floating-info{ display:flex; flex-direction:column; align-items:flex-start; }
+.hero-floating-name{ font-size: 13px; font-weight: 900; }
+.hero-floating-meta{ font-size: 11px; opacity: .78; }
+
+.hero-modal-overlay{
+    position: fixed;
+    inset: 0;
+    z-index: 1001;
+    background: rgba(0,0,0,0.65);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.hero-modal-card{
+    background: radial-gradient(circle at top, #1b1634, #050816);
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    padding: 16px;
+    display:flex;
+    flex-direction:column;
+}
+.hero-3d-wrapper{
+    flex: 1;
+    width: 100%;
+    border-radius: 16px;
+    overflow:hidden;
+}
+.hero-modal-close{
+    margin-top: 12px;
+    width: 100%;
+    border-radius: 999px;
+    border: 0;
+    padding: 12px 0;
+    font-size: 14px;
+    font-weight: 900;
+    background: linear-gradient(90deg, #ff8a3c, #ff4b7d);
+    color:#fff;
+    cursor:pointer;
+}
+
+/* ==========================================
+   TOURNAMENT / CASHCUP (keep compatible)
+   ========================================== */
+
+.tournament-page{ display:grid; gap: 14px; }
+
+.tournament-card{
+    background: rgba(10, 15, 30, 0.78);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 18px;
+    padding: 14px;
+    color:#fff;
+    box-shadow: var(--shadow2);
+}
+
+.tournament-card.error{ color:#f87171; border-color: rgba(248,113,113,0.22); }
+
+.tc-row{ display:flex; justify-content:space-between; margin-bottom: 6px; }
+.tc-timer{ margin: 10px 0; font-weight: 900; text-align:center; }
+.tc-actions{ margin-top: 10px; }
+
+.tc-btn{
+    width: 100%;
+    padding: 12px;
+    border-radius: 14px;
+    border: 0;
+    font-weight: 1000;
+    cursor:pointer;
+}
+.tc-btn.join{ background: linear-gradient(135deg, #22c55e, #16a34a); color:#00180d; }
+.tc-btn.play{ background: linear-gradient(135deg, #3b82f6, #2563eb); color:#fff; }
+
+/* Cashcup card (yours but polished) */
+.cashcup-card{
+    position: relative;
+    border-radius: 22px;
+    padding: 18px;
+    background: linear-gradient(135deg, #1a0f00, #3b1f00);
+    color:#fff;
+    cursor:pointer;
+    overflow:hidden;
+    box-shadow:
+            0 0 30px rgba(255,170,0,0.22),
+            inset 0 0 20px rgba(255,200,50,0.12);
+    transition: transform .18s ease, box-shadow .18s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+.cashcup-card:hover{
+    transform: scale(1.02);
+    box-shadow:
+            0 0 45px rgba(255,180,0,0.45),
+            inset 0 0 25px rgba(255,220,120,0.22);
+}
+.cashcup-card:active{ transform: scale(0.985); }
+
+.cashcup-glow{
+    position:absolute;
+    inset:-40%;
+    background: radial-gradient(circle, rgba(255,200,80,0.30), transparent 60%);
+    animation: cashcupPulse 2.5s infinite;
+    pointer-events:none;
+}
+@keyframes cashcupPulse{
+    0%{opacity:.35; transform:scale(.92)}
+    50%{opacity:.85; transform:scale(1.08)}
+    100%{opacity:.35; transform:scale(.92)}
+}
+
+.cashcup-header{ display:flex; justify-content:space-between; align-items:center; }
+.cashcup-badge{
+    background:#ff3b30;
+    color:#fff;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-weight: 1000;
+    box-shadow: 0 0 10px rgba(255,60,60,0.55);
+}
+.cashcup-title{ font-size: 20px; font-weight: 1000; letter-spacing: 1px; }
+
+.cashcup-body{ margin-top: 14px; }
+.cashcup-prize{ font-size: 13px; opacity: .8; }
+.cashcup-amount{
+    font-size: 22px;
+    font-weight: 1000;
+    color: #00ff9c;
+    text-shadow: 0 0 10px rgba(0,255,160,0.55), 0 0 20px rgba(0,255,160,0.25);
+}
+.cashcup-info{ margin-top: 10px; font-size: 13px; opacity: .9; line-height: 1.4; }
+.cashcup-footer{
+    margin-top: 14px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    text-align:right;
+    font-weight: 900;
+    color: #ffcf4a;
+}
+
+/* ==========================================
+   EVENT AD
+   ========================================== */
+
+.event-ad-overlay{
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 18px;
+    background: rgba(0,0,0,0.72);
+    backdrop-filter: blur(10px);
+}
+
+.event-ad-card{
+    width: min(420px, 100%);
+    border-radius: 18px;
+    padding: 16px 16px 14px;
+    position: relative;
+    overflow:hidden;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(18,18,22,0.92);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+}
+
+.event-ad-card::before{
+    content:"";
+    position:absolute;
+    inset:-120px -120px auto auto;
+    width: 280px;
+    height: 280px;
+    background: radial-gradient(circle, rgba(255,196,0,0.35), transparent 70%);
+    transform: rotate(25deg);
+    pointer-events:none;
+}
+
+.event-ad-close{
+    position:absolute;
+    right: 10px;
+    top: 10px;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.06);
+    color:#fff;
+}
+
+.event-ad-badge{
+    display:inline-flex;
+    align-items:center;
+    gap: 8px;
+    font-weight: 1000;
+    font-size: 12px;
+    letter-spacing: .6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(255,196,0,0.14);
+    border: 1px solid rgba(255,196,0,0.22);
+    margin-bottom: 10px;
+}
+
+.event-ad-title{
+    color:#fff;
+    font-size: 18px;
+    font-weight: 1000;
+    line-height: 1.2;
+    margin-bottom: 10px;
+}
+.event-ad-sub{
+    color: rgba(255,255,255,0.86);
+    font-size: 14px;
+    line-height: 1.35;
+    margin-bottom: 14px;
+}
+.event-ad-actions{ display:flex; gap: 10px; }
+.event-ad-btn{
+    flex: 1;
+    height: 44px;
+    border-radius: 12px;
+    font-weight: 1000;
+    border: 1px solid rgba(255,255,255,0.12);
+}
+.event-ad-btn--primary{
+    color:#111;
+    background: linear-gradient(135deg, #ffd24a, #ffb300);
+    border: 0;
+}
+.event-ad-btn--ghost{
+    color:#fff;
+    background: rgba(255,255,255,0.06);
+}
+.event-ad-foot{
+    margin-top: 10px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.55);
+}
+
+/* ==========================================
+   FOOTER
+   ========================================== */
+
+.app-footer{
+    margin-top: 4px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    display:flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: rgba(255,255,255,0.45);
+}
+
+/* global */
+button{ font-family: inherit; }
