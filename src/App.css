@@ -21,7 +21,7 @@
 
     --shadow1: 0 24px 70px rgba(0,0,0,0.55);
     --shadow2: 0 14px 30px rgba(0,0,0,0.45);
-    --header-offset: 100px;  /* насколько спустить header вниз */
+    --header-offset: 250px;  /* насколько спустить header вниз */
     --header-height: 200px; /* текущая высота header (у тебя в patch = 200px) */
 }
 
