@@ -59,6 +59,7 @@ export function BottomNav({
 
             <div className="bottomnav-inner">
                 <button
+                    data-key="shop"
                     className={`bn-item ${active === 'shop' ? 'is-active' : ''}`}
                     onClick={() => {
                         tapSoft()
@@ -74,6 +75,7 @@ export function BottomNav({
                 </button>
 
                 <button
+                    data-key="quests"
                     className={`bn-item ${active === 'quests' ? 'is-active' : ''}`}
                     onClick={() => {
                         tapSoft()
@@ -93,6 +95,7 @@ export function BottomNav({
                 </button>
 
                 <button
+                    data-key="farm"
                     className={`bn-center ${active === 'farm' ? 'is-active' : ''}`}
                     onClick={() => {
                         tapLight()
@@ -107,6 +110,7 @@ export function BottomNav({
                 </button>
 
                 <button
+                    data-key="friends"
                     className={`bn-item ${active === 'friends' ? 'is-active' : ''}`}
                     onClick={() => {
                         tapSoft()
@@ -122,6 +126,7 @@ export function BottomNav({
                 </button>
 
                 <button
+                    data-key="tournaments"
                     className={`bn-item ${active === 'tournaments' ? 'is-active' : ''}`}
                     onClick={() => {
                         tapSoft()
