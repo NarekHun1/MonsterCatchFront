@@ -7,7 +7,7 @@ import FriendsIcon from './assets/icons/friends.svg?react'
 import TournamentIcon from './assets/icons/leaders.svg?react'
 import QuestsIcon from './assets/icons/tasks.svg?react'
 
-type NavKey = 'shop' | 'quests' | 'monster' | 'friends' | 'tournaments'
+export type NavKey = 'shop' | 'quests' | 'farm' | 'monster' | 'friends' | 'tournaments'
 
 interface Props {
     active: NavKey

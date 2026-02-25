@@ -1356,22 +1356,26 @@
                     {!error && (
                         <BottomNav
                             active={
-                                currentPage === 'tournament' ? 'tournaments'
-                                    : currentPage === 'invite' ? 'friends'
-                                        : currentPage === 'quests' ? 'quests'
-                                            : currentPage === 'monsters' ? 'farm'
+                                currentPage === 'tournament'
+                                    ? 'tournaments'
+                                    : currentPage === 'invite'
+                                        ? 'friends'
+                                        : currentPage === 'quests'
+                                            ? 'quests'
+                                            : currentPage === 'monsters'
+                                                ? 'monster'
                                                 : 'shop'
                             }
                             questsDot={questsDot}
                             eggsBadge={0}
                             onShop={() => setCurrentPage('market')}
                             onQuests={async () => {
-                                await refreshQuestsDot();
-                                setCurrentPage('quests');
+                                await refreshQuestsDot()
+                                setCurrentPage('quests')
                             }}
-                            onFarm={() => {
-                                setCurrentPage('monsters'); // ✅ Monster Farm
-                                setShowHero(false);         // на всякий (если было открыто)
+                            onMonster={() => {
+                                setCurrentPage('monsters') // ✅ Monster Farm page
+                                setShowHero(false) // на всякий (если было открыто)
                             }}
                             onFriends={() => setCurrentPage('invite')}
                             onTournaments={() => setCurrentPage('tournament')}
