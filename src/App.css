@@ -1399,3 +1399,27 @@ button{ font-family: inherit; }
 .chip-title{
     padding-top: 2px;
 }
+/* ==========================================
+   TG TOP BAR FIX (без сдвига контента)
+   Хедер растёт ВВЕРХ (top отрицательный),
+   а контент внутри опускаем padding-top.
+   Низ хедера остаётся на том же месте.
+   ========================================== */
+
+:root{
+    --tg-topbar: 56px; /* если надо: 52/60 */
+    --header-h: 200px; /* твой текущий header height из патча */
+}
+
+/* растягиваем header вверх, не меняя его нижнюю границу */
+.app-header{
+    top: calc(var(--tg-topbar) * -1) !important;
+    height: calc(var(--header-h) + var(--tg-topbar)) !important;
+
+    /* опускаем внутренности вниз */
+    padding-top: calc(14px + var(--tg-topbar)) !important;
+
+    /* остальные твои стили хедера оставляем как есть */
+}
+
+/* ВАЖНО: app-shell НЕ трогаем — остаётся как было */
