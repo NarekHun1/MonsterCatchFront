@@ -2,12 +2,12 @@ import { useMemo } from 'react'
 import './BottomNav.css'
 
 import ShopIcon from './assets/icons/shop.svg?react'
-import FarmIcon from './assets/icons/farm.svg?react'
+import MonsterIcon from './assets/icons/farm.svg?react' // можешь заменить на monster.svg
 import FriendsIcon from './assets/icons/friends.svg?react'
 import TournamentIcon from './assets/icons/leaders.svg?react'
 import QuestsIcon from './assets/icons/tasks.svg?react'
 
-type NavKey = 'shop' | 'quests' | 'farm' | 'friends' | 'tournaments'
+type NavKey = 'shop' | 'quests' | 'monster' | 'friends' | 'tournaments'
 
 interface Props {
     active: NavKey
@@ -15,7 +15,7 @@ interface Props {
     questsDot?: boolean
     onShop: () => void
     onQuests: () => void
-    onFarm: () => void
+    onMonster: () => void
     onFriends: () => void
     onTournaments: () => void
 }
@@ -36,16 +36,15 @@ export function BottomNav({
                               questsDot,
                               onShop,
                               onQuests,
-                              onFarm,
+                              onMonster,
                               onFriends,
                               onTournaments,
                           }: Props) {
-    // particles count is small => cheap on mobile
     const particles = useMemo(() => Array.from({ length: 10 }, (_, i) => i), [])
 
     return (
         <nav className="bottomnav" role="navigation" aria-label="Bottom navigation">
-            {/* background FX layer */}
+            {/* FX */}
             <div className="bn-fx" aria-hidden="true">
                 <div className="bn-glass" />
                 <div className="bn-scanline" />
@@ -58,6 +57,7 @@ export function BottomNav({
             </div>
 
             <div className="bottomnav-inner">
+                {/* РЫНОК */}
                 <button
                     data-key="shop"
                     className={`bn-item ${active === 'shop' ? 'is-active' : ''}`}
@@ -66,14 +66,14 @@ export function BottomNav({
                         onShop()
                     }}
                     type="button"
-                    aria-current={active === 'shop' ? 'page' : undefined}
                 >
                     <div className="bn-ico">
                         <ShopIcon className="bn-svg" />
                     </div>
-                    <div className="bn-txt">РЫНОК</div>
+                    <div className="bn-txt">Рынок</div>
                 </button>
 
+                {/* ЗАДАНИЯ */}
                 <button
                     data-key="quests"
                     className={`bn-item ${active === 'quests' ? 'is-active' : ''}`}
@@ -82,7 +82,6 @@ export function BottomNav({
                         onQuests()
                     }}
                     type="button"
-                    aria-current={active === 'quests' ? 'page' : undefined}
                 >
                     <div className="bn-ico bn-ico--eggs">
                         <QuestsIcon className="bn-svg" />
@@ -91,24 +90,25 @@ export function BottomNav({
                             <span className="bn-badge">{eggsBadge > 99 ? '99+' : eggsBadge}</span>
                         )}
                     </div>
-                    <div className="bn-txt">ЗАДАНИЯ</div>
+                    <div className="bn-txt">Задания</div>
                 </button>
 
+                {/* 🔥 MONSTER CENTER */}
                 <button
-                    data-key="farm"
-                    className={`bn-center ${active === 'farm' ? 'is-active' : ''}`}
+                    data-key="monster"
+                    className={`bn-center ${active === 'monster' ? 'is-active' : ''}`}
                     onClick={() => {
                         tapLight()
-                        onFarm()
+                        onMonster()
                     }}
                     type="button"
-                    aria-current={active === 'farm' ? 'page' : undefined}
                 >
                     <span className="bn-center-ring" aria-hidden="true" />
-                    <FarmIcon className="bn-center-svg" />
-                    <div className="bn-center-txt">FARM</div>
+                    <MonsterIcon className="bn-center-svg" />
+                    <div className="bn-center-txt">MONSTER</div>
                 </button>
 
+                {/* ДРУЗЬЯ */}
                 <button
                     data-key="friends"
                     className={`bn-item ${active === 'friends' ? 'is-active' : ''}`}
@@ -117,14 +117,14 @@ export function BottomNav({
                         onFriends()
                     }}
                     type="button"
-                    aria-current={active === 'friends' ? 'page' : undefined}
                 >
                     <div className="bn-ico">
                         <FriendsIcon className="bn-svg" />
                     </div>
-                    <div className="bn-txt">ДРУЗЬЯ</div>
+                    <div className="bn-txt">Друзья</div>
                 </button>
 
+                {/* ТУРНИРЫ */}
                 <button
                     data-key="tournaments"
                     className={`bn-item ${active === 'tournaments' ? 'is-active' : ''}`}
@@ -133,12 +133,11 @@ export function BottomNav({
                         onTournaments()
                     }}
                     type="button"
-                    aria-current={active === 'tournaments' ? 'page' : undefined}
                 >
                     <div className="bn-ico">
                         <TournamentIcon className="bn-svg" />
                     </div>
-                    <div className="bn-txt">ТУРНИРЫ</div>
+                    <div className="bn-txt">Турниры</div>
                 </button>
             </div>
         </nav>
