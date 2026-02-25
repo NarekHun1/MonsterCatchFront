@@ -1407,7 +1407,7 @@ button{ font-family: inherit; }
    ========================================== */
 
 :root{
-    --tg-topbar: 56px; /* если надо: 52/60 */
+    --tg-topbar: 28px; /* если надо: 52/60 */
     --header-h: 200px; /* твой текущий header height из патча */
 }
 
