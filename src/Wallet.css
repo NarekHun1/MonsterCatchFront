@@ -324,3 +324,67 @@
     font-weight: 700;
     margin-left: 6px;
 }
+/* ==========================================
+   FULLSCREEN SHINE (Splash)
+   добавь в самый низ App.css
+   ========================================== */
+
+/* усиливаем фон и даём “живой” слой */
+.splash-root{
+    overflow: hidden;
+}
+
+/* большой мягкий свет */
+.splash-root::before{
+    content:"";
+    position: absolute;
+    inset: -35%;
+    background:
+            radial-gradient(circle at 30% 10%, rgba(0,255,180,0.22), transparent 55%),
+            radial-gradient(circle at 80% 80%, rgba(124,58,237,0.18), transparent 58%),
+            radial-gradient(circle at 60% 30%, rgba(56,189,248,0.14), transparent 60%);
+    filter: blur(10px);
+    animation: splashAurora 6s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes splashAurora{
+    0%{ transform: translate3d(-2%, -1%, 0) scale(1); opacity:.85; }
+    50%{ transform: translate3d(2%, 1%, 0) scale(1.05); opacity:1; }
+    100%{ transform: translate3d(-2%, -1%, 0) scale(1); opacity:.85; }
+}
+
+/* тот самый “SHINE” как блик — на весь экран */
+.splash-root::after{
+    content:"";
+    position: absolute;
+    top: -70%;
+    left: -60%;
+    width: 55%;
+    height: 220%;
+    background: linear-gradient(
+            120deg,
+            transparent,
+            rgba(255,255,255,0.22),
+            rgba(255,255,255,0.10),
+            transparent
+    );
+    transform: rotate(18deg);
+    animation: splashShine 2.8s ease-in-out infinite;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    opacity: .9;
+}
+
+@keyframes splashShine{
+    0%{ left: -70%; opacity: 0; }
+    15%{ opacity: .9; }
+    50%{ left: 140%; opacity: .55; }
+    100%{ left: 140%; opacity: 0; }
+}
+
+/* чтобы контент всегда был сверху */
+.splash-inner{
+    position: relative;
+    z-index: 2;
+}
