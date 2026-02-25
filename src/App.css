@@ -1413,13 +1413,9 @@ button{ font-family: inherit; }
 
 /* растягиваем header вверх, не меняя его нижнюю границу */
 .app-header{
-    top: calc(var(--tg-topbar) * -1) !important;
-    height: calc(var(--header-h) + var(--tg-topbar)) !important;
-
-    /* опускаем внутренности вниз */
-    padding-top: calc(14px + var(--tg-topbar)) !important;
-
-    /* остальные твои стили хедера оставляем как есть */
+    top: 0 !important;
+    padding-top: calc(14px + env(safe-area-inset-top)) !important;
 }
+
 
 /* ВАЖНО: app-shell НЕ трогаем — остаётся как было */
