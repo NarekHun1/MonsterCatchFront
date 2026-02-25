@@ -106,7 +106,7 @@
 
 /* icon wrapper */
 .bn-ico{
-    height:22px;
+    height:26px;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -132,8 +132,8 @@
    ========================================= */
 
 .bn-svg{
-    width:22px;
-    height:22px;
+    width:26px;
+    height:26px;
     display:block;
 
     color: rgba(255,255,255,0.90);
@@ -256,8 +256,8 @@
 }
 
 .bn-center-svg{
-    width:24px;
-    height:24px;
+    width:30px;
+    height:30px;
     display:block;
 
     color: var(--bn-neon);
@@ -268,7 +268,15 @@
 
     transition: transform .18s ease, filter .18s ease;
 }
-
+/* 🔥 принудительно красим пути/линии */
+.bn-svg *{
+    fill: currentColor !important;
+    stroke: currentColor !important;
+}
+.bn-center-svg *{
+    fill: currentColor !important;
+    stroke: currentColor !important;
+}
 .bn-center-txt{
     font-size:9.5px;
     font-weight:800; /* было 900 */
