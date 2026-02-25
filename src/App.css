@@ -1564,7 +1564,7 @@ button{ font-family: inherit; }
     --shell-gap: 16px;
 
     --bottomnav-height: 84px;  /* высота BottomNav */
-    --content-push: 26px;      /* ⬅️ ВЕСЬ САЙТ НИЖЕ */
+    --content-push: 30px;      /* ⬅️ ВЕСЬ САЙТ НИЖЕ */
 }
 
 /* header - fixed, correct in Telegram iOS */
