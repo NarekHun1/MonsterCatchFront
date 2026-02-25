@@ -1,345 +1,204 @@
 /* =========================================
-   PREMIUM GAME BOTTOM NAV (FINAL WORKING)
-   - 5 items always fit (repeat(5, minmax(0, 1fr)))
-   - center slightly emphasized but not wider
-   - SVG always visible (currentColor force)
-   - labels auto-hide on narrow screens
+   MONSTER CATCH – FULL WIDTH NEON NAV
+   - full width
+   - big icons
+   - strong glow
+   - center dominant
    ========================================= */
 
 :root{
-    --bn-bg: rgba(14,14,18,0.88);
-    --bn-border: rgba(255,255,255,0.10);
-
-    --bn-item-bg: rgba(255,255,255,0.045);
-    --bn-item-border: rgba(255,255,255,0.07);
-
-    --bn-text: rgba(255,255,255,0.82);
-    --bn-neon: #ADFF00;
+    --neon:#ADFF00;
 }
 
-/* wrapper */
+/* WRAPPER */
 .bottomnav{
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-
-    z-index: 9999;
-    pointer-events: none;
-
-    padding: 0 12px calc(env(safe-area-inset-bottom) + 10px) 12px;
-}
-
-/* мягкий fade */
-.bottomnav::before{
-    content:"";
-    position:absolute;
+    position:fixed;
     left:0;
     right:0;
     bottom:0;
-    height:72px;
+    z-index:9999;
     pointer-events:none;
-    opacity:.55;
-    background: linear-gradient(
-            to top,
-            rgba(0,0,0,0.62),
-            rgba(0,0,0,0.22) 55%,
-            rgba(0,0,0,0.0)
-    );
 }
 
-/* BAR */
+/* FULL WIDTH BAR */
 .bottomnav-inner{
     pointer-events:auto;
 
-    height:58px;
     width:100%;
+    height:82px; /* 🔥 выше */
+    padding:14px 10px calc(env(safe-area-inset-bottom) + 12px);
 
-    display:grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr)); /* 🔥 всегда 5 */
+    display:flex;
+    justify-content:space-around;
     align-items:center;
 
-    gap:6px;
-    padding:8px 6px;
+    background:
+            linear-gradient(180deg,
+            rgba(20,20,28,0.95),
+            rgba(10,10,15,0.98)
+            );
 
-    background: var(--bn-bg);
-    border: 1px solid var(--bn-border);
-    border-radius: 18px;
+    border-top:1px solid rgba(255,255,255,0.08);
 
-    backdrop-filter: blur(16px);
     box-shadow:
-            0 14px 36px rgba(0,0,0,0.55),
+            0 -15px 40px rgba(0,0,0,0.8),
             inset 0 1px 0 rgba(255,255,255,0.05);
 }
 
 /* =========================================
-   ITEMS
+   COMMON ITEM
    ========================================= */
 
 .bn-item,
 .bn-center{
-    min-width:0; /* 🔥 важно для grid */
-}
-
-.bn-item{
-    height:46px;
-    border-radius:14px;
+    flex:1;
+    max-width:20%;
+    height:64px;
 
     display:flex;
     flex-direction:column;
     align-items:center;
     justify-content:center;
-    gap:3px;
+    gap:6px;
 
-    background: var(--bn-item-bg);
-    border: 1px solid var(--bn-item-border);
-
-    color: var(--bn-text);
+    background:transparent;
+    border:none;
     cursor:pointer;
-
-    user-select:none;
-    -webkit-tap-highlight-color:transparent;
-
-    transition:
-            transform .12s ease,
-            background .18s ease,
-            color .18s ease,
-            border-color .18s ease,
-            box-shadow .18s ease;
-}
-
-.bn-item:active{ transform: scale(0.985); }
-
-/* icon wrapper */
-.bn-ico{
-    height:26px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
     position:relative;
+    color:#ffffffcc;
+
+    transition:all .2s ease;
 }
 
-/* label */
+/* BIG ICONS */
+.bn-svg{
+    width:34px;   /* 🔥 БОЛЬШЕ */
+    height:34px;
+    display:block;
+
+    filter:drop-shadow(0 0 10px rgba(0,0,0,.6));
+    transition:.2s ease;
+}
+
+/* Force SVG color */
+.bn-svg *,
+.bn-center-svg *{
+    fill:currentColor !important;
+    stroke:currentColor !important;
+}
+
+/* LABEL */
 .bn-txt{
-    font-size:9.5px;
-    line-height:1;
+    font-size:12px;
     font-weight:700;
-    letter-spacing:0.02em;
-
-    max-width:100%;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-
-    opacity:0.90;
+    letter-spacing:.03em;
 }
 
 /* =========================================
-   SVG ICONS
+   ACTIVE STATE
    ========================================= */
 
-.bn-svg{
-    width:26px;
-    height:26px;
-    display:block;
-
-    color: rgba(255,255,255,0.92);
-    filter: drop-shadow(0 0 8px rgba(0,0,0,0.45));
-    transition: all .18s ease;
-}
-
-/* 🔥 принудительно красим пути/линии (чтобы не исчезали) */
-.bn-svg *,
-.bn-center-svg *{
-    fill: currentColor !important;
-    stroke: currentColor !important;
-}
-
-/* ACTIVE */
 .bn-item.is-active{
-    background: rgba(173,255,0,0.10);
-    border-color: rgba(173,255,0,0.22);
-    box-shadow: inset 0 0 0 1px rgba(173,255,0,0.08);
+    color:var(--neon);
 }
 
 .bn-item.is-active .bn-svg{
-    color: var(--bn-neon);
-    filter: drop-shadow(0 0 10px rgba(173,255,0,0.55));
-}
-
-.bn-item.is-active .bn-txt{
-    color: rgba(255,255,255,0.92);
+    filter:
+            drop-shadow(0 0 12px var(--neon))
+            drop-shadow(0 0 22px rgba(173,255,0,.6));
 }
 
 /* =========================================
-   DOT / BADGE
+   CENTER BUTTON (FARM)
    ========================================= */
 
-.bn-ico--eggs{
-    position:relative;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+.bn-center{
+    max-width:22%;
+    height:74px; /* 🔥 выше остальных */
+    transform:translateY(-12px); /* поднимаем */
+
+    background:linear-gradient(180deg,
+    rgba(173,255,0,0.15),
+    rgba(173,255,0,0.05)
+    );
+
+    border-radius:20px;
+
+    box-shadow:
+            0 0 25px rgba(173,255,0,0.25),
+            0 12px 30px rgba(0,0,0,.6);
 }
+
+.bn-center-svg{
+    width:40px;  /* 🔥 БОЛЬШОЙ ЦЕНТР */
+    height:40px;
+    color:var(--neon);
+
+    filter:
+            drop-shadow(0 0 15px var(--neon))
+            drop-shadow(0 0 30px rgba(173,255,0,.7));
+}
+
+.bn-center-txt{
+    font-size:13px;
+    font-weight:800;
+    letter-spacing:.04em;
+    color:#fff;
+}
+
+/* ACTIVE CENTER */
+.bn-center.is-active{
+    box-shadow:
+            0 0 40px rgba(173,255,0,.4),
+            0 15px 35px rgba(0,0,0,.8);
+}
+
+/* =========================================
+   BADGE / DOT
+   ========================================= */
 
 .bn-dot{
     position:absolute;
-    top:-3px;
-    right:-5px;
+    top:6px;
+    right:20%;
 
-    width:9px;
-    height:9px;
-    border-radius:999px;
-
+    width:10px;
+    height:10px;
+    border-radius:50%;
     background:#ff3b30;
-    border:2px solid rgba(14,14,18,0.92);
-    box-shadow:0 8px 16px rgba(255,59,48,0.35);
 
-    animation: bnDotPulse 1.35s ease-in-out infinite;
-}
-
-@keyframes bnDotPulse{
-    0%   { transform: scale(1); }
-    50%  { transform: scale(1.12); }
-    100% { transform: scale(1); }
+    box-shadow:0 0 15px rgba(255,59,48,.6);
 }
 
 .bn-badge{
     position:absolute;
-    top:-7px;
-    right:-9px;
-
-    min-width:18px;
-    height:14px;
-    padding:0 4px;
-    border-radius:999px;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    top:4px;
+    right:18%;
 
     background:#ff3b30;
-    color:#fff;
-    font-size:9px;
+    color:white;
+    font-size:10px;
     font-weight:800;
-
-    box-shadow:0 7px 16px rgba(255,59,48,0.28);
+    padding:3px 6px;
+    border-radius:20px;
+    box-shadow:0 0 20px rgba(255,59,48,.5);
 }
 
 /* =========================================
-   CENTER (FARM) — чуть сильнее, но НЕ шире
+   SMALL SCREENS
    ========================================= */
 
-.bn-center{
-    height:46px;              /* 🔥 такой же как остальные */
-    border-radius:14px;       /* 🔥 такой же */
-
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:3px;
-
-    position: relative;
-
-    background: rgba(255,255,255,0.055);
-    border: 1px solid rgba(255,255,255,0.11);
-    color:#fff;
-
-    cursor:pointer;
-    user-select:none;
-    -webkit-tap-highlight-color:transparent;
-
-    box-shadow: 0 14px 34px rgba(0,0,0,0.50);
-    transition: transform .12s ease, background .18s ease, border-color .18s ease;
-}
-
-.bn-center:active{ transform: scale(0.985); }
-
-.bn-center::before{
-    content:"";
-    position:absolute;
-    inset:-2px;
-    border-radius:16px;
-    background: radial-gradient(circle at 50% 0%,
-    rgba(173,255,0,0.18),
-    rgba(173,255,0,0.00) 68%);
-    opacity: 0.95;
-    z-index: 0;
-}
-
-.bn-center-svg{
-    width:28px;
-    height:28px;
-    display:block;
-
-    color: var(--bn-neon);
-    filter: drop-shadow(0 0 12px rgba(173,255,0,0.55));
-
-    position: relative;
-    z-index: 1;
-
-    transition: transform .18s ease, filter .18s ease;
-}
-
-.bn-center-txt{
-    font-size:9.5px;
-    font-weight:800;
-    letter-spacing:0.02em;
-    line-height:1;
-
-    max-width:100%;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-
-    opacity: 0.98;
-    position: relative;
-    z-index: 1;
-}
-
-.bn-center.is-active{
-    background: rgba(173,255,0,0.09);
-    border-color: rgba(173,255,0,0.20);
-}
-
-.bn-center.is-active .bn-center-svg{
-    transform: scale(1.04);
-    filter: drop-shadow(0 0 14px rgba(173,255,0,0.65));
-}
-
-/* =========================================
-   REDUCE MOTION
-   ========================================= */
-@media (prefers-reduced-motion: reduce){
-    .bn-dot{ animation:none; }
-    .bn-item, .bn-center{ transition:none; }
-}
-
-/* =========================================
-   SMALL SCREENS: hide labels (чтобы 5 точно влезли)
-   ========================================= */
-@media (max-width: 380px){
+@media (max-width:380px){
     .bn-txt,
     .bn-center-txt{
         display:none;
     }
 
-    .bn-ico{ height:28px; }
-    .bn-item, .bn-center{ height:48px; }
-
-    .bn-svg{ width:26px; height:26px; }
-    .bn-center-svg{ width:30px; height:30px; }
-}
-
-/* EXTRA SMALL */
-@media (max-width: 340px){
-    .bottomnav{
-        padding: 0 10px calc(env(safe-area-inset-bottom) + 8px) 10px;
+    .bn-item,
+    .bn-center{
+        height:60px;
     }
 
-    .bottomnav-inner{
-        gap:5px;
-        padding:8px 5px;
-    }
+    .bn-svg{ width:30px; height:30px; }
+    .bn-center-svg{ width:36px; height:36px; }
 }
