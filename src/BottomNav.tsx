@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import './BottomNav.css'
 
 import ShopIcon from './assets/icons/shop.svg?react'
@@ -19,6 +20,16 @@ interface Props {
     onTournaments: () => void
 }
 
+function tapLight() {
+    const tg = (window as any).Telegram?.WebApp
+    tg?.HapticFeedback?.impactOccurred?.('light')
+}
+
+function tapSoft() {
+    const tg = (window as any).Telegram?.WebApp
+    tg?.HapticFeedback?.selectionChanged?.()
+}
+
 export function BottomNav({
                               active,
                               eggsBadge,
@@ -29,14 +40,32 @@ export function BottomNav({
                               onFriends,
                               onTournaments,
                           }: Props) {
+    // particles count is small => cheap on mobile
+    const particles = useMemo(() => Array.from({ length: 10 }, (_, i) => i), [])
+
     return (
         <nav className="bottomnav" role="navigation" aria-label="Bottom navigation">
-            <div className="bottomnav-inner">
+            {/* background FX layer */}
+            <div className="bn-fx" aria-hidden="true">
+                <div className="bn-glass" />
+                <div className="bn-scanline" />
+                <div className="bn-noise" />
+                <div className="bn-particles">
+                    {particles.map((i) => (
+                        <span key={i} className={`bn-p bn-p-${i + 1}`} />
+                    ))}
+                </div>
+            </div>
 
+            <div className="bottomnav-inner">
                 <button
                     className={`bn-item ${active === 'shop' ? 'is-active' : ''}`}
-                    onClick={onShop}
+                    onClick={() => {
+                        tapSoft()
+                        onShop()
+                    }}
                     type="button"
+                    aria-current={active === 'shop' ? 'page' : undefined}
                 >
                     <div className="bn-ico">
                         <ShopIcon className="bn-svg" />
@@ -46,8 +75,12 @@ export function BottomNav({
 
                 <button
                     className={`bn-item ${active === 'quests' ? 'is-active' : ''}`}
-                    onClick={onQuests}
+                    onClick={() => {
+                        tapSoft()
+                        onQuests()
+                    }}
                     type="button"
+                    aria-current={active === 'quests' ? 'page' : undefined}
                 >
                     <div className="bn-ico bn-ico--eggs">
                         <QuestsIcon className="bn-svg" />
@@ -61,17 +94,26 @@ export function BottomNav({
 
                 <button
                     className={`bn-center ${active === 'farm' ? 'is-active' : ''}`}
-                    onClick={onFarm}
+                    onClick={() => {
+                        tapLight()
+                        onFarm()
+                    }}
                     type="button"
+                    aria-current={active === 'farm' ? 'page' : undefined}
                 >
+                    <span className="bn-center-ring" aria-hidden="true" />
                     <FarmIcon className="bn-center-svg" />
                     <div className="bn-center-txt">FARM</div>
                 </button>
 
                 <button
                     className={`bn-item ${active === 'friends' ? 'is-active' : ''}`}
-                    onClick={onFriends}
+                    onClick={() => {
+                        tapSoft()
+                        onFriends()
+                    }}
                     type="button"
+                    aria-current={active === 'friends' ? 'page' : undefined}
                 >
                     <div className="bn-ico">
                         <FriendsIcon className="bn-svg" />
@@ -81,15 +123,18 @@ export function BottomNav({
 
                 <button
                     className={`bn-item ${active === 'tournaments' ? 'is-active' : ''}`}
-                    onClick={onTournaments}
+                    onClick={() => {
+                        tapSoft()
+                        onTournaments()
+                    }}
                     type="button"
+                    aria-current={active === 'tournaments' ? 'page' : undefined}
                 >
                     <div className="bn-ico">
                         <TournamentIcon className="bn-svg" />
                     </div>
                     <div className="bn-txt">ТУРНИРЫ</div>
                 </button>
-
             </div>
         </nav>
     )
