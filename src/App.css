@@ -1,1216 +1,225 @@
 /* ==========================================
-   Monster Catch — App.css (Premium Money UI)
-   ✅ one-source-of-truth, no duplicates
+   Monster Catch — Clean Stable Layout
+   Single source of truth
    ========================================== */
 
 :root{
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
     color: #f9fafb;
 
-    --txt: rgba(255,255,255,0.92);
-    --muted: rgba(255,255,255,0.62);
-    --soft: rgba(255,255,255,0.06);
-    --brd: rgba(255,255,255,0.10);
+    --bg-main: #060a16;
 
-    --bg1: #020617;
-    --bg2: #0b1227;
-    --bg3: #111827;
-
-    --glass: rgba(15, 23, 42, 0.78);
-    --glass2: rgba(10, 15, 30, 0.82);
-
-    --shadow1: 0 24px 70px rgba(0,0,0,0.55);
-    --shadow2: 0 14px 30px rgba(0,0,0,0.45);
-    --header-offset: 100px;  /* насколько спустить header вниз */
-    --header-height: 200px; /* текущая высота header (у тебя в patch = 200px) */
+    /* ===== Layout control ===== */
+    --tg-topbar: 0px;          /* обновляется из JS */
+    --header-height: 168px;
+    --header-offset: 0px;      /* header выше/ниже */
+    --content-push: 22px;      /* весь сайт ниже */
+    --shell-gap: 16px;
+    --bottomnav-height: 84px;
 }
-.app-header{
-    background: #060a16 !important;  /* полностью непрозрачный */
-    backdrop-filter: none !important;
-}
-/* ===== header down (force) ===== */
-.app-header{
-    position: fixed !important;
-    top: var(--header-offset) !important;
-    left: 0 !important;
-    right: 0 !important;
-}
-
-/* чтобы контент не заезжал под header */
-.app-shell{
-    margin-top: calc(var(--header-height) + var(--header-offset)) !important;
-}
-*,
-*::before,
-*::after { box-sizing: border-box; }
-
-body { margin: 0; background: radial-gradient(circle at top, #1e293b, var(--bg1)); }
 
 /* ==========================================
-   ROOT / BACKGROUND
+   RESET
+   ========================================== */
+
+*,
+*::before,
+*::after{
+    box-sizing: border-box;
+}
+
+body{
+    margin:0;
+    background: radial-gradient(circle at top, #0f172a, #020617);
+}
+
+/* ==========================================
+   ROOT
    ========================================== */
 
 .app-root{
     min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: stretch;
-    background: radial-gradient(circle at top, #0f172a, var(--bg1));
-    color: #e5e7eb;
-}
+    display:flex;
+    justify-content:center;
+    align-items:stretch;
+    background: radial-gradient(circle at top, #0f172a, #020617);
 
-.app-bg-glow{
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    background:
-            radial-gradient(circle at 20% 0%, rgba(56, 189, 248, 0.18), transparent 55%),
-            radial-gradient(circle at 80% 100%, rgba(249, 115, 22, 0.20), transparent 55%);
-    opacity: .95;
-    z-index: 0;
+    padding-top: calc(
+            env(safe-area-inset-top)
+            + var(--tg-topbar)
+            + var(--header-height)
+            + var(--shell-gap)
+            + var(--content-push)
+    );
+
+    padding-bottom: calc(
+            env(safe-area-inset-bottom)
+            + var(--bottomnav-height)
+            + 12px
+    );
 }
 
 /* ==========================================
-   HEADER
+   HEADER (Telegram style)
    ========================================== */
 
 .app-header{
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: calc(env(safe-area-inset-top) + var(--tg-topbar) + var(--header-offset));
+    left:0;
+    right:0;
+    height: var(--header-height);
+    z-index:1000;
 
-    width: 100%;
-    height: 300px;
-
-    padding: 16px 18px 22px;
-    background: rgba(10, 15, 30, 0.94);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.55);
-    z-index: 1000;
-
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 12px;
-
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-    backdrop-filter: blur(10px);
+    background: var(--bg-main);
+    overflow:hidden;
 }
 
-.app-userchip{
-    position: relative;
-    width: 100%;
-    padding: 10px 12px;
-    background: linear-gradient(180deg, rgba(17, 24, 39, 0.78), rgba(2, 6, 23, 0.82));
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    box-shadow: 0 18px 44px rgba(0,0,0,0.45);
+/* soft premium glow */
+.app-header::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:
+            radial-gradient(120% 120% at 50% 0%, rgba(56,189,248,0.10), transparent 55%),
+            radial-gradient(120% 140% at 100% 0%, rgba(167,139,250,0.10), transparent 60%);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
-.chip-title{
-    font-size: 18px;
-    font-weight: 900;
-    letter-spacing: .3px;
-    text-align: center;
-    opacity: .95;
+/* header inner layout */
+.tg-header{
+    height:100%;
+    padding:12px 14px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    position:relative;
+    z-index:1;
 }
 
-.user-main{
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.tg-toprow{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
 }
 
-.user-avatar{
-    width: 34px;
-    height: 34px;
-    border-radius: 999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.tg-title{
+    flex:1;
+    text-align:center;
+    font-weight:900;
+    font-size:20px;
+}
+
+.tg-pill-btn{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    height:34px;
+    padding:0 12px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,0.12);
+    background:rgba(255,255,255,0.06);
+    color:#fff;
+    font-weight:700;
+    cursor:pointer;
+}
+
+.tg-icon-btn{
+    width:34px;
+    height:34px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,0.12);
+    background:rgba(255,255,255,0.06);
+    color:#fff;
+    cursor:pointer;
+}
+
+/* user */
+.tg-userrow{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.tg-avatar{
+    width:40px;
+    height:40px;
+    border-radius:999px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
     background: radial-gradient(circle at 30% 0%, #facc15, #f97316);
-    font-size: 18px;
-    box-shadow: 0 10px 22px rgba(0,0,0,0.45);
+    font-size:20px;
 }
 
-.user-meta{ display: flex; flex-direction: column; line-height: 1.05; }
-
-.user-name{ font-size: 14px; font-weight: 800; color: var(--txt); }
-.user-id-small{ font-size: 11px; color: rgba(255,255,255,0.52); }
-
-/* pills row */
-.user-stats-row{
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
+.tg-username{
+    font-weight:900;
+    font-size:16px;
+}
+.tg-userid{
+    font-size:12px;
+    opacity:.6;
 }
 
-.user-pill{
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 10px;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.08);
-    font-size: 12px;
-    font-weight: 700;
-    color: rgba(255,255,255,0.86);
+/* pills */
+.tg-pills{
+    display:flex;
+    gap:10px;
+    align-items:center;
 }
 
-.user-pill--stars{
-    background: rgba(56, 189, 248, 0.14);
-    border-color: rgba(56,189,248,0.22);
-    box-shadow: 0 0 16px rgba(56,189,248,0.18);
-}
-.user-pill--coins{
-    background: rgba(250, 204, 21, 0.12);
-    border-color: rgba(250,204,21,0.18);
-}
-.user-pill--tickets{
-    background: rgba(167, 139, 250, 0.14);
-    border-color: rgba(167,139,250,0.20);
-}
-
-/* right column actions (wallet + lang) */
-.header-actions-column{
-    margin-left: auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
+.tg-pill{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    height:34px;
+    padding:0 12px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,0.12);
+    background:rgba(255,255,255,0.06);
+    font-weight:900;
+    font-size:13px;
 }
 
-.header-wallet-btn{
-    width: 38px;
-    height: 38px;
-    border-radius: 14px;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.10);
-    backdrop-filter: blur(8px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: transform .12s ease, background .12s ease;
+.tg-pill--stars{
+    background: rgba(56,189,248,0.12);
 }
-.header-wallet-btn:hover{ background: rgba(255,255,255,0.12); transform: translateY(-1px); }
-.header-wallet-btn:active{ transform: scale(0.96); }
+.tg-pill--coins{
+    background: rgba(250,204,21,0.12);
+}
+.tg-pill--tickets{
+    background: rgba(167,139,250,0.14);
+}
 
-.lang-glass-btn{
-    width: 28px;
-    height: 28px;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.08);
-    cursor: pointer;
-    font-size: 14px;
-    opacity: .85;
-}
-.lang-glass-btn:active{ transform: scale(0.96); }
-
-.lang-glass-menu{
-    position: absolute;
-    top: calc(100% + 8px);
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(10,10,18,0.96);
-    border: 1px solid rgba(255,255,255,0.10);
-    border-radius: 14px;
-    padding: 6px;
-    z-index: 1000;
-    width: 160px;
-    box-shadow: 0 18px 50px rgba(0,0,0,0.6);
-}
-.lang-glass-menu button{
-    width: 100%;
-    border: 0;
-    background: transparent;
-    color: rgba(255,255,255,0.86);
-    padding: 10px 10px;
-    border-radius: 10px;
-    text-align: left;
-    cursor: pointer;
-}
-.lang-glass-menu button.active{
-    background: rgba(255,255,255,0.08);
+.tg-icon-square{
+    width:38px;
+    height:34px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,0.12);
+    background:rgba(255,255,255,0.06);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
 }
 
 /* ==========================================
-   SHELL (card container)
+   SHELL
    ========================================== */
 
 .app-shell{
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    max-width: 520px;
-
-    margin: 200px 16px 16px;
-    padding: 16px 16px 12px;
-
-    border-radius: 24px;
-    background: rgba(15, 23, 42, 0.92);
-    border: 1px solid rgba(255,255,255,0.08);
-
-    box-shadow:
-            0 22px 55px rgba(0,0,0,0.55),
-            inset 0 0 0 1px rgba(255,255,255,0.04);
-
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-
-    /* safe area + bottom nav */
-    padding-bottom: calc(env(safe-area-inset-bottom) + 140px);
-}
-
-.app-shell.game-active{
-    margin-top: 0 !important;
-    padding-top: 15px;
-}
-
-/* ==========================================
-   TOP TABS (menu-nav)
-   ========================================== */
-
-.menu-nav{
-    display: flex;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 6px;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.08);
-    backdrop-filter: blur(10px);
-}
-
-.menu-tab{
-    flex: 1;
-    border: 0;
-    background: transparent;
-    color: rgba(255,255,255,0.70);
-    font-size: 12px;
-    padding: 8px 8px;
-    border-radius: 999px;
-    cursor: pointer;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-
-    transition: transform .12s ease, background .14s ease, color .14s ease;
-    -webkit-tap-highlight-color: transparent;
-}
-
-.menu-tab--active{
-    background: linear-gradient(135deg, rgba(34,197,94,0.95), rgba(16,185,129,0.85));
-    color: rgba(0,0,0,0.86);
-    box-shadow: 0 12px 28px rgba(34,197,94,0.22);
-    transform: translateY(-1px);
-}
-
-.tab-icon{ font-size: 22px; line-height: 1; }
-.tab-label{ font-size: 11px; opacity: .95; }
-
-/* ==========================================
-   PANELS
-   ========================================== */
-
-.app-content{
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 4px;
-}
-
-.panel{
-    padding: 12px 12px 14px;
-    border-radius: 18px;
-    background: rgba(10, 15, 30, 0.78);
-    border: 1px solid rgba(255,255,255,0.08);
-    box-shadow: var(--shadow2);
-}
-
-.panel.panel-menu{
-    background: linear-gradient(180deg, rgba(10, 15, 30, 0.92), rgba(10, 15, 30, 0.78));
-    border: 1px solid rgba(255,255,255,0.10);
-    box-shadow:
-            0 24px 70px rgba(0,0,0,0.55),
-            inset 0 0 0 1px rgba(255,255,255,0.04);
-}
-
-.panel-title{
-    margin: 0 0 6px;
-    font-size: 16px;
-    font-weight: 900;
-    letter-spacing: .2px;
-}
-.panel-muted{
-    margin: 0 0 10px;
-    font-size: 12px;
-    color: var(--muted);
-}
-
-.panel-error{
-    margin: 0;
-    font-size: 12px;
-    color: #fecaca;
-}
-
-.panel-error-box{
-    border-color: rgba(248, 113, 113, 0.35);
-    background: linear-gradient(135deg, rgba(127, 29, 29, 0.62), rgba(10, 15, 30, 0.86));
-}
-
-/* ==========================================
-   PLAY BUTTON
-   ========================================== */
-
-.play-main-btn{
-    position: relative;
-    width: 100%;
-    height: 66px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-
-    border-radius: 22px;
-    border: 0;
-    cursor: pointer;
-
-    background: linear-gradient(135deg, #00ff9d, #00c3ff, #00ff9d);
-    box-shadow:
-            0 18px 44px rgba(0,255,180,0.35),
-            0 6px 18px rgba(0,0,0,0.35),
-            inset 0 0 12px rgba(255,255,255,0.22);
-
-    font-weight: 900;
-    font-size: 20px;
-    color: #002f2a;
-
-    overflow: hidden;
-    transition: transform .14s ease, box-shadow .14s ease;
-    -webkit-tap-highlight-color: transparent;
-}
-.play-main-btn:hover{ transform: translateY(-2px) scale(1.01); }
-.play-main-btn:active{ transform: scale(0.985); }
-
-.play-glow{
-    position: absolute;
-    inset: -40%;
-    background: radial-gradient(circle, rgba(255,255,255,0.33), transparent 60%);
-    animation: playGlowMove 3.5s linear infinite;
-}
-@keyframes playGlowMove{ 0%{transform:translateX(-30%)} 100%{transform:translateX(30%)} }
-
-.play-shine{
-    position: absolute;
-    top: -60%;
-    left: -40%;
-    width: 40%;
-    height: 200%;
-    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.55), transparent);
-    transform: rotate(20deg);
-    animation: playShine 4s infinite;
-}
-@keyframes playShine{ 0%{left:-40%} 40%{left:140%} 100%{left:140%} }
-
-.play-icon{ font-size: 26px; filter: drop-shadow(0 0 6px rgba(255,255,255,0.65)); }
-.play-text{ position: relative; z-index: 1; letter-spacing: 1px; }
-
-/* ==========================================
-   BUY COINS CARD
-   ========================================== */
-
-.menu-actions{ display:flex; flex-direction:column; gap: 12px; margin-top: 16px; }
-
-.buy-coins-card{
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-
-    padding: 18px 18px;
-    border-radius: 22px;
-
-    background: linear-gradient(135deg, #ffb703, #ff8c00, #ffb703);
-    box-shadow:
-            0 16px 40px rgba(255, 183, 3, 0.28),
-            inset 0 0 10px rgba(255,255,255,0.22);
-
-    cursor: pointer;
-    overflow: hidden;
-    transition: transform .14s ease, box-shadow .14s ease;
-    -webkit-tap-highlight-color: transparent;
-}
-.buy-coins-card:hover{ transform: translateY(-2px) scale(1.01); box-shadow: 0 20px 52px rgba(255,183,3,0.38); }
-.buy-coins-card:active{ transform: scale(0.985); }
-
-.buy-coins-glow{
-    position:absolute;
-    inset:-40%;
-    background: radial-gradient(circle, rgba(255,255,255,0.30), transparent 60%);
-    animation: glowMove 4s linear infinite;
-}
-@keyframes glowMove{ 0%{transform:translateX(-30%)} 100%{transform:translateX(30%)} }
-
-.buy-coins-icon{ font-size: 34px; filter: drop-shadow(0 0 6px rgba(255,255,255,0.65)); }
-
-.buy-coins-content{ position: relative; z-index: 1; }
-.buy-coins-title{ font-size: 18px; font-weight: 1000; color: #2b1600; }
-.buy-coins-subtitle{ font-size: 14px; font-weight: 800; color: #3a1e00; opacity: 0.95; }
-.buy-coins-note{ font-size: 12px; margin-top: 2px; color: #4a2600; opacity: 0.85; }
-
-/* ==========================================
-   MENU GRID (Premium)
-   ========================================== */
-
-.menu-grid{
-    display:grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-    margin-top: 10px;
-}
-
-/* universal menu card */
-.menu-card{
-    position: relative;
-    overflow: hidden;
-
-    border: 0;
-    border-radius: 18px;
-    padding: 14px 14px 12px;
-    min-height: 116px;
-
-    text-align: left;
-    cursor: pointer;
-
-    display:flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 6px;
-
-    background:
-            radial-gradient(120px 90px at 15% 10%, rgba(56,189,248,0.22), transparent 65%),
-            radial-gradient(140px 120px at 90% 110%, rgba(167,139,250,0.18), transparent 60%),
-            linear-gradient(180deg, rgba(17,24,39,0.86), rgba(2,6,23,0.92));
-
-    border: 1px solid rgba(255,255,255,0.10);
-
-    box-shadow:
-            0 14px 30px rgba(0,0,0,0.45),
-            inset 0 0 0 1px rgba(255,255,255,0.04);
-
-    transition: transform .14s ease, box-shadow .14s ease, filter .14s ease;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-}
-
-.menu-card::before{
-    content:"";
-    position:absolute;
-    inset:-60%;
-    background: radial-gradient(circle, rgba(255,255,255,0.14), transparent 55%);
-    transform: translateX(-25%);
-    opacity: .55;
-    pointer-events:none;
-}
-
-.menu-card::after{
-    content:"";
-    position:absolute;
-    top:-70%;
-    left:-45%;
-    width: 55%;
-    height: 230%;
-    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.22), transparent);
-    transform: rotate(18deg);
-    opacity: 0;
-    pointer-events:none;
-}
-
-.menu-card:hover{
-    transform: translateY(-2px);
-    box-shadow:
-            0 22px 46px rgba(0,0,0,0.55),
-            inset 0 0 0 1px rgba(255,255,255,0.08);
-}
-.menu-card:active{
-    transform: translateY(0) scale(0.985);
-    filter: brightness(1.03);
-}
-.menu-card:active::after{
-    opacity: .8;
-    animation: menuShine 650ms ease-out 1;
-}
-@keyframes menuShine{
-    0%{ left:-45%; opacity:0; }
-    20%{ opacity:.9; }
-    100%{ left:145%; opacity:0; }
-}
-
-.menu-card--disabled{
-    cursor: default;
-    opacity: 0.6;
-    filter: saturate(0.7);
-}
-
-/* icon + text */
-.menu-icon{
-    font-size: 30px;
-    line-height: 1;
-    filter: drop-shadow(0 10px 18px rgba(0,0,0,0.55));
-}
-.menu-card-title{
-    font-size: 14px;
-    font-weight: 1000;
-    color: rgba(255,255,255,0.95);
-    letter-spacing: .2px;
-}
-.menu-card-text{
-    font-size: 12px;
-    color: rgba(255,255,255,0.66);
-    line-height: 1.25;
-}
-
-/* optional per-card accents (if you add these classes) */
-.menu-card--wallet{
-    background:
-            radial-gradient(150px 110px at 15% 10%, rgba(34,197,94,0.20), transparent 70%),
-            linear-gradient(180deg, rgba(17,24,39,0.86), rgba(2,6,23,0.92));
-}
-.menu-card--quests{
-    background:
-            radial-gradient(150px 110px at 15% 10%, rgba(59,130,246,0.20), transparent 70%),
-            linear-gradient(180deg, rgba(17,24,39,0.86), rgba(2,6,23,0.92));
-}
-.menu-card--game{
-    background:
-            radial-gradient(150px 110px at 15% 10%, rgba(168,85,247,0.20), transparent 70%),
-            linear-gradient(180deg, rgba(17,24,39,0.86), rgba(2,6,23,0.92));
-}
-.menu-card--crush{
-    background:
-            radial-gradient(150px 110px at 15% 10%, rgba(236,72,153,0.22), transparent 70%),
-            linear-gradient(180deg, rgba(17,24,39,0.86), rgba(2,6,23,0.92));
-}
-.menu-card--invite{
-    background:
-            radial-gradient(150px 110px at 15% 10%, rgba(14,165,233,0.22), transparent 70%),
-            linear-gradient(180deg, rgba(17,24,39,0.86), rgba(2,6,23,0.92));
-}
-.menu-card--leaderboard{
-    background:
-            radial-gradient(170px 130px at 15% 10%, rgba(250,204,21,0.22), transparent 70%),
-            linear-gradient(180deg, rgba(17,24,39,0.86), rgba(2,6,23,0.92));
-}
-
-/* ==========================================
-   MENU BUTTONS
-   ========================================== */
-
-.menu-btn{
-    width: 100%;
-    padding: 14px 16px;
-    border-radius: 18px;
-    border: 0;
-    background: linear-gradient(135deg, #4f46e5, #7c3aed);
-    color: #f9fafb;
-    font-size: 16px;
-    font-weight: 900;
-    margin-bottom: 10px;
-    cursor: pointer;
-
-    box-shadow:
-            0 14px 34px rgba(79,70,229,0.35),
-            inset 0 0 0 1px rgba(255,255,255,0.08);
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap: 8px;
-
-    transition: transform .10s ease, box-shadow .10s ease, opacity .15s ease;
-    -webkit-tap-highlight-color: transparent;
-}
-.menu-btn:active{ transform: translateY(1px) scale(0.99); }
-
-.menu-btn--secondary{
-    background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
-    border: 1px solid rgba(255,255,255,0.10);
-    box-shadow:
-            0 14px 34px rgba(0,0,0,0.35),
-            inset 0 0 0 1px rgba(255,255,255,0.04);
-}
-
-/* ==========================================
-   LEADERBOARD
-   ========================================== */
-
-.leaderboard-container{
-    margin-top: 10px;
-    padding: 16px;
-    border-radius: 20px;
-    background: rgba(10, 15, 30, 0.82);
-    border: 1px solid rgba(255,255,255,0.08);
-    box-shadow: 0 18px 55px rgba(0,0,0,0.45);
-}
-.leaderboard-title{ font-size: 20px; font-weight: 900; margin-bottom: 12px; }
-
-.leaderboard-big-list{
+    width:100%;
+    max-width:520px;
+    margin: var(--shell-gap) 16px 16px;
+    padding:16px;
+    border-radius:24px;
+    background: rgba(15,23,42,0.92);
+    border:1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 22px 55px rgba(0,0,0,0.55);
     display:flex;
     flex-direction:column;
-    gap: 12px;
-    max-height: 420px;
-    overflow-y: auto;
-}
-
-.leaderboard-card{
-    display:flex;
-    align-items:center;
-    gap: 12px;
-    padding: 12px 14px;
-    border-radius: 16px;
-    background: rgba(17, 24, 39, 0.78);
-    border: 1px solid rgba(255,255,255,0.08);
-    transition: transform .14s ease, background .14s ease;
-}
-.leaderboard-card:hover{ transform: translateY(-2px); background: rgba(17,24,39,0.88); }
-
-.lb-place{ width: 32px; font-size: 16px; font-weight: 900; text-align:center; color: #a3bafd; }
-.lb-place-1{ color:#ffdd55; font-size: 20px; }
-.lb-place-2{ color:#c0c0c0; font-size: 20px; }
-.lb-place-3{ color:#cd7f32; font-size: 20px; }
-
-.lb-avatar{
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 30% 0%, #facc15, #f97316);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size: 22px;
-}
-.lb-name{ flex: 1; font-size: 15px; font-weight: 800; }
-.lb-score{ font-size: 16px; font-weight: 1000; color:#4ade80; }
-
-/* ==========================================
-   DAILY / SHOP (kept close to your styles)
-   ========================================== */
-
-.daily-list{ display:flex; flex-direction:column; gap: 8px; margin-top: 6px; }
-
-.daily-item{
-    border-radius: 12px;
-    padding: 8px 10px 10px;
-    background: rgba(17, 24, 39, 0.72);
-    border: 1px solid rgba(255,255,255,0.08);
-}
-
-.daily-row{ display:flex; justify-content:space-between; font-size: 12px; }
-.daily-progress-text{ color: rgba(255,255,255,0.55); }
-
-.daily-bar{
-    position: relative;
-    margin-top: 6px;
-    height: 5px;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.06);
-    overflow: hidden;
-}
-.daily-bar-fill{
-    position:absolute;
-    inset:0;
-    transform-origin: left center;
-    transform: scaleX(0);
-    background: linear-gradient(90deg, #22c55e, #facc15, #f97316);
-    transition: transform 0.2s ease-out;
-}
-.daily-footer{ margin-top: 8px; display:flex; justify-content:space-between; font-size: 11px; }
-.daily-reward{ color: #a5b4fc; }
-
-.daily-claim-btn{
-    border: 0;
-    border-radius: 999px;
-    padding: 6px 10px;
-    font-size: 11px;
-    cursor: pointer;
-    background: linear-gradient(135deg, #22c55e, #16a34a);
-    color: #ecfdf5;
-    box-shadow: 0 8px 16px rgba(22,163,74,0.22);
-}
-
-.daily-badge{
-    padding: 4px 8px;
-    border-radius: 999px;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    background: rgba(34,197,94,0.12);
-    color: rgba(187,247,208,0.95);
-    border: 1px solid rgba(34,197,94,0.18);
-}
-.daily-badge--grey{
-    background: rgba(255,255,255,0.06);
-    border-color: rgba(255,255,255,0.08);
-    color: rgba(255,255,255,0.75);
-}
-
-.shop-list{ display:flex; flex-direction:column; gap: 8px; margin-top: 6px; }
-
-.shop-item{
-    border-radius: 12px;
-    padding: 8px 10px;
-    background: rgba(17, 24, 39, 0.72);
-    border: 1px solid rgba(255,255,255,0.08);
-    font-size: 12px;
-}
-.shop-row{ display:flex; justify-content:space-between; align-items:center; margin-top: 4px; }
-.shop-level{ color: rgba(255,255,255,0.55); }
-.shop-price{ color:#eab308; }
-
-.shop-buy-btn{
-    border: 0;
-    border-radius: 999px;
-    padding: 8px 12px;
-    font-size: 12px;
-    cursor: pointer;
-    background: linear-gradient(135deg, #22c55e, #16a34a);
-    color: #ecfdf5;
-    box-shadow: 0 10px 22px rgba(22,163,74,0.22);
-}
-.shop-buy-btn:disabled{ opacity: .5; cursor: default; box-shadow:none; }
-
-/* ==========================================
-   REWARD POPUP
-   ========================================== */
-
-.reward-overlay{
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.62);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    z-index: 50;
-    backdrop-filter: blur(10px);
-}
-.reward-card{
-    width: 280px;
-    border-radius: 20px;
-    padding: 16px 14px 14px;
-    background: radial-gradient(circle at top, rgba(56,189,248,0.35), rgba(10,15,30,0.95));
-    border: 1px solid rgba(59,130,246,0.22);
-    box-shadow: 0 24px 70px rgba(0,0,0,0.65);
-    text-align:center;
-}
-.reward-emoji{ font-size: 40px; }
-.reward-title{ margin-top: 6px; font-size: 18px; font-weight: 900; }
-.reward-text{ margin-top: 4px; font-size: 13px; color: rgba(255,255,255,0.80); }
-.reward-level{ margin-top: 6px; font-size: 12px; color: rgba(191,219,254,0.95); }
-.reward-btn{
-    margin-top: 10px;
-    border: 0;
-    border-radius: 999px;
-    padding: 10px 14px;
-    font-size: 14px;
-    font-weight: 900;
-    cursor: pointer;
-    background: linear-gradient(135deg, #22c55e, #16a34a);
-    color: #ecfdf5;
-    box-shadow: 0 16px 32px rgba(22,163,74,0.22);
-}
-
-/* ==========================================
-   SHOP POPUP
-   ========================================== */
-
-.shop-overlay{
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.65);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    z-index: 999999;
-    backdrop-filter: blur(10px);
-}
-.shop-popup{
-    background: rgba(10, 15, 30, 0.95);
-    padding: 22px;
-    width: 80%;
-    max-width: 380px;
-    border-radius: 18px;
-    text-align: center;
-    border: 1px solid rgba(255,255,255,0.10);
-    box-shadow: 0 24px 70px rgba(0,0,0,0.65);
-}
-
-/* ==========================================
-   SPLASH
-   ========================================== */
-
-.splash-root{
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(circle at top, #2b1338 0, #050510 55%, #000 100%);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding: 24px;
-}
-.splash-inner{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap: 16px;
-    max-width: 320px;
-    width: 100%;
-    text-align:center;
-    color:#fff;
-}
-.splash-logo-circle{
-    width: 140px;
-    height: 140px;
-    border-radius: 50%;
-    overflow:hidden;
-    background: radial-gradient(circle at 30% 10%, #ffdd66, #ff7a3c 45%, #7b1fa2 100%);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    box-shadow: 0 0 30px rgba(255,122,60,0.8), 0 0 80px rgba(123,31,162,0.6);
-}
-.splash-logo-img{
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-.splash-title{
-    font-size: 26px;
-    font-weight: 1000;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    margin: 0;
-}
-.splash-subtitle{
-    font-size: 14px;
-    opacity: .8;
-    margin: 0 0 8px;
-}
-.splash-bar{
-    width: 100%;
-    height: 6px;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.08);
-    overflow:hidden;
-    position: relative;
-}
-.splash-bar-fill{
-    position:absolute;
-    inset:0;
-    transform-origin: left center;
-    animation: splash-loading 1.4s infinite ease-in-out;
-}
-.splash-bar-fill::before{
-    content:"";
-    position:absolute;
-    inset:0;
-    background: linear-gradient(90deg, #ffeb3b, #ff9800, #ff5722);
-}
-@keyframes splash-loading{
-    0%{ transform: scaleX(0.1); }
-    40%{ transform: scaleX(0.7); }
-    80%{ transform: scaleX(1); }
-    100%{ transform: scaleX(1); }
-}
-
-/* ==========================================
-   HERO FLOAT + MODAL
-   ========================================== */
-
-.hero-floating-bar{
-    position: fixed;
-    bottom: 16px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-
-    display:flex;
-    align-items:center;
-    gap: 10px;
-
-    padding: 10px 14px;
-    border-radius: 999px;
-    border: 1px solid rgba(255,255,255,0.12);
-    background: rgba(10, 15, 30, 0.70);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 18px 44px rgba(0,0,0,0.55);
-
-    color:#fff;
-    cursor:pointer;
-    outline:none;
-    -webkit-tap-highlight-color: transparent;
-}
-.hero-floating-bar:active{ transform: translateX(-50%) scale(0.985); }
-
-.hero-floating-avatar{
-    width: 34px;
-    height: 34px;
-    border-radius: 999px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background: rgba(255,255,255,0.10);
-    font-size: 20px;
-}
-
-.hero-floating-info{ display:flex; flex-direction:column; align-items:flex-start; }
-.hero-floating-name{ font-size: 13px; font-weight: 900; }
-.hero-floating-meta{ font-size: 11px; opacity: .78; }
-
-.hero-modal-overlay{
-    position: fixed;
-    inset: 0;
-    z-index: 1001;
-    background: rgba(0,0,0,0.65);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
-.hero-modal-card{
-    background: radial-gradient(circle at top, #1b1634, #050816);
-    width: 100%;
-    height: 100%;
-    border-radius: 0;
-    padding: 16px;
-    display:flex;
-    flex-direction:column;
-}
-.hero-3d-wrapper{
-    flex: 1;
-    width: 100%;
-    border-radius: 16px;
-    overflow:hidden;
-}
-.hero-modal-close{
-    margin-top: 12px;
-    width: 100%;
-    border-radius: 999px;
-    border: 0;
-    padding: 12px 0;
-    font-size: 14px;
-    font-weight: 900;
-    background: linear-gradient(90deg, #ff8a3c, #ff4b7d);
-    color:#fff;
-    cursor:pointer;
-}
-
-/* ==========================================
-   TOURNAMENT / CASHCUP (keep compatible)
-   ========================================== */
-
-.tournament-page{ display:grid; gap: 14px; }
-
-.tournament-card{
-    background: rgba(10, 15, 30, 0.78);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 18px;
-    padding: 14px;
-    color:#fff;
-    box-shadow: var(--shadow2);
-}
-
-.tournament-card.error{ color:#f87171; border-color: rgba(248,113,113,0.22); }
-
-.tc-row{ display:flex; justify-content:space-between; margin-bottom: 6px; }
-.tc-timer{ margin: 10px 0; font-weight: 900; text-align:center; }
-.tc-actions{ margin-top: 10px; }
-
-.tc-btn{
-    width: 100%;
-    padding: 12px;
-    border-radius: 14px;
-    border: 0;
-    font-weight: 1000;
-    cursor:pointer;
-}
-.tc-btn.join{ background: linear-gradient(135deg, #22c55e, #16a34a); color:#00180d; }
-.tc-btn.play{ background: linear-gradient(135deg, #3b82f6, #2563eb); color:#fff; }
-
-/* Cashcup card (yours but polished) */
-.cashcup-card{
-    position: relative;
-    border-radius: 22px;
-    padding: 18px;
-    background: linear-gradient(135deg, #1a0f00, #3b1f00);
-    color:#fff;
-    cursor:pointer;
-    overflow:hidden;
-    box-shadow:
-            0 0 30px rgba(255,170,0,0.22),
-            inset 0 0 20px rgba(255,200,50,0.12);
-    transition: transform .18s ease, box-shadow .18s ease;
-    -webkit-tap-highlight-color: transparent;
-}
-.cashcup-card:hover{
-    transform: scale(1.02);
-    box-shadow:
-            0 0 45px rgba(255,180,0,0.45),
-            inset 0 0 25px rgba(255,220,120,0.22);
-}
-.cashcup-card:active{ transform: scale(0.985); }
-
-.cashcup-glow{
-    position:absolute;
-    inset:-40%;
-    background: radial-gradient(circle, rgba(255,200,80,0.30), transparent 60%);
-    animation: cashcupPulse 2.5s infinite;
-    pointer-events:none;
-}
-@keyframes cashcupPulse{
-    0%{opacity:.35; transform:scale(.92)}
-    50%{opacity:.85; transform:scale(1.08)}
-    100%{opacity:.35; transform:scale(.92)}
-}
-
-.cashcup-header{ display:flex; justify-content:space-between; align-items:center; }
-.cashcup-badge{
-    background:#ff3b30;
-    color:#fff;
-    font-size: 11px;
-    padding: 4px 8px;
-    border-radius: 999px;
-    font-weight: 1000;
-    box-shadow: 0 0 10px rgba(255,60,60,0.55);
-}
-.cashcup-title{ font-size: 20px; font-weight: 1000; letter-spacing: 1px; }
-
-.cashcup-body{ margin-top: 14px; }
-.cashcup-prize{ font-size: 13px; opacity: .8; }
-.cashcup-amount{
-    font-size: 22px;
-    font-weight: 1000;
-    color: #00ff9c;
-    text-shadow: 0 0 10px rgba(0,255,160,0.55), 0 0 20px rgba(0,255,160,0.25);
-}
-.cashcup-info{ margin-top: 10px; font-size: 13px; opacity: .9; line-height: 1.4; }
-.cashcup-footer{
-    margin-top: 14px;
-    padding-top: 10px;
-    border-top: 1px solid rgba(255,255,255,0.12);
-    text-align:right;
-    font-weight: 900;
-    color: #ffcf4a;
-}
-
-/* ==========================================
-   EVENT AD
-   ========================================== */
-
-.event-ad-overlay{
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding: 18px;
-    background: rgba(0,0,0,0.72);
-    backdrop-filter: blur(10px);
-}
-
-.event-ad-card{
-    width: min(420px, 100%);
-    border-radius: 18px;
-    padding: 16px 16px 14px;
-    position: relative;
-    overflow:hidden;
-    border: 1px solid rgba(255,255,255,0.10);
-    background: rgba(18,18,22,0.92);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.55);
-}
-
-.event-ad-card::before{
-    content:"";
-    position:absolute;
-    inset:-120px -120px auto auto;
-    width: 280px;
-    height: 280px;
-    background: radial-gradient(circle, rgba(255,196,0,0.35), transparent 70%);
-    transform: rotate(25deg);
-    pointer-events:none;
-}
-
-.event-ad-close{
-    position:absolute;
-    right: 10px;
-    top: 10px;
-    width: 34px;
-    height: 34px;
-    border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.12);
-    background: rgba(255,255,255,0.06);
-    color:#fff;
-}
-
-.event-ad-badge{
-    display:inline-flex;
-    align-items:center;
-    gap: 8px;
-    font-weight: 1000;
-    font-size: 12px;
-    letter-spacing: .6px;
-    padding: 6px 10px;
-    border-radius: 999px;
-    background: rgba(255,196,0,0.14);
-    border: 1px solid rgba(255,196,0,0.22);
-    margin-bottom: 10px;
-}
-
-.event-ad-title{
-    color:#fff;
-    font-size: 18px;
-    font-weight: 1000;
-    line-height: 1.2;
-    margin-bottom: 10px;
-}
-.event-ad-sub{
-    color: rgba(255,255,255,0.86);
-    font-size: 14px;
-    line-height: 1.35;
-    margin-bottom: 14px;
-}
-.event-ad-actions{ display:flex; gap: 10px; }
-.event-ad-btn{
-    flex: 1;
-    height: 44px;
-    border-radius: 12px;
-    font-weight: 1000;
-    border: 1px solid rgba(255,255,255,0.12);
-}
-.event-ad-btn--primary{
-    color:#111;
-    background: linear-gradient(135deg, #ffd24a, #ffb300);
-    border: 0;
-}
-.event-ad-btn--ghost{
-    color:#fff;
-    background: rgba(255,255,255,0.06);
-}
-.event-ad-foot{
-    margin-top: 10px;
-    font-size: 12px;
-    color: rgba(255,255,255,0.55);
+    gap:12px;
 }
 
 /* ==========================================
@@ -1218,393 +227,19 @@ body { margin: 0; background: radial-gradient(circle at top, #1e293b, var(--bg1)
    ========================================== */
 
 .app-footer{
-    margin-top: 4px;
-    padding-top: 10px;
-    border-top: 1px solid rgba(255,255,255,0.08);
+    margin-top:6px;
+    padding-top:10px;
+    border-top:1px solid rgba(255,255,255,0.08);
     display:flex;
-    justify-content: space-between;
-    font-size: 10px;
-    color: rgba(255,255,255,0.45);
+    justify-content:space-between;
+    font-size:10px;
+    opacity:.5;
 }
 
-/* global */
-button{ font-family: inherit; }
 /* ==========================================
-   PREMIUM POLISH PATCH (drop-in)
-   вставь в самый низ App.css
+   BUTTON RESET
    ========================================== */
 
-/* 1) Header: glass, depth, nicer spacing */
-.app-header{
-    height: 200px !important;
-    padding: 14px 16px 18px !important;
-
-    background:
-            radial-gradient(120% 120% at 50% 0%, rgba(56,189,248,0.14), transparent 55%),
-            radial-gradient(120% 140% at 100% 0%, rgba(167,139,250,0.12), transparent 60%),
-            linear-gradient(180deg, rgba(6,10,22,0.92), rgba(6,10,22,0.74)) !important;
-
-    border-bottom: 1px solid rgba(255,255,255,0.08) !important;
-    backdrop-filter: blur(14px) !important;
-    box-shadow: 0 18px 60px rgba(0,0,0,0.55) !important;
-}
-
-/* чтобы контент не залезал под header */
-.app-shell{
-    margin-top: 190px !important;
-}
-
-/* 2) User chip: more premium */
-.app-userchip{
-    border-radius: 22px !important;
-    padding: 12px 12px !important;
-    background:
-            radial-gradient(140px 110px at 12% 10%, rgba(56,189,248,0.18), transparent 68%),
-            radial-gradient(170px 140px at 90% 120%, rgba(249,115,22,0.10), transparent 60%),
-            linear-gradient(180deg, rgba(17,24,39,0.74), rgba(2,6,23,0.80)) !important;
-
-    border: 1px solid rgba(255,255,255,0.10) !important;
-    box-shadow:
-            0 22px 60px rgba(0,0,0,0.55),
-            inset 0 0 0 1px rgba(255,255,255,0.04) !important;
-}
-
-/* pills: tighter, nicer glow */
-.user-pill{
-    padding: 6px 10px !important;
-    border: 1px solid rgba(255,255,255,0.10) !important;
-    background: rgba(255,255,255,0.06) !important;
-}
-.user-pill--stars{
-    box-shadow: 0 0 20px rgba(56,189,248,0.22) !important;
-}
-.user-pill--tickets{
-    box-shadow: 0 0 18px rgba(167,139,250,0.18) !important;
-}
-
-/* 3) Menu grid cards: “real app” depth + sheen */
-.menu-grid{
-    gap: 14px !important;
-    margin-top: 12px !important;
-}
-
-.menu-card{
-    border-radius: 20px !important;
-    min-height: 132px !important;
-    padding: 16px 16px 14px !important;
-
-    background:
-            radial-gradient(150px 120px at 14% 10%, rgba(56,189,248,0.22), transparent 70%),
-            radial-gradient(180px 150px at 100% 120%, rgba(167,139,250,0.18), transparent 65%),
-            linear-gradient(180deg, rgba(17,24,39,0.82), rgba(2,6,23,0.92)) !important;
-
-    border: 1px solid rgba(255,255,255,0.10) !important;
-
-    box-shadow:
-            0 18px 46px rgba(0,0,0,0.55),
-            inset 0 0 0 1px rgba(255,255,255,0.04) !important;
-}
-
-.menu-card::before{
-    opacity: 0.55 !important;
-}
-
-.menu-card::after{
-    opacity: 0 !important;
-}
-.menu-card:active::after{
-    opacity: .9 !important;
-    animation: menuShine 650ms ease-out 1 !important;
-}
-
-/* icon a bit bigger */
-.menu-icon{
-    font-size: 34px !important;
-    filter: drop-shadow(0 12px 22px rgba(0,0,0,0.55)) !important;
-}
-
-/* better typography */
-.menu-card-title{
-    font-size: 16px !important;
-    font-weight: 950 !important;
-    letter-spacing: .2px !important;
-}
-.menu-card-text{
-    font-size: 13px !important;
-    line-height: 1.25 !important;
-    color: rgba(255,255,255,0.66) !important;
-}
-
-/* 4) Different “accents” per card (add these classNames in JSX) */
-.menu-card--wallet{
-    background:
-            radial-gradient(180px 140px at 20% 10%, rgba(34,197,94,0.22), transparent 70%),
-            linear-gradient(180deg, rgba(17,24,39,0.82), rgba(2,6,23,0.92)) !important;
-}
-.menu-card--quests{
-    background:
-            radial-gradient(180px 140px at 20% 10%, rgba(59,130,246,0.22), transparent 70%),
-            linear-gradient(180deg, rgba(17,24,39,0.82), rgba(2,6,23,0.92)) !important;
-}
-.menu-card--solo{
-    background:
-            radial-gradient(190px 150px at 20% 10%, rgba(168,85,247,0.22), transparent 70%),
-            linear-gradient(180deg, rgba(17,24,39,0.82), rgba(2,6,23,0.92)) !important;
-}
-.menu-card--crush{
-    background:
-            radial-gradient(190px 150px at 20% 10%, rgba(236,72,153,0.22), transparent 70%),
-            linear-gradient(180deg, rgba(17,24,39,0.82), rgba(2,6,23,0.92)) !important;
-}
-.menu-card--invite{
-    background:
-            radial-gradient(190px 150px at 20% 10%, rgba(14,165,233,0.22), transparent 70%),
-            linear-gradient(180deg, rgba(17,24,39,0.82), rgba(2,6,23,0.92)) !important;
-}
-.menu-card--leaders{
-    background:
-            radial-gradient(210px 160px at 20% 10%, rgba(250,204,21,0.22), transparent 72%),
-            linear-gradient(180deg, rgba(17,24,39,0.82), rgba(2,6,23,0.92)) !important;
-}
-
-/* 5) Make header buttons look like iOS glass */
-.header-wallet-btn{
-    border-radius: 16px !important;
-    background: rgba(255,255,255,0.08) !important;
-    border: 1px solid rgba(255,255,255,0.10) !important;
-    box-shadow: 0 14px 36px rgba(0,0,0,0.45) !important;
-}
-.lang-glass-btn{
-    background: rgba(255,255,255,0.06) !important;
-    border: 1px solid rgba(255,255,255,0.10) !important;
-}
-
-/* 6) Small: remove “too grey” feel */
-.panel{
-    background: rgba(10, 15, 30, 0.74) !important;
-    border: 1px solid rgba(255,255,255,0.08) !important;
-}
-/* ===== header down (force) ===== */
-.app-header{
-    position: fixed !important;
-    top: var(--header-offset) !important;
-    left: 0 !important;
-    right: 0 !important;
-}
-/* ===== FIX: ничего не видно за header ===== */
-.app-header{
-    position: fixed !important;
-    top: 0 !important;
-    left: 0; right: 0;
-
-    /* делаем фон НЕпрозрачным */
-    background: #060a16 !important; /* плотный тёмный */
-    backdrop-filter: blur(14px) !important;
-    -webkit-backdrop-filter: blur(14px) !important;
-}
-
-/* если где-то всё равно просвечивает из-за градиентов — ставим “подложку” */
-.app-header::before{
-    content:"";
-    position:absolute;
-    inset:0;
-    background: #060a16;   /* 100% opaque */
-    z-index:-1;
-}
-.app-shell{
-    margin-top: 200px !important; /* или сколько у тебя height */
-}
-/* ===== HEADER: NO SEE-THROUGH (opaque base + pretty overlay) ===== */
-.app-header{
-    position: fixed !important;
-    top: 0 !important;
-    left: 0; right: 0;
-    z-index: 9999 !important;
-
-    /* ✅ 100% непрозрачная база */
-    background: #060a16 !important;
-
-    /* blur можно оставить, но он не должен делать прозрачность */
-    backdrop-filter: blur(14px) !important;
-    -webkit-backdrop-filter: blur(14px) !important;
-}
-
-/* ✅ красивый слой СВЕРХУ, но он не “прозрачит” контент под хедером */
-.app-header::after{
-    content:"";
-    position:absolute;
-    inset:0;
-    pointer-events:none;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-
-    /* тут твои блики/градиенты */
-    background:
-            radial-gradient(120% 120% at 50% 0%, rgba(56,189,248,0.14), transparent 55%),
-            radial-gradient(120% 140% at 100% 0%, rgba(167,139,250,0.12), transparent 60%),
-            linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.00));
-}
-
-/* чтобы контент начинался ниже */
-.app-shell{
-    margin-top: 200px !important; /* = height header */
-}
-/* чтобы контент не заезжал под header */
-.app-shell{
-    margin-top: calc(var(--header-height) + var(--header-offset)) !important;
-}
-/* ==========================================
-   FINAL HEADER CONTROL (single source of truth)
-   ========================================== */
-
-:root{
-    --header-offset: 100px;   /* насколько спустить вниз */
-    --header-height: 200px;   /* высота хедера */
-}
-
-/* header вниз + непрозрачный (ничего не видно сзади) */
-.app-header{
-    position: fixed !important;
-    top: var(--header-offset) !important;
-    left: 0 !important;
-    right: 0 !important;
-
-    height: var(--header-height) !important;
-    z-index: 9999 !important;
-
-    background: #060a16 !important; /* полностью непрозрачный */
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-
-    /* чтобы ::after позиционировался внутри */
-    isolation: isolate;
-}
-
-/* красивый “премиум” слой сверху (не просвечивает контент) */
-.app-header::after{
-    content:"";
-    position:absolute;
-    inset:0;
-    pointer-events:none;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    background:
-            radial-gradient(120% 120% at 50% 0%, rgba(56,189,248,0.14), transparent 55%),
-            radial-gradient(120% 140% at 100% 0%, rgba(167,139,250,0.12), transparent 60%),
-            linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.00));
-}
-
-/* контент ниже хедера */
-.app-shell{
-    margin-top: calc(var(--header-height) + var(--header-offset)) !important;
-}
-/* ===== FINAL: header down + reserve space for content ===== */
-
-:root{
-    --tg-topbar: 0px;         /* будет выставляться из JS */
-    --header-offset: 12px;
-    --header-height: 168px;   /* можешь оставить 200px если надо */
-    --shell-gap: 16px;
-
-    --bottomnav-height: 84px; /* твой BottomNav по факту */
-}
-
-/* header */
-.app-header{
-    position: fixed !important;
-    top: calc(env(safe-area-inset-top) + var(--tg-topbar) + var(--header-offset)) !important;
-    left: 0 !important;
-    right: 0 !important;
-    height: var(--header-height) !important;
-    z-index: 50 !important;
-
-    background: #060a16 !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-}
-
-/* резервируем место под header + top chrome телеги */
-.app-root{
-    padding-top: calc(
-            env(safe-area-inset-top)
-            + var(--tg-topbar)
-            + var(--header-offset)
-            + var(--header-height)
-            + var(--shell-gap)
-    ) !important;
-
-    padding-bottom: calc(
-            env(safe-area-inset-bottom)
-            + var(--bottomnav-height)
-            + 12px
-    ) !important;
-}
-
-/* оболочка */
-.app-shell{
-    margin: var(--shell-gap) !important;
-}
-
-/* 🔥 РЕЗЕРВ сверху под header, чтобы контент НЕ мог оказаться выше */
-.app-root{
-    padding-top: calc(env(safe-area-inset-top) + var(--header-offset) + var(--header-height)) !important;
-}
-
-/* возвращаем shell в нормальный поток (без огромных margin-top) */
-.app-shell{
-    margin: 16px 16px 16px !important;
-}
-/* ==========================================
-   FINAL LAYOUT PATCH (single source of truth)
-   put THIS at the very bottom of App.css
-   ========================================== */
-
-:root{
-    --tg-topbar: 0px;          /* set from JS */
-    --header-height: 200px;    /* твой финальный header */
-    --header-offset: -10px;    /* ⬅️ Monster Catch ВЫШЕ (минус = вверх) */
-    --shell-gap: 16px;
-
-    --bottomnav-height: 84px;  /* высота BottomNav */
-    --content-push: 26px;      /* ⬅️ ВЕСЬ САЙТ НИЖЕ */
-}
-
-/* header - fixed, correct in Telegram iOS */
-.app-header{
-    position: fixed !important;
-    top: calc(env(safe-area-inset-top) + var(--tg-topbar) + var(--header-offset)) !important;
-    left: 0 !important;
-    right: 0 !important;
-    height: var(--header-height) !important;
-    z-index: 1000 !important;
-
-    /* непрозрачный, чтобы ничего не просвечивало */
-    background: #060a16 !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-}
-
-/* reserve space for header + telegram chrome + extra push */
-.app-root{
-    padding-top: calc(
-            env(safe-area-inset-top)
-            + var(--tg-topbar)
-            + var(--header-height)
-            + var(--shell-gap)
-            + var(--content-push)
-    ) !important;
-
-    padding-bottom: calc(
-            env(safe-area-inset-bottom)
-            + var(--bottomnav-height)
-            + 12px
-    ) !important;
-}
-
-/* IMPORTANT: kill all old margin-top hacks */
-.app-shell{
-    margin: var(--shell-gap) 16px 16px !important; /* top/left-right/bottom */
-}
-
-/* if game page hides header, remove reserved space */
-.app-shell.game-active{
-    margin-top: 0 !important;
+button{
+    font-family:inherit;
 }
