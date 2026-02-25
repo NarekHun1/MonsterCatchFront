@@ -45,7 +45,8 @@ export const translations: Record<Lang, Record<string, string>> = {
         cool: 'Круто',
         buyCoinsSubtitle: '💰 Играй • выигрывай • выводи',
         buyCoinsNote: 'Оплата через Telegram Stars ⭐',
-
+        tasks: "Задания",
+        tasksDesc: "Выполняй задания и получай награды",
         prizePool: 'Призовой фонд',
         every30min: 'каждые 30 минут',
         enterAndWin: 'Войти и выиграть',
