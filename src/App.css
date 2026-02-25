@@ -1445,5 +1445,5 @@ button{ font-family: inherit; }
 }
 /* ВАЖНО: app-shell НЕ трогаем — остаётся как было */
 .app-userchip{
-    margin-top: 18px !important; /* регулируй тут */
+    margin-top: 30px !important; /* регулируй тут */
 }
