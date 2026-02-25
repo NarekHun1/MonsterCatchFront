@@ -761,9 +761,7 @@
                                         <span className="user-pill-icon">🎟</span>
                                         <span className="user-pill-value">{tickets}</span>
                                     </div>
-                                    <div className="header-wallet-btn" onClick={() => setCurrentPage('wallet')}>
-                                        <WalletIcon />
-                                    </div>
+
                                     <div className="header-actions-column">
                                         <div
                                             className="header-wallet-btn"
