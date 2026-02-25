@@ -349,3 +349,83 @@
     .bn-ico{ width: 38px; height: 38px; }
     .bottomnav-inner{ height: 84px; }
 }
+/* ===== Telegram-iOS look (только визуал, логика та же) ===== */
+
+/* чуть ниже бар, более “системный” */
+.bottomnav-inner{
+    height: 84px;
+    padding: 10px 12px calc(env(safe-area-inset-bottom) + 10px);
+}
+
+/* убрать “жир” и сделать как у Telegram: маленькая подпись */
+.bn-txt{
+    font-size: 10.5px;
+    font-weight: 600;          /* было 800-900 */
+    letter-spacing: .01em;     /* было .06-.10 */
+    text-transform: none;      /* было uppercase */
+    opacity: .92;
+    line-height: 1;
+    color: rgba(255,255,255,0.74);
+}
+
+/* иконки меньше и одинаковые */
+.bn-ico{
+    width: 30px;               /* было 40 */
+    height: 30px;
+    border-radius: 10px;
+}
+
+.bn-svg{
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.55)); /* мягче */
+}
+
+/* активная вкладка — аккуратный синий/неон можно оставить твой */
+.bn-item.is-active{
+    color: var(--bn-neon);
+}
+.bn-item.is-active .bn-txt{
+    color: rgba(255,255,255,0.95);
+}
+.bn-item.is-active .bn-svg{
+    filter:
+            drop-shadow(0 0 10px rgba(173,255,0,0.55));
+}
+
+/* центр FARM тоже чуть спокойнее, чтобы не “кричал” */
+.bn-center{
+    transform: translateY(-12px);
+    height: 74px;
+}
+.bn-center-svg{
+    width: 42px;
+    height: 42px;
+    filter:
+            drop-shadow(0 0 12px rgba(173,255,0,0.65));
+}
+.bn-center-txt{
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .04em;
+}
+
+/* бейджи как iOS: ближе к углу и меньше */
+.bn-dot{
+    top: 2px;
+    right: 2px;
+    width: 9px;
+    height: 9px;
+}
+.bn-badge{
+    top: -2px;
+    right: -4px;
+    font-size: 10px;
+    padding: 2px 6px;
+}
+
+/* на маленьких экранах подписи можно не прятать, но уменьшить */
+@media (max-width: 380px){
+    .bn-txt, .bn-center-txt{ display: block; }
+    .bn-txt{ font-size: 10px; }
+}
