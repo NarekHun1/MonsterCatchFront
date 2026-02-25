@@ -732,80 +732,79 @@
                 {currentPage !== 'game' && (
                     <header className="app-header">
                         {me && userId && (
-                            <div className="app-userchip">
-                                <div className="chip-title">Monster Catch</div>
-                                <div className="user-main">
-                                    <div className="user-avatar">
-                                        <span>😈</span>
-                                    </div>
-                                    <div className="user-meta">
-                                        <div className="user-name">
-                                            {me.username || me.firstName || 'Игрок'}
-                                        </div>
-                                        <div className="user-id-small">ID: {userId}</div>
+                            <div className="tg-header">
+                                {/* top row */}
+                                <div className="tg-toprow">
+                                    <button className="tg-pill-btn" onClick={() => setCurrentPage('menu')}>
+                                        <span className="tg-pill-x">✕</span>
+                                        Закрыть
+                                    </button>
+
+                                    <div className="tg-title">Monster Catch</div>
+
+                                    <div className="tg-right">
+                                        <button className="tg-icon-btn" type="button" aria-label="more">
+                                            ˅
+                                        </button>
+                                        <button className="tg-icon-btn" type="button" aria-label="menu">
+                                            …
+                                        </button>
                                     </div>
                                 </div>
 
-                                <div className="user-stats-row">
-                                    <div className="user-pill user-pill--stars">
+                                {/* user row */}
+                                <div className="tg-userrow">
+                                    <div className="tg-avatar">😈</div>
+
+                                    <div className="tg-userinfo">
+                                        <div className="tg-username">{me.username || me.firstName || 'Игрок'}</div>
+                                        <div className="tg-userid">ID: {userId}</div>
+                                    </div>
+                                </div>
+
+                                {/* pills row */}
+                                <div className="tg-pills">
+                                    <div className="tg-pill tg-pill--stars">
                                         <BlueStarIcon size={16} />
-                                        <span className="user-pill-value">{me.stars}</span>
+                                        <span>{me.stars}</span>
                                     </div>
 
+                                    <div className="tg-pill tg-pill--coins">
+                                        <span className="tg-emoji">🪙</span>
+                                        <span>{me.coins}</span>
+                                    </div>
 
-                                    <div className="user-pill user-pill--coins">
-                                        <span className="user-pill-icon">🪙</span>
-                                        <span className="user-pill-value">{me.coins}</span>
+                                    <div className="tg-pill tg-pill--tickets">
+                                        <span className="tg-emoji">🎟</span>
+                                        <span>{tickets}</span>
                                     </div>
-                                    <div className="user-pill user-pill--tickets">
-                                        <span className="user-pill-icon">🎟</span>
-                                        <span className="user-pill-value">{tickets}</span>
-                                    </div>
-                                    <div className="header-wallet-btn" onClick={() => setCurrentPage('wallet')}>
+
+                                    <button className="tg-icon-square" onClick={() => setCurrentPage('wallet')} aria-label="wallet">
                                         <WalletIcon />
+                                    </button>
+
+                                    <div className="tg-lang-wrap">
+                                        <button className="tg-icon-square" onClick={() => setShowLangMenu(v => !v)} aria-label="language">
+                                            🌍
+                                        </button>
+
+                                        {showLangMenu && (
+                                            <div className="tg-lang-menu">
+                                                <button
+                                                    className={lang === 'ru' ? 'active' : ''}
+                                                    onClick={() => { setLang('ru'); setShowLangMenu(false); }}
+                                                >
+                                                    🇷🇺 Русский
+                                                </button>
+                                                <button
+                                                    className={lang === 'en' ? 'active' : ''}
+                                                    onClick={() => { setLang('en'); setShowLangMenu(false); }}
+                                                >
+                                                    🇬🇧 English
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
-                                    <div className="header-actions-column">
-                                        <div
-                                            className="header-wallet-btn"
-                                            onClick={() => setCurrentPage('wallet')}
-                                        >
-                                            <WalletIcon />
-                                        </div>
-
-                                        <div className="header-lang-wrapper">
-                                            <button
-                                                className="lang-glass-btn"
-                                                onClick={() => setShowLangMenu(v => !v)}
-                                            >
-                                                🌍
-                                            </button>
-
-                                            {showLangMenu && (
-                                                <div className="lang-glass-menu">
-                                                    <button
-                                                        className={lang === 'ru' ? 'active' : ''}
-                                                        onClick={() => {
-                                                            setLang('ru');
-                                                            setShowLangMenu(false);
-                                                        }}
-                                                    >
-                                                        🇷🇺 Русский
-                                                    </button>
-                                                    <button
-                                                        className={lang === 'en' ? 'active' : ''}
-                                                        onClick={() => {
-                                                            setLang('en');
-                                                            setShowLangMenu(false);
-                                                        }}
-                                                    >
-                                                        🇬🇧 English
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-
-
                                 </div>
                             </div>
                         )}

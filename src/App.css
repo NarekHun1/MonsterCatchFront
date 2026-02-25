@@ -1608,3 +1608,207 @@ button{ font-family: inherit; }
 .app-shell.game-active{
     margin-top: 0 !important;
 }
+/* ===========================
+   Telegram-style Header (like screenshot)
+   put at VERY bottom
+   =========================== */
+
+:root{
+    --tg-topbar: 0px;          /* если используешь JS, он обновит */
+    --header-height: 168px;
+    --header-offset: 0px;      /* хочешь чуть выше/ниже: -8px / +8px */
+    --shell-gap: 16px;
+
+    --bottomnav-height: 84px;
+    --content-push: 14px;      /* весь контент чуть ниже */
+}
+
+/* fixed header */
+.app-header{
+    position: fixed !important;
+    top: calc(env(safe-area-inset-top) + var(--tg-topbar) + var(--header-offset)) !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: var(--header-height) !important;
+    z-index: 1000 !important;
+
+    background: #060a16 !important;
+    overflow: hidden;
+}
+
+/* красивый “телеграм” градиент поверх */
+.app-header::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:
+            radial-gradient(120% 120% at 50% 0%, rgba(56,189,248,0.10), transparent 55%),
+            radial-gradient(120% 140% at 100% 0%, rgba(167,139,250,0.10), transparent 60%),
+            linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.00));
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+/* резерв сверху/снизу */
+.app-root{
+    padding-top: calc(
+            env(safe-area-inset-top)
+            + var(--tg-topbar)
+            + var(--header-height)
+            + var(--shell-gap)
+            + var(--content-push)
+    ) !important;
+
+    padding-bottom: calc(env(safe-area-inset-bottom) + var(--bottomnav-height) + 12px) !important;
+}
+
+/* убиваем все старые margin-top хаки */
+.app-shell{
+    margin: var(--shell-gap) 16px 16px !important;
+}
+
+/* ---- header layout ---- */
+.tg-header{
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    padding: 12px 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* top row: close | title | actions */
+.tg-toprow{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 10px;
+}
+
+.tg-title{
+    flex: 1;
+    text-align:center;
+    font-weight: 900;
+    font-size: 20px;
+    color: rgba(255,255,255,0.92);
+}
+
+.tg-right{
+    display:flex;
+    gap: 8px;
+}
+
+.tg-pill-btn{
+    display:inline-flex;
+    align-items:center;
+    gap: 8px;
+    height: 34px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.88);
+    font-weight: 800;
+    cursor: pointer;
+}
+.tg-pill-x{ opacity: .9; }
+
+.tg-icon-btn{
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.90);
+    font-weight: 900;
+    cursor:pointer;
+}
+
+/* user row */
+.tg-userrow{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+}
+
+.tg-avatar{
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: radial-gradient(circle at 30% 0%, #facc15, #f97316);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.45);
+    font-size: 20px;
+}
+
+.tg-userinfo{ line-height: 1.1; }
+.tg-username{ font-size: 16px; font-weight: 900; color: rgba(255,255,255,0.92); }
+.tg-userid{ font-size: 12px; color: rgba(255,255,255,0.55); margin-top: 2px; }
+
+/* pills row */
+.tg-pills{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+}
+
+.tg-pill{
+    display:inline-flex;
+    align-items:center;
+    gap: 8px;
+    height: 34px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.90);
+    font-weight: 900;
+    font-size: 13px;
+}
+
+.tg-pill--stars{ background: rgba(56,189,248,0.12); border-color: rgba(56,189,248,0.18); }
+.tg-pill--coins{ background: rgba(250,204,21,0.10); border-color: rgba(250,204,21,0.16); }
+.tg-pill--tickets{ background: rgba(167,139,250,0.12); border-color: rgba(167,139,250,0.18); }
+
+.tg-icon-square{
+    width: 38px;
+    height: 34px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.06);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+}
+
+/* lang dropdown */
+.tg-lang-wrap{ position: relative; }
+
+.tg-lang-menu{
+    position:absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 170px;
+    padding: 6px;
+    border-radius: 14px;
+    background: rgba(10,10,18,0.96);
+    border: 1px solid rgba(255,255,255,0.10);
+    box-shadow: 0 18px 50px rgba(0,0,0,0.6);
+    z-index: 2000;
+}
+
+.tg-lang-menu button{
+    width:100%;
+    border:0;
+    background:transparent;
+    color: rgba(255,255,255,0.86);
+    padding: 10px 10px;
+    border-radius: 10px;
+    text-align:left;
+    cursor:pointer;
+}
+.tg-lang-menu button.active{ background: rgba(255,255,255,0.08); }
