@@ -33,10 +33,10 @@ export function BottomNav({
         <nav className="bottomnav" role="navigation" aria-label="Bottom navigation">
             <div className="bottomnav-inner">
 
-                {/* SHOP */}
                 <button
                     className={`bn-item ${active === 'shop' ? 'is-active' : ''}`}
                     onClick={onShop}
+                    type="button"
                 >
                     <div className="bn-ico">
                         <ShopIcon className="bn-svg" />
@@ -44,39 +44,34 @@ export function BottomNav({
                     <div className="bn-txt">РЫНОК</div>
                 </button>
 
-                {/* QUESTS */}
                 <button
                     className={`bn-item ${active === 'quests' ? 'is-active' : ''}`}
                     onClick={onQuests}
+                    type="button"
                 >
                     <div className="bn-ico bn-ico--eggs">
                         <QuestsIcon className="bn-svg" />
-
                         {questsDot && <span className="bn-dot" />}
-
                         {!!eggsBadge && (
-                            <span className="bn-badge">
-                {eggsBadge > 99 ? '99+' : eggsBadge}
-              </span>
+                            <span className="bn-badge">{eggsBadge > 99 ? '99+' : eggsBadge}</span>
                         )}
                     </div>
                     <div className="bn-txt">ЗАДАНИЯ</div>
                 </button>
 
-                {/* CENTER FARM */}
                 <button
                     className={`bn-center ${active === 'farm' ? 'is-active' : ''}`}
                     onClick={onFarm}
+                    type="button"
                 >
-                    <div className="bn-center-glow" />
                     <FarmIcon className="bn-center-svg" />
                     <div className="bn-center-txt">FARM</div>
                 </button>
 
-                {/* FRIENDS */}
                 <button
                     className={`bn-item ${active === 'friends' ? 'is-active' : ''}`}
                     onClick={onFriends}
+                    type="button"
                 >
                     <div className="bn-ico">
                         <FriendsIcon className="bn-svg" />
@@ -84,10 +79,10 @@ export function BottomNav({
                     <div className="bn-txt">ДРУЗЬЯ</div>
                 </button>
 
-                {/* TOURNAMENTS */}
                 <button
                     className={`bn-item ${active === 'tournaments' ? 'is-active' : ''}`}
                     onClick={onTournaments}
+                    type="button"
                 >
                     <div className="bn-ico">
                         <TournamentIcon className="bn-svg" />

@@ -1,10 +1,8 @@
 /* =========================================
-   ULTRA COMPACT GAME BOTTOM NAV (SVG READY)
-   - 100% width
-   - NO bottom gap
-   - SVG icons (currentColor)
-   - fits "ТУРНИРЫ"
-   - mobile game style
+   PREMIUM GAME BOTTOM NAV (CLEAN)
+   - crisp icons
+   - clear active state
+   - center "FARM" as main button
    ========================================= */
 
 .bottomnav{
@@ -16,22 +14,22 @@
     z-index: 9999;
     pointer-events: none;
 
-    padding: 6px 0 env(safe-area-inset-bottom) 0;
+    padding: 0 12px calc(env(safe-area-inset-bottom) + 10px) 12px;
 }
 
-/* dark fade behind bar */
+/* softer fade (less грязь) */
 .bottomnav::before{
     content:"";
     position:absolute;
     left:0;
     right:0;
     bottom:0;
-    height:120px;
+    height:90px;
     pointer-events:none;
     background: linear-gradient(
             to top,
-            rgba(0,0,0,0.85),
-            rgba(0,0,0,0.45) 45%,
+            rgba(0,0,0,0.80),
+            rgba(0,0,0,0.35) 55%,
             rgba(0,0,0,0.0)
     );
 }
@@ -40,23 +38,24 @@
 .bottomnav-inner{
     pointer-events:auto;
 
+    height:64px;
     width:100%;
-    height:58px;
 
     display:grid;
-    grid-template-columns: 1fr 1fr 1.1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1.25fr 1fr 1fr;
     align-items:center;
 
-    gap:4px;
-    padding:4px 6px;
+    gap:8px;
+    padding:10px 10px;
 
-    background:
-            radial-gradient(circle at 50% 10%, rgba(255,255,255,0.08), rgba(0,0,0,0) 60%),
-            rgba(10,10,14,0.95);
+    background: rgba(12,12,16,0.88);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 20px;
 
-    border-top:1px solid rgba(255,255,255,0.10);
-    box-shadow:0 -12px 40px rgba(0,0,0,0.65);
-    backdrop-filter: blur(14px);
+    backdrop-filter: blur(18px);
+    box-shadow:
+            0 18px 45px rgba(0,0,0,0.60),
+            inset 0 1px 0 rgba(255,255,255,0.06);
 }
 
 /* =========================================
@@ -64,116 +63,116 @@
    ========================================= */
 
 .bn-item{
-    height:44px;
-    border-radius:12px;
-    background:transparent;
-    border:1px solid transparent;
+    height:52px;
+    border-radius:16px;
+    background: transparent;
+    border: 1px solid transparent;
 
     display:flex;
     flex-direction:column;
     align-items:center;
     justify-content:center;
-    gap:1px;
+    gap:4px;
 
-    color:rgba(255,255,255,0.55);
+    color: rgba(255,255,255,0.62);
     cursor:pointer;
 
     user-select:none;
     -webkit-tap-highlight-color:transparent;
 
     transition:
-            transform .1s ease,
-            background .15s ease,
-            color .15s ease,
-            border-color .15s ease;
+            transform .12s ease,
+            background .18s ease,
+            color .18s ease,
+            border-color .18s ease,
+            box-shadow .18s ease;
 }
 
 .bn-item:active{
-    transform:scale(0.97);
+    transform: scale(0.98);
 }
 
-/* icon wrapper (for SVG + dot/badge positioning) */
+/* icon wrapper */
 .bn-ico{
-    height:20px;
+    height:24px;
     display:flex;
     align-items:center;
     justify-content:center;
     position:relative;
-    opacity:0.95;
 }
 
-/* quests icon wrapper (keeps dot/badge stable) */
-.bn-ico--eggs{
-    position: relative;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+/* SVG icons */
+.bn-svg{
+    width:24px;
+    height:24px;
+    display:block;
+    color: rgba(255,255,255,0.70);
+    transition: all .18s ease;
 }
 
 /* label */
 .bn-txt{
-    font-size:7px;
+    font-size:10px;
     line-height:1;
     font-weight:800;
-    letter-spacing:0.01em;
+    letter-spacing:0.02em;
 
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
     max-width:100%;
+    opacity:0.85;
 }
 
-/* ACTIVE */
+/* ACTIVE ITEM */
 .bn-item.is-active{
     color:#fff;
-    background:rgba(173,255,0,0.08);
-    border-color:rgba(173,255,0,0.25);
-}
-
-/* =========================================
-   SVG ICONS (requires fill/stroke="currentColor")
-   ========================================= */
-
-.bn-svg{
-    width:20px;
-    height:20px;
-    display:block;
-    color: rgba(255,255,255,.55);
-    transition: all .2s ease;
+    background: rgba(173,255,0,0.10);
+    border-color: rgba(173,255,0,0.22);
+    box-shadow: inset 0 0 0 1px rgba(173,255,0,0.08);
 }
 
 .bn-item.is-active .bn-svg{
     color:#ADFF00;
-    filter: drop-shadow(0 0 6px rgba(173,255,0,.55));
+    filter: drop-shadow(0 0 10px rgba(173,255,0,0.55));
 }
 
-/* DOT (quests) */
+/* =========================================
+   DOT / BADGE (quests)
+   ========================================= */
+
+.bn-ico--eggs{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
 .bn-dot{
     position:absolute;
-    top:-7px;
-    right:-9px;
+    top:-4px;
+    right:-6px;
 
-    width:12px;
-    height:12px;
+    width:10px;
+    height:10px;
     border-radius:999px;
 
     background:#ff3b30;
-    border:2px solid rgba(10,10,14,0.95);
+    border:2px solid rgba(12,12,16,0.88);
     box-shadow:0 10px 22px rgba(255,59,48,0.45);
 
     animation: bnDotPulse 1.25s ease-in-out infinite;
 }
 
 @keyframes bnDotPulse{
-    0%   { transform: scale(1);    box-shadow: 0 10px 22px rgba(255,59,48,0.35); }
-    50%  { transform: scale(1.18); box-shadow: 0 14px 28px rgba(255,59,48,0.55); }
-    100% { transform: scale(1);    box-shadow: 0 10px 22px rgba(255,59,48,0.35); }
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.15); }
+    100% { transform: scale(1); }
 }
 
-/* BADGE */
 .bn-badge{
     position:absolute;
-    top:-8px;
+    top:-7px;
     right:-10px;
 
     min-width:18px;
@@ -198,96 +197,86 @@
    ========================================= */
 
 .bn-center{
-    height:48px;
-    border-radius:16px;
+    height:56px;
+    border-radius:18px;
 
     display:flex;
     flex-direction:column;
     align-items:center;
     justify-content:center;
-    gap:1px;
+    gap:4px;
 
-    background:
-            radial-gradient(circle at 50% 0%, rgba(173,255,0,0.18), rgba(255,255,255,0) 60%),
-            rgba(255,255,255,0.08);
-
-    border:1px solid rgba(255,255,255,0.14);
+    position: relative;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
     color:#fff;
 
     cursor:pointer;
     user-select:none;
     -webkit-tap-highlight-color:transparent;
 
-    box-shadow:0 14px 36px rgba(0,0,0,0.55);
-    transition:transform .1s ease, border-color .2s ease, background .2s ease;
+    transition: transform .12s ease, background .18s ease, border-color .18s ease;
 }
 
-.bn-center:active{
-    transform:scale(0.97);
+.bn-center:active{ transform: scale(0.98); }
+
+/* neon ring behind */
+.bn-center::before{
+    content:"";
+    position:absolute;
+    inset:-2px;
+    border-radius:20px;
+    background: radial-gradient(circle at 50% 0%,
+    rgba(173,255,0,0.22),
+    rgba(173,255,0,0.00) 65%);
+    opacity: 0.9;
+    z-index: 0;
 }
 
+/* center icon */
 .bn-center-svg{
-    width:24px;
-    height:24px;
+    width:26px;
+    height:26px;
     display:block;
     color:#ADFF00;
-    transition: all .2s ease;
-}
-
-.bn-center.is-active{
-    border-color: rgba(173,255,0,0.35);
-    background:
-            radial-gradient(circle at 50% 0%, rgba(173,255,0,0.22), rgba(255,255,255,0) 60%),
-            rgba(255,255,255,0.08);
-}
-
-.bn-center.is-active .bn-center-svg{
-    transform: scale(1.08);
-    filter: drop-shadow(0 0 10px rgba(173,255,0,.7));
+    filter: drop-shadow(0 0 12px rgba(173,255,0,0.60));
+    position: relative;
+    z-index: 1;
 }
 
 .bn-center-txt{
-    font-size:7px;
+    font-size:10px;
     font-weight:900;
-    letter-spacing:0.01em;
+    letter-spacing:0.02em;
     line-height:1;
     white-space:nowrap;
+    opacity: 0.95;
+    position: relative;
+    z-index: 1;
+}
+
+.bn-center.is-active{
+    background: rgba(173,255,0,0.10);
+    border-color: rgba(173,255,0,0.25);
 }
 
 /* =========================================
    EXTRA SMALL SCREENS
    ========================================= */
 @media (max-width:340px){
+    .bottomnav{ padding: 0 10px calc(env(safe-area-inset-bottom) + 8px) 10px; }
+
     .bottomnav-inner{
-        height:56px;
-        padding:4px;
-        gap:3px;
-        grid-template-columns: 1fr 1fr 1.05fr 1fr 1fr;
+        height:62px;
+        gap:6px;
+        padding:10px 8px;
+        grid-template-columns: 1fr 1fr 1.2fr 1fr 1fr;
     }
 
-    .bn-item{
-        height:42px;
-    }
+    .bn-svg{ width:23px; height:23px; }
+    .bn-txt{ font-size:9.5px; }
 
-    .bn-svg{
-        width:19px;
-        height:19px;
-    }
-
-    .bn-txt{
-        font-size:6.5px;
-    }
-
-    .bn-center{
-        height:46px;
-    }
-
-    .bn-center-svg{
-        width:23px;
-        height:23px;
-    }
-
-    .bn-center-txt{
-        font-size:6.5px;
-    }
+    .bn-center{ height:54px; }
+    .bn-center-svg{ width:25px; height:25px; }
+    .bn-center-txt{ font-size:9.5px; }
 }
