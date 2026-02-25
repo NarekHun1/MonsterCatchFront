@@ -1369,3 +1369,33 @@ button{ font-family: inherit; }
     background: rgba(10, 15, 30, 0.74) !important;
     border: 1px solid rgba(255,255,255,0.08) !important;
 }
+/* ==========================================
+   TG iOS TOP BAR FIX
+   Сдвигаем fixed header вниз, чтобы "Monster Catch" не резалось
+   ========================================== */
+
+:root{
+    /* высота верхней шапки Telegram (iOS чаще ~56px).
+       Если у тебя чуть больше/меньше — поменяй на 52/60. */
+    --tg-topbar: 56px;
+}
+
+/* сдвигаем header вниз */
+.app-header{
+    top: var(--tg-topbar) !important;
+}
+
+/* и контейнер тоже вниз на столько же */
+.app-shell{
+    margin-top: calc(190px + var(--tg-topbar)) !important;
+}
+
+/* в режиме игры ты и так убираешь отступ */
+.app-shell.game-active{
+    margin-top: 0 !important;
+}
+
+/* если хочешь — чуть опустить только текст внутри чипа (не обязательно) */
+.chip-title{
+    padding-top: 2px;
+}
