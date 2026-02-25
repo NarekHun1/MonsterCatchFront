@@ -24,7 +24,18 @@
     --header-offset: 500px;  /* насколько спустить header вниз */
     --header-height: 200px; /* текущая высота header (у тебя в patch = 200px) */
 }
+/* ===== header down (force) ===== */
+.app-header{
+    position: fixed !important;
+    top: var(--header-offset) !important;
+    left: 0 !important;
+    right: 0 !important;
+}
 
+/* чтобы контент не заезжал под header */
+.app-shell{
+    margin-top: calc(var(--header-height) + var(--header-offset)) !important;
+}
 *,
 *::before,
 *::after { box-sizing: border-box; }
