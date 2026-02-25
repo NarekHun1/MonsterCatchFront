@@ -262,7 +262,28 @@ export function Wallet({ token, onBack }: WalletProps) {
                                 onChange={(e) => setWithdrawCoins(e.target.value)}
                                 placeholder={`${minCoins}+`}
                             />
+                            <input
+                                type="number"
+                                className="wallet-input"
+                                value={withdrawCoins}
+                                onChange={(e) => setWithdrawCoins(e.target.value)}
+                                placeholder={`${minCoins}+`}
+                            />
+                            {/* Preview: сколько это в $ */}
+                            {(() => {
+                                const c = Number(withdrawCoins);
+                                if (!info || !c || c <= 0) return null;
 
+                                const usd = c * (info.coinPriceUsd || 0);
+                                return (
+                                    <div className="wallet-preview">
+                                        ≈ <b>{usd.toFixed(2)} $</b>
+                                        <span className="wallet-preview-muted">
+        {' '}({c} 🪙 × {(info.coinPriceUsd || 0).toFixed(4)}$)
+      </span>
+                                    </div>
+                                );
+                            })()}
                             <button
                                 className="menu-btn"
                                 disabled={withdrawLoading}
