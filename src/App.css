@@ -1391,7 +1391,29 @@ button{ font-family: inherit; }
     left: 0 !important;
     right: 0 !important;
 }
+/* ===== FIX: ничего не видно за header ===== */
+.app-header{
+    position: fixed !important;
+    top: 0 !important;
+    left: 0; right: 0;
 
+    /* делаем фон НЕпрозрачным */
+    background: #060a16 !important; /* плотный тёмный */
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+}
+
+/* если где-то всё равно просвечивает из-за градиентов — ставим “подложку” */
+.app-header::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background: #060a16;   /* 100% opaque */
+    z-index:-1;
+}
+.app-shell{
+    margin-top: 200px !important; /* или сколько у тебя height */
+}
 /* чтобы контент не заезжал под header */
 .app-shell{
     margin-top: calc(var(--header-height) + var(--header-offset)) !important;
