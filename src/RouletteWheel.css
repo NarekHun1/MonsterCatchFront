@@ -1,74 +1,176 @@
+/* ==========================================
+   Monster Catch — RouletteWheel.css (Premium Fullscreen)
+   ========================================== */
+
 .roulette-overlay{
     position: fixed;
     inset: 0;
-    background:
-            radial-gradient(circle at 50% 20%, rgba(255,211,77,.12), rgba(0,0,0,0) 55%),
-            rgba(0,0,0,.72);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding: 16px;
     z-index: 9999;
+
+    /* full-screen premium backdrop */
+    background:
+            radial-gradient(circle at 50% 10%, rgba(255,211,77,.14), rgba(0,0,0,0) 55%),
+            radial-gradient(circle at 15% 90%, rgba(74,163,255,.12), rgba(0,0,0,0) 55%),
+            rgba(0,0,0,.78);
+
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+
+    /* safe areas */
+    padding:
+            calc(14px + env(safe-area-inset-top))
+            calc(14px + env(safe-area-inset-right))
+            calc(14px + env(safe-area-inset-bottom))
+            calc(14px + env(safe-area-inset-left));
 }
 
+/* FULLSCREEN MODAL */
 .roulette-modal{
-    width: min(520px, 100%);
-    border-radius: 22px;
+    width: 100%;
+    height: 100%;
+    border-radius: 24px;
+
     background:
             radial-gradient(circle at 20% 10%, rgba(255,255,255,.10), rgba(255,255,255,0) 40%),
-            radial-gradient(circle at 80% 100%, rgba(255, 211, 77, .08), rgba(255,255,255,0) 45%),
-            rgba(11,11,18,.96);
+            radial-gradient(circle at 85% 110%, rgba(255, 211, 77, .10), rgba(255,255,255,0) 45%),
+            rgba(8, 10, 16, .96);
+
     border: 1px solid rgba(255,255,255,0.10);
-    box-shadow: 0 24px 70px rgba(0,0,0,0.55);
-    padding: 16px 16px 18px;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.65);
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden; /* важно для sticky/скролла */
     position: relative;
 }
 
-.roulette-close{
-    position:absolute;
-    top: 10px;
-    right: 10px;
-    width: 36px;
-    height: 36px;
-    border-radius: 12px;
+/* TOP BAR */
+.roulette-topbar{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    padding: 14px 14px 10px;
+
+    background:
+            linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,0));
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.rb-left{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.rb-title{
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.rb-title b{
+    font-size: 16px;
+    letter-spacing: .02em;
+    color: rgba(255,255,255,.95);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rb-title span{
+    margin-top: 2px;
+    font-size: 12px;
+    color: rgba(200,210,255,.78);
+}
+
+.rb-actions{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ICON BUTTONS */
+.rb-btn{
+    height: 40px;
+    padding: 0 12px;
+    border-radius: 14px;
     border: 1px solid rgba(255,255,255,0.12);
     background: rgba(255,255,255,0.06);
-    color: #fff;
-    cursor:pointer;
+    color: rgba(255,255,255,0.92);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 900;
 }
 
-.roulette-title{
-    padding: 6px 6px 10px;
-    text-align:center;
+.rb-btn:active{
+    transform: translateY(1px);
 }
 
-.rt-badge{
-    display:inline-block;
-    padding: 6px 10px;
+.rb-icon{
+    width: 40px;
+    padding: 0;
+    justify-content: center;
+}
+
+.rb-back{
+    width: 40px;
+    padding: 0;
+    justify-content: center;
+}
+
+/* SCROLLABLE BODY */
+.roulette-body{
+    flex: 1;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 10px 14px 18px;
+}
+
+.roulette-badge{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 12px;
     border-radius: 999px;
     font-size: 12px;
-    letter-spacing: .08em;
+    letter-spacing: .10em;
+    text-transform: uppercase;
     color: rgba(255,255,255,0.85);
     border: 1px solid rgba(255,255,255,0.10);
     background: rgba(255,255,255,0.05);
 }
 
-.rt-main{
-    margin-top: 8px;
+.roulette-hero{
+    margin-top: 10px;
+    display: grid;
+    gap: 6px;
+}
+
+.roulette-hero h2{
+    margin: 0;
     font-size: 22px;
-    font-weight: 900;
-    color:#fff;
+    font-weight: 950;
+    letter-spacing: .02em;
+    color: rgba(255,255,255,.98);
 }
 
-.rt-sub{
-    margin-top: 6px;
+.roulette-hero p{
+    margin: 0;
     font-size: 13px;
-    opacity: .85;
-    color:#cfd3ff;
+    color: rgba(205,215,255,.86);
+    line-height: 1.35;
 }
 
+/* ERROR */
 .roulette-error{
-    margin: 8px 6px 10px;
+    margin-top: 12px;
     padding: 10px 12px;
     border-radius: 14px;
     background: rgba(255,80,80,0.10);
@@ -77,11 +179,12 @@
     font-size: 13px;
 }
 
+/* STAGE */
 .roulette-stage{
     position: relative;
-    width: 320px;
-    height: 320px;
-    margin: 10px auto 14px;
+    width: min(340px, 100%);
+    aspect-ratio: 1 / 1;
+    margin: 14px auto 12px;
 }
 
 .pointer{
@@ -128,41 +231,29 @@
     background: linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,0));
     opacity: .22;
 }
-/* контейнер внутри сектора */
+
 .sector-content{
     position: absolute;
     inset: 0;
-
-    /* ✅ компенсируем ПОВОРОТ сектора: для каждого сектора свой угол */
     transform: rotate(calc(-1 * (360deg / var(--count)) * var(--i)));
 }
 
-/* ИКОНКА — сверху по центру */
 .sector-icon{
     position: absolute;
-
-    /* 1️⃣ стартуем из центра круга */
     left: 50%;
     top: 50%;
-
-    /* 2️⃣ смещаем ПО РАДИУСУ (а не X/Y экрана) */
     transform:
             translate(-50%, -50%)
             rotate(calc((360deg / var(--count)) * var(--i)))
-            translateY(-35px)        /* 🔥 ЭТО РАДИУС */
+            translateY(-35px)
             rotate(calc(-1 * (360deg / var(--count)) * var(--i)));
-
     font-size: 42px;
     line-height: 1;
     filter: drop-shadow(0 12px 22px rgba(0,0,0,.55));
     pointer-events: none;
 }
 
-/* ЦИФРА/ТЕКСТ — снизу по центру */
-.sector-label{
-    display: none !important;
-}
-
+.sector-label{ display:none !important; }
 
 .wheel-center{
     position:absolute;
@@ -174,8 +265,8 @@
 }
 
 .wc-ring{
-    width: 82px;
-    height: 82px;
+    width: 86px;
+    height: 86px;
     border-radius: 50%;
     background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,255,255,0.10);
@@ -191,17 +282,31 @@
     box-shadow: 0 0 0 6px rgba(255,211,77,.18);
 }
 
+/* STICKY FOOTER (ВСЕГДА ВИДНО) */
+.roulette-footer{
+    position: sticky;
+    bottom: 0;
+
+    padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+    background:
+            linear-gradient(180deg, rgba(8,10,16,0), rgba(8,10,16,.92) 25%, rgba(8,10,16,.98));
+    border-top: 1px solid rgba(255,255,255,0.08);
+
+    display: grid;
+    gap: 10px;
+}
+
 .spin-btn{
     width: 100%;
     padding: 14px 14px;
     border-radius: 16px;
     border: none;
     cursor:pointer;
-    font-weight: 900;
+    font-weight: 950;
     font-size: 16px;
     color:#0b0f18;
     background: linear-gradient(135deg, #ffd34d, #ff9f1c);
-    box-shadow: 0 14px 34px rgba(255,159,28,.20);
+    box-shadow: 0 14px 34px rgba(255,159,28,.22);
     position: relative;
 }
 
@@ -210,21 +315,30 @@
     cursor: not-allowed;
 }
 
-.spin-cost{
-    margin-left: 10px;
+.spin-meta{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    color: rgba(205,215,255,.80);
     font-size: 12px;
-    font-weight: 800;
-    opacity: .75;
 }
 
+.spin-cost{
+    font-weight: 900;
+    opacity: .95;
+}
+
+/* RESULT CARD */
 .roulette-result{
-    margin-top: 14px;
+    margin-top: 12px;
 }
 
 .rr-title{
-    font-weight: 900;
-    color:#fff;
-    margin: 0 2px 8px;
+    font-weight: 950;
+    color: rgba(255,255,255,.96);
+    margin: 0 2px 10px;
+    font-size: 16px;
 }
 
 .rr-card{
@@ -238,33 +352,49 @@
     display:flex;
     justify-content:space-between;
     gap: 10px;
-    color:#fff;
-    margin: 6px 0;
+    color: rgba(255,255,255,.95);
+    margin: 7px 0;
     font-size: 13px;
 }
 
-.rr-muted{
-    opacity:.75;
-}
+.rr-muted{ opacity:.75; }
 
 .rr-small{
     margin-top: 10px;
     font-size: 12px;
-    opacity: .8;
-    color:#cfd3ff;
+    opacity: .85;
+    color: rgba(200,210,255,.82);
+}
+
+.rr-actions{
+    margin-top: 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
 }
 
 .rr-ok{
-    margin-top: 10px;
     width: 100%;
     padding: 12px;
     border-radius: 14px;
     border: 1px solid rgba(255,255,255,0.12);
     background: rgba(255,255,255,0.06);
-    color:#fff;
-    font-weight: 900;
+    color: rgba(255,255,255,.96);
+    font-weight: 950;
     cursor:pointer;
 }
+
+.rr-menu{
+    width: 100%;
+    padding: 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,211,77,0.28);
+    background: rgba(255,211,77,0.10);
+    color: rgba(255,255,255,.96);
+    font-weight: 950;
+    cursor:pointer;
+}
+
 .reward-fly{
     position: fixed;
     z-index: 100000;
