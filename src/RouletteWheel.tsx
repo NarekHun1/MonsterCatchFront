@@ -1,8 +1,7 @@
-import {useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import './RouletteWheel.css';
 import { apiFetch } from './api';
 import spinSfx from './assets/sfx/spin.wav';
-
 
 type PrizeType = 'COINS' | 'TICKETS' | 'STARS' | 'NOTHING' | 'JACKPOT';
 
@@ -28,6 +27,7 @@ type Sector = {
     variant?: 'coin' | 'ticket' | 'star' | 'jackpot' | 'zero';
 };
 
+// ⚠️ id должны совпадать с backend ROULETTE_SECTORS.id
 const SECTORS: Sector[] = [
     { id: 'ticket_1', label: '+1', icon: '🎟️', variant: 'ticket' },
     { id: 'ticket_3', label: '+3', icon: '🎟️', variant: 'ticket' },
@@ -49,10 +49,25 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
 
     const [spinning, setSpinning] = useState(false);
     const [error, setError] = useState<string>('');
+
     const [result, setResult] = useState<SpinResponse | null>(null);
+    const [showResult, setShowResult] = useState(false);
 
     const spinAudioRef = useRef<HTMLAudioElement | null>(null);
     const rotationRef = useRef<number>(0);
+
+    const sectorCount = SECTORS.length;
+    const sectorAngle = 360 / sectorCount;
+
+    const sectorIndexById = useMemo(() => {
+        const map = new Map<string, number>();
+        SECTORS.forEach((s, i) => map.set(s.id, i));
+        return map;
+    }, []);
+
+    const hintText = useMemo(() => '1 раз в день бесплатно, потом 10 🪙', []);
+
+    // ✅ LOCK BACKGROUND SCROLL (iOS Telegram WebView fix)
     useEffect(() => {
         const prevOverflow = document.body.style.overflow;
         const prevTouch = (document.body.style as any).touchAction;
@@ -65,16 +80,6 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
             (document.body.style as any).touchAction = prevTouch;
         };
     }, []);
-    const sectorCount = SECTORS.length;
-    const sectorAngle = 360 / sectorCount;
-
-    const sectorIndexById = useMemo(() => {
-        const map = new Map<string, number>();
-        SECTORS.forEach((s, i) => map.set(s.id, i));
-        return map;
-    }, []);
-
-    const hintText = useMemo(() => '1 раз в день бесплатно, потом 10 🪙', []);
 
     const ensureSpinAudio = () => {
         if (!spinAudioRef.current) {
@@ -110,6 +115,7 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
     };
 
     const spinToIndex = (targetIndex: number) => {
+        // Стрелка сверху. Нужен центр сектора под стрелку.
         const targetCenterDeg = targetIndex * sectorAngle + sectorAngle / 2;
         const current = clampRotation(rotationRef.current);
 
@@ -124,6 +130,7 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
 
         rotationRef.current = finalDeg;
 
+        // нормализуем
         window.setTimeout(() => {
             const normalized = clampRotation(rotationRef.current);
             rotationRef.current = normalized;
@@ -135,11 +142,24 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
         }, 4300);
     };
 
+    const openResult = (data: SpinResponse) => {
+        setResult(data);
+        setShowResult(true);
+    };
+
+    const closeResultOnly = () => setShowResult(false);
+
+    const closeToMenu = () => {
+        // отдельный “В меню” — просто закрываем рулетку
+        onClose();
+    };
+
     const handleSpin = async () => {
         if (spinning) return;
 
         setError('');
         setResult(null);
+        setShowResult(false);
 
         if (!token) {
             const msg = 'Нет токена. Открой игру через Telegram.';
@@ -152,6 +172,7 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
         startSpinSound();
 
         try {
+            // сервер решает: free/paid, списание и приз
             const res = await apiFetch('/roulette/spin', token, { method: 'POST' });
             const data: SpinResponse = await res.json().catch(() => ({} as any));
 
@@ -176,7 +197,7 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
 
                 window.setTimeout(() => {
                     stopSpinSound();
-                    setResult(data);
+                    openResult(data);
                     onReward(data);
                     flyToHeader(data.type, data.amount);
                     setSpinning(false);
@@ -185,11 +206,13 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
                 return;
             }
 
+            // запускаем вращение
             spinToIndex(idx);
 
+            // по окончанию — открываем отдельный экран результата
             window.setTimeout(() => {
                 stopSpinSound();
-                setResult(data);
+                openResult(data);
                 onReward(data);
                 flyToHeader(data.type, data.amount);
                 setSpinning(false);
@@ -205,11 +228,15 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
         }
     };
 
-    const closeToMenu = () => {
-        // сейчас это просто закрытие модалки
-        // если хочешь отдельный переход "в меню" — скажи, куда именно (farm/shop/etc)
-        onClose();
-    };
+    // иконка для результата
+    const resultIcon = useMemo(() => {
+        if (!result) return '🎁';
+        if (result.type === 'COINS') return '🪙';
+        if (result.type === 'STARS') return '⭐';
+        if (result.type === 'TICKETS') return '🎟️';
+        if (result.type === 'JACKPOT') return '💎';
+        return '⭕';
+    }, [result]);
 
     return (
         <div className="roulette-overlay" onClick={onClose} role="dialog" aria-modal="true">
@@ -234,7 +261,7 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
                     </div>
                 </div>
 
-                {/* BODY (SCROLL) */}
+                {/* BODY */}
                 <div className="roulette-body">
                     <div className="roulette-badge">Lucky Spin</div>
 
@@ -271,51 +298,9 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
                             </div>
                         </div>
                     </div>
-
-                    {result && (
-                        <div className="roulette-result">
-                            <div className="rr-title">🎁 Твой приз</div>
-
-                            <div className="rr-card">
-                                <div className="rr-line">
-                                    <span className="rr-muted">Выпало:</span>
-                                    <b>{result.label}</b>
-                                </div>
-
-                                <div className="rr-line">
-                                    <span className="rr-muted">Тип:</span>
-                                    <b>{result.type}</b>
-                                </div>
-
-                                {typeof result.amount === 'number' && (
-                                    <div className="rr-line">
-                                        <span className="rr-muted">Кол-во:</span>
-                                        <b>{result.amount}</b>
-                                    </div>
-                                )}
-
-                                <div className="rr-line">
-                                    <span className="rr-muted">Цена:</span>
-                                    <b>{result.costCoins} 🪙</b>
-                                </div>
-
-                                <div className="rr-small">
-                                    {result.freeTodayUsed
-                                        ? 'Бесплатный спин сегодня уже использован.'
-                                        : 'Это был бесплатный спин сегодня ✅'}
-                                </div>
-
-                                {/* Кнопки прямо в карточке результата — но футер всё равно всегда виден */}
-                                <div className="rr-actions">
-                                    <button className="rr-ok" onClick={onClose}>Ок</button>
-                                    <button className="rr-menu" onClick={closeToMenu}>В меню</button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
                 </div>
 
-                {/* FOOTER (STICKY) — ВСЕГДА ВИДНО */}
+                {/* FOOTER (CTA always visible) */}
                 <div className="roulette-footer">
                     <button className="spin-btn" onClick={handleSpin} disabled={spinning}>
                         {spinning ? 'КРУТИТСЯ…' : 'КРУТИТЬ'}
@@ -326,6 +311,65 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
                         <span className="spin-cost">⭐ / 🪙</span>
                     </div>
                 </div>
+
+                {/* RESULT SCREEN (separate overlay) */}
+                {showResult && result && (
+                    <div className="roulette-resultOverlay" onClick={closeResultOnly}>
+                        <div className="roulette-resultModal" onClick={(e) => e.stopPropagation()}>
+                            <div className="rso-head">
+                                <div className="rso-badge">RESULT</div>
+                                <button className="rso-x" onClick={closeResultOnly} aria-label="Close result">
+                                    ✕
+                                </button>
+                            </div>
+
+                            <div className="rso-icon">{resultIcon}</div>
+                            <div className="rso-title">Твой приз</div>
+                            <div className="rso-sub">
+                                {result.type === 'NOTHING' ? 'Повезёт в следующий раз 😈' : 'Поздравляем! Забирай бонус ✅'}
+                            </div>
+
+                            <div className="rso-card">
+                                <div className="rso-row">
+                                    <span>Выпало</span>
+                                    <b>{result.label}</b>
+                                </div>
+
+                                <div className="rso-row">
+                                    <span>Тип</span>
+                                    <b>{result.type}</b>
+                                </div>
+
+                                {typeof result.amount === 'number' && (
+                                    <div className="rso-row">
+                                        <span>Кол-во</span>
+                                        <b>{result.amount}</b>
+                                    </div>
+                                )}
+
+                                <div className="rso-row">
+                                    <span>Цена</span>
+                                    <b>{result.costCoins} 🪙</b>
+                                </div>
+
+                                <div className="rso-small">
+                                    {result.freeTodayUsed
+                                        ? 'Бесплатный спин сегодня уже использован.'
+                                        : 'Это был бесплатный спин сегодня ✅'}
+                                </div>
+                            </div>
+
+                            <div className="rso-actions">
+                                <button className="rso-ok" onClick={closeResultOnly}>
+                                    OK (ещё крутить)
+                                </button>
+                                <button className="rso-menu" onClick={closeToMenu}>
+                                    В МЕНЮ
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
