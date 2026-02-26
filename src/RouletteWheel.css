@@ -554,7 +554,42 @@
     filter: drop-shadow(0 12px 18px rgba(0,0,0,.55));
     pointer-events: none;
 }
+.rf-actions{
+    display: grid;
+    grid-template-columns: 1fr 120px;
+    gap: 10px;
+}
 
+.menu-btn{
+    width: 100%;
+    padding: 16px 12px;
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,.95);
+    font-weight: 950;
+    cursor: pointer;
+    transition: transform .12s ease, background .12s ease, border-color .12s ease;
+}
+
+.menu-btn:hover{
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.18);
+}
+
+.menu-btn:active{
+    transform: translateY(1px);
+}
+
+.menu-btn:disabled{
+    opacity: .7;
+    cursor: not-allowed;
+}
+
+/* на очень узких экранах делаем в столбик */
+@media (max-width: 360px){
+    .rf-actions{ grid-template-columns: 1fr; }
+}
 /* ================= Responsive tweaks ================= */
 
 @media (max-height: 740px){

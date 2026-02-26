@@ -302,12 +302,18 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
 
                 {/* FOOTER (CTA always visible) */}
                 <div className="roulette-footer">
-                    <button className="spin-btn" onClick={handleSpin} disabled={spinning}>
-                        {spinning ? 'КРУТИТСЯ…' : 'КРУТИТЬ'}
-                    </button>
+                    <div className="rf-actions">
+                        <button className="spin-btn" onClick={handleSpin} disabled={spinning}>
+                            {spinning ? 'КРУТИТСЯ…' : 'КРУТИТЬ'}
+                        </button>
+
+                        <button className="menu-btn" onClick={onClose} disabled={spinning}>
+                            В МЕНЮ
+                        </button>
+                    </div>
 
                     <div className="spin-meta">
-                        <span>Выход: ← / ✕ / тап по фону</span>
+                        <span>Выход: ← / ✕ / В МЕНЮ</span>
                         <span className="spin-cost">⭐ / 🪙</span>
                     </div>
                 </div>
