@@ -1,7 +1,8 @@
-import { useMemo, useRef, useState } from 'react';
+import {useEffect, useMemo, useRef, useState } from 'react';
 import './RouletteWheel.css';
 import { apiFetch } from './api';
 import spinSfx from './assets/sfx/spin.wav';
+
 
 type PrizeType = 'COINS' | 'TICKETS' | 'STARS' | 'NOTHING' | 'JACKPOT';
 
@@ -52,7 +53,18 @@ export function RouletteWheel({ token, onClose, onReward }: RouletteWheelProps) 
 
     const spinAudioRef = useRef<HTMLAudioElement | null>(null);
     const rotationRef = useRef<number>(0);
+    useEffect(() => {
+        const prevOverflow = document.body.style.overflow;
+        const prevTouch = (document.body.style as any).touchAction;
 
+        document.body.style.overflow = 'hidden';
+        (document.body.style as any).touchAction = 'none';
+
+        return () => {
+            document.body.style.overflow = prevOverflow;
+            (document.body.style as any).touchAction = prevTouch;
+        };
+    }, []);
     const sectorCount = SECTORS.length;
     const sectorAngle = 360 / sectorCount;
 

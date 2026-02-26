@@ -1,52 +1,86 @@
 /* ==========================================
-   Monster Catch — RouletteWheel.css (Premium Fullscreen)
+   Monster Catch — RouletteWheel.css
+   PREMIUM FULLSCREEN • iOS SAFE AREA • STICKY CTA
    ========================================== */
+
+:root{
+    /* под твой нижний navbar (подгони 84-110) */
+    --bottom-nav-h: 92px;
+
+    --txt: rgba(255,255,255,.92);
+    --muted: rgba(205,215,255,.82);
+    --brd: rgba(255,255,255,.10);
+    --soft: rgba(255,255,255,.06);
+
+    --bg: rgba(8,10,16,.96);
+    --shadow: 0 24px 80px rgba(0,0,0,.65);
+
+    --gold1: #ffd34d;
+    --gold2: #ff9f1c;
+
+    --blue: #4aa3ff;
+}
+
+/* ============== Overlay / Layout ============== */
 
 .roulette-overlay{
     position: fixed;
     inset: 0;
     z-index: 9999;
+    width: 100%;
+    height: 100dvh;                 /* ✅ важно для iOS */
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
 
-    /* full-screen premium backdrop */
+    /* ✅ чтобы не было “езда” и резины */
+    overscroll-behavior: none;
+    touch-action: none;
+
+    /* фон */
     background:
             radial-gradient(circle at 50% 10%, rgba(255,211,77,.14), rgba(0,0,0,0) 55%),
             radial-gradient(circle at 15% 90%, rgba(74,163,255,.12), rgba(0,0,0,0) 55%),
             rgba(0,0,0,.78);
 
-    display: flex;
-    align-items: stretch;
-    justify-content: stretch;
-
-    /* safe areas */
+    /* безопасные зоны + лёгкий отступ */
     padding:
-            calc(14px + env(safe-area-inset-top))
-            calc(14px + env(safe-area-inset-right))
-            calc(14px + env(safe-area-inset-bottom))
-            calc(14px + env(safe-area-inset-left));
+            calc(12px + env(safe-area-inset-top))
+            calc(12px + env(safe-area-inset-right))
+            calc(12px + env(safe-area-inset-bottom))
+            calc(12px + env(safe-area-inset-left));
 }
 
-/* FULLSCREEN MODAL */
 .roulette-modal{
     width: 100%;
     height: 100%;
     border-radius: 24px;
+    overflow: hidden;
+    position: relative;
 
     background:
             radial-gradient(circle at 20% 10%, rgba(255,255,255,.10), rgba(255,255,255,0) 40%),
             radial-gradient(circle at 85% 110%, rgba(255, 211, 77, .10), rgba(255,255,255,0) 45%),
-            rgba(8, 10, 16, .96);
+            var(--bg);
 
-    border: 1px solid rgba(255,255,255,0.10);
-    box-shadow: 0 24px 80px rgba(0,0,0,0.65);
+    border: 1px solid var(--brd);
+    box-shadow: var(--shadow);
 
     display: flex;
     flex-direction: column;
-
-    overflow: hidden; /* важно для sticky/скролла */
-    position: relative;
 }
 
-/* TOP BAR */
+/* ✅ лёгкая анимация появления (приятно, как в про-продуктах) */
+.roulette-modal{
+    animation: rouletteIn .18s ease-out;
+}
+@keyframes rouletteIn{
+    from{ transform: translateY(10px) scale(.98); opacity: .0; }
+    to  { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* ============== Topbar ============== */
+
 .roulette-topbar{
     display: flex;
     align-items: center;
@@ -55,8 +89,7 @@
 
     padding: 14px 14px 10px;
 
-    background:
-            linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,0));
+    background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,0));
     border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
@@ -76,7 +109,7 @@
 .rb-title b{
     font-size: 16px;
     letter-spacing: .02em;
-    color: rgba(255,255,255,.95);
+    color: rgba(255,255,255,.96);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -85,7 +118,7 @@
 .rb-title span{
     margin-top: 2px;
     font-size: 12px;
-    color: rgba(200,210,255,.78);
+    color: rgba(200,210,255,.80);
 }
 
 .rb-actions{
@@ -94,43 +127,59 @@
     gap: 8px;
 }
 
-/* ICON BUTTONS */
 .rb-btn{
     height: 40px;
     padding: 0 12px;
     border-radius: 14px;
-    border: 1px solid rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.14);
     background: rgba(255,255,255,0.06);
     color: rgba(255,255,255,0.92);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-    font-weight: 900;
+    font-weight: 950;
+
+    transition: transform .12s ease, background .12s ease, border-color .12s ease;
+}
+
+.rb-btn:hover{
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.18);
 }
 
 .rb-btn:active{
-    transform: translateY(1px);
+    transform: translateY(1px) scale(.99);
 }
 
-.rb-icon{
+.rb-icon, .rb-back{
     width: 40px;
     padding: 0;
-    justify-content: center;
 }
 
-.rb-back{
-    width: 40px;
-    padding: 0;
-    justify-content: center;
-}
+/* ============== Body (scroll only here) ============== */
 
-/* SCROLLABLE BODY */
 .roulette-body{
     flex: 1;
     overflow: auto;
     -webkit-overflow-scrolling: touch;
-    padding: 10px 14px 18px;
+    padding: 12px 14px 16px;
+
+    /* ✅ чтобы контент не прятался под sticky footer */
+    padding-bottom: calc(18px + env(safe-area-inset-bottom) + var(--bottom-nav-h) + 92px);
+}
+
+/* лёгкая “полоса” сверху-справа (дорого смотрится) */
+.roulette-body::before{
+    content:"";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+            radial-gradient(circle at 90% 12%, rgba(255,255,255,.06), rgba(0,0,0,0) 40%),
+            radial-gradient(circle at 12% 65%, rgba(74,163,255,.06), rgba(0,0,0,0) 45%);
+    opacity: .9;
 }
 
 .roulette-badge{
@@ -142,9 +191,10 @@
     font-size: 12px;
     letter-spacing: .10em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.85);
+    color: rgba(255,255,255,0.86);
     border: 1px solid rgba(255,255,255,0.10);
     background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(8px);
 }
 
 .roulette-hero{
@@ -164,11 +214,11 @@
 .roulette-hero p{
     margin: 0;
     font-size: 13px;
-    color: rgba(205,215,255,.86);
+    color: rgba(205,215,255,.88);
     line-height: 1.35;
 }
 
-/* ERROR */
+/* error */
 .roulette-error{
     margin-top: 12px;
     padding: 10px 12px;
@@ -179,24 +229,28 @@
     font-size: 13px;
 }
 
-/* STAGE */
+/* ============== Wheel Stage ============== */
+
 .roulette-stage{
     position: relative;
-    width: min(340px, 100%);
+    width: min(360px, 92vw);
     aspect-ratio: 1 / 1;
     margin: 14px auto 12px;
+
+    /* ✅ чтобы колесо не вылезало, когда экран ниже */
+    max-height: calc(100dvh - 340px);
 }
 
 .pointer{
     position:absolute;
-    top: -6px;
+    top: -7px;
     left: 50%;
     transform: translateX(-50%);
     width: 0;
     height: 0;
     border-left: 12px solid transparent;
     border-right: 12px solid transparent;
-    border-bottom: 22px solid #4aa3ff;
+    border-bottom: 22px solid var(--blue);
     filter: drop-shadow(0 10px 16px rgba(0,0,0,.55));
     z-index: 5;
 }
@@ -206,16 +260,31 @@
     height: 100%;
     border-radius: 50%;
     position: relative;
+
     background:
             radial-gradient(circle at 30% 25%, rgba(255,255,255,.10), rgba(255,255,255,0) 45%),
             radial-gradient(circle at 50% 60%, rgba(255,211,77,.10), rgba(0,0,0,0) 55%),
             #0b0f18;
+
     border: 1px solid rgba(255,255,255,0.10);
-    box-shadow: inset 0 0 0 6px rgba(255,255,255,0.03), 0 18px 50px rgba(0,0,0,0.55);
+    box-shadow:
+            inset 0 0 0 6px rgba(255,255,255,0.03),
+            0 18px 50px rgba(0,0,0,0.55);
     overflow:hidden;
 }
 
-.sector {
+/* внешний глянец */
+.wheel::after{
+    content:"";
+    position:absolute;
+    inset: -30%;
+    background: radial-gradient(circle at 30% 20%, rgba(255,255,255,.14), rgba(0,0,0,0) 60%);
+    transform: rotate(18deg);
+    opacity: .35;
+    pointer-events:none;
+}
+
+.sector{
     position: absolute;
     width: 50%;
     height: 50%;
@@ -238,6 +307,7 @@
     transform: rotate(calc(-1 * (360deg / var(--count)) * var(--i)));
 }
 
+/* иконка чуть ближе к краю и крупнее */
 .sector-icon{
     position: absolute;
     left: 50%;
@@ -245,11 +315,12 @@
     transform:
             translate(-50%, -50%)
             rotate(calc((360deg / var(--count)) * var(--i)))
-            translateY(-35px)
+            translateY(-42px)
             rotate(calc(-1 * (360deg / var(--count)) * var(--i)));
-    font-size: 42px;
+
+    font-size: 44px;
     line-height: 1;
-    filter: drop-shadow(0 12px 22px rgba(0,0,0,.55));
+    filter: drop-shadow(0 14px 22px rgba(0,0,0,.55));
     pointer-events: none;
 }
 
@@ -265,12 +336,13 @@
 }
 
 .wc-ring{
-    width: 86px;
-    height: 86px;
+    width: 90px;
+    height: 90px;
     border-radius: 50%;
     background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,255,255,0.10);
     box-shadow: 0 10px 28px rgba(0,0,0,.45);
+    backdrop-filter: blur(10px);
 }
 
 .wc-dot{
@@ -278,41 +350,56 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: #ffd34d;
+    background: var(--gold1);
     box-shadow: 0 0 0 6px rgba(255,211,77,.18);
 }
 
-/* STICKY FOOTER (ВСЕГДА ВИДНО) */
+/* ============== Sticky Footer (CTA always visible) ============== */
+
 .roulette-footer{
     position: sticky;
     bottom: 0;
+    z-index: 10;
 
-    padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
-    background:
-            linear-gradient(180deg, rgba(8,10,16,0), rgba(8,10,16,.92) 25%, rgba(8,10,16,.98));
+    /* ✅ запас под bottom nav + safe area */
+    padding: 12px 14px calc(12px + env(safe-area-inset-bottom) + var(--bottom-nav-h));
+
+    background: linear-gradient(180deg,
+    rgba(8,10,16,0),
+    rgba(8,10,16,.92) 22%,
+    rgba(8,10,16,.98)
+    );
+
     border-top: 1px solid rgba(255,255,255,0.08);
-
     display: grid;
     gap: 10px;
 }
 
 .spin-btn{
     width: 100%;
-    padding: 14px 14px;
-    border-radius: 16px;
+    padding: 16px 14px;
+    border-radius: 18px;
     border: none;
     cursor:pointer;
     font-weight: 950;
-    font-size: 16px;
+    font-size: 17px;
+    letter-spacing: .02em;
     color:#0b0f18;
-    background: linear-gradient(135deg, #ffd34d, #ff9f1c);
-    box-shadow: 0 14px 34px rgba(255,159,28,.22);
+
+    background: linear-gradient(135deg, var(--gold1), var(--gold2));
+    box-shadow: 0 16px 42px rgba(255,159,28,.22);
     position: relative;
+
+    transition: transform .12s ease, filter .12s ease, opacity .12s ease;
 }
 
+.spin-btn:hover{ filter: brightness(1.03); }
+.spin-btn:active{ transform: translateY(1px) scale(.995); }
+
 .spin-btn:disabled{
-    opacity: .7;
+    opacity: .72;
     cursor: not-allowed;
+    filter: grayscale(.1);
 }
 
 .spin-meta{
@@ -325,11 +412,12 @@
 }
 
 .spin-cost{
-    font-weight: 900;
+    font-weight: 950;
     opacity: .95;
 }
 
-/* RESULT CARD */
+/* ============== Result Card ============== */
+
 .roulette-result{
     margin-top: 12px;
 }
@@ -346,6 +434,7 @@
     border-radius: 16px;
     background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,255,255,0.10);
+    backdrop-filter: blur(10px);
 }
 
 .rr-line{
@@ -362,7 +451,7 @@
 .rr-small{
     margin-top: 10px;
     font-size: 12px;
-    opacity: .85;
+    opacity: .88;
     color: rgba(200,210,255,.82);
 }
 
@@ -373,27 +462,34 @@
     gap: 10px;
 }
 
-.rr-ok{
+.rr-ok, .rr-menu{
     width: 100%;
     padding: 12px;
     border-radius: 14px;
-    border: 1px solid rgba(255,255,255,0.12);
-    background: rgba(255,255,255,0.06);
-    color: rgba(255,255,255,.96);
     font-weight: 950;
     cursor:pointer;
+    transition: transform .12s ease, background .12s ease, border-color .12s ease;
 }
 
+.rr-ok{
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,.96);
+}
+
+.rr-ok:hover{ background: rgba(255,255,255,0.08); }
+.rr-ok:active{ transform: translateY(1px); }
+
 .rr-menu{
-    width: 100%;
-    padding: 12px;
-    border-radius: 14px;
     border: 1px solid rgba(255,211,77,0.28);
     background: rgba(255,211,77,0.10);
     color: rgba(255,255,255,.96);
-    font-weight: 950;
-    cursor:pointer;
 }
+
+.rr-menu:hover{ background: rgba(255,211,77,0.14); }
+.rr-menu:active{ transform: translateY(1px); }
+
+/* ============== Flying reward ============== */
 
 .reward-fly{
     position: fixed;
@@ -402,4 +498,17 @@
     line-height: 1;
     filter: drop-shadow(0 12px 18px rgba(0,0,0,.55));
     pointer-events: none;
+}
+
+/* ============== Mobile tweaks ============== */
+
+@media (max-height: 740px){
+    .roulette-hero h2{ font-size: 20px; }
+    .sector-icon{ font-size: 42px; translate: 0; }
+    .roulette-stage{ max-height: calc(100dvh - 320px); }
+}
+
+@media (max-width: 360px){
+    .rb-title b{ font-size: 15px; }
+    .roulette-stage{ width: min(330px, 92vw); }
 }
