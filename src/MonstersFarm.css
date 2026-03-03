@@ -127,6 +127,326 @@ button { font-family: inherit; }
 .farm-empty-emoji{ font-size: 42px; margin-bottom: 8px; }
 .farm-empty-text{ font-size: 14px; color: rgba(255,255,255,0.82); }
 
+.farm-tabs {
+    display: flex;
+    gap: 8px;
+    margin: 8px 0 0;
+}
+
+.farm-tab {
+    flex: 1;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(0,0,0,0.4);
+    color: #fff;
+    padding: 6px 8px;
+    font-size: 12px;
+}
+
+.farm-tab--active {
+    background: linear-gradient(120deg, #ffb347, #ff6b81);
+    border-color: transparent;
+    box-shadow: 0 0 12px rgba(255,119,0,0.6);
+}
+
+.farm-panel {
+    margin-top: 10px;
+    border-radius: 20px;
+    padding: 10px 10px 12px;
+    background: linear-gradient(180deg, rgba(6,6,18,0.98), rgba(5,5,12,0.96));
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 18px 55px rgba(0,0,0,0.55);
+}
+
+.farm-section-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.farm-muted {
+    font-size: 12px;
+    opacity: 0.7;
+    margin-bottom: 6px;
+}
+
+.farm-success {
+    margin-top: 6px;
+    padding: 6px 10px;
+    border-radius: 12px;
+    background: rgba(80,255,160,0.14);
+    color: #c4ffd8;
+    font-size: 13px;
+}
+
+.farm-label {
+    font-size: 12px;
+    opacity: 0.8;
+    margin-bottom: 4px;
+}
+
+.farm-select {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(4,4,10,0.9);
+    color: #fff;
+    padding: 6px 8px;
+    font-size: 13px;
+}
+
+.farm-secondary {
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.16);
+    background: rgba(0,0,0,0.32);
+    color: #fff;
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+.fusion-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+
+.fusion-col {
+    flex: 1;
+    min-width: 0;
+}
+
+.fusion-toggle-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+
+.fusion-toggle {
+    flex: 1;
+    padding: 4px 6px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.16);
+    background: rgba(0,0,0,0.5);
+    color: #fff;
+    font-size: 11px;
+}
+
+.fusion-toggle.is-active {
+    background: linear-gradient(120deg, #7bd9ff, #9f7bff);
+    border-color: transparent;
+}
+
+.fusion-row--toggles {
+    margin-top: 10px;
+    flex-direction: column;
+}
+
+.fusion-switch {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    font-size: 12px;
+}
+
+.fusion-switch input {
+    width: 18px;
+    height: 18px;
+}
+
+.fusion-actions {
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.fusion-preview {
+    margin-top: 12px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.fusion-result-card {
+    margin-top: 6px;
+    padding: 8px 10px;
+    border-radius: 12px;
+    background: radial-gradient(circle at top left, rgba(255,255,255,0.12), transparent 55%),
+    rgba(0,0,0,0.7);
+}
+
+.fusion-result-name {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.fusion-result-desc {
+    margin-top: 4px;
+    font-size: 12px;
+    opacity: 0.85;
+}
+
+.fusion-options-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0,1fr));
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.fusion-option-card {
+    padding: 6px 6px 8px;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid rgba(255,255,255,0.06);
+}
+
+.fusion-option-card .farm-primary {
+    width: 100%;
+    margin-top: 4px;
+    padding-inline: 0;
+    font-size: 12px;
+}
+
+.fusion-premium-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.summon-pity {
+    margin-top: 4px;
+    padding: 8px 10px;
+    border-radius: 12px;
+    background: radial-gradient(circle at top left, rgba(155,115,255,0.32), transparent 60%),
+    rgba(0,0,0,0.7);
+}
+
+.summon-pity-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+.summon-pity-bar {
+    position: relative;
+    height: 8px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.1);
+}
+
+.summon-pity-fill {
+    position: absolute;
+    inset: 0;
+    transform-origin: left center;
+    background: linear-gradient(90deg, #8effc3, #ffe96b, #ff7b8a);
+}
+
+.summon-pity-note {
+    margin-top: 4px;
+    font-size: 11px;
+    opacity: 0.8;
+}
+
+.summon-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.summon-btn {
+    flex: 1;
+    border-radius: 999px;
+    padding: 10px 12px;
+    font-size: 14px;
+    border: none;
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+}
+
+.summon-btn--gold {
+    background: linear-gradient(120deg, #ffce6b, #ffa54b);
+    color: #3a2300;
+    box-shadow: 0 0 16px rgba(255,180,0,0.6);
+}
+
+.summon-last {
+    margin-top: 12px;
+}
+
+.summon-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0,1fr));
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.summon-card {
+    padding: 4px 4px 6px;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.7);
+    border: 1px solid rgba(255,255,255,0.08);
+    text-align: center;
+}
+
+.summon-name {
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.summon-sub {
+    font-size: 10px;
+    opacity: 0.85;
+}
+
+.summon-time {
+    margin-top: 2px;
+    font-size: 9px;
+    opacity: 0.7;
+}
+
+.summon-card.rarity-legendary {
+    border-color: #ffdf6b;
+    box-shadow: 0 0 10px rgba(255,223,107,0.6);
+}
+
+.summon-card.rarity-epic {
+    border-color: #c17bff;
+}
+
+.summon-card.rarity-rare {
+    border-color: #6bb8ff;
+}
+
+.summon-history {
+    margin-top: 12px;
+}
+
+.summon-history-list {
+    max-height: 220px;
+    overflow-y: auto;
+    margin-top: 4px;
+    padding-right: 4px;
+}
+
+.summon-history-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 11px;
+}
+
+.summon-history-name {
+    flex: 1;
+}
+
+.summon-history-time {
+    white-space: nowrap;
+    opacity: 0.7;
+}
+
 /* ===== Carousel rail (centered) ===== */
 .farm-rail{
     display:flex;
