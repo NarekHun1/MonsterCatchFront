@@ -1477,6 +1477,8 @@ interface SummonResponse {
     message?: string;
 }
 
+type SummonMode = 'BASIC' | 'PREMIUM';
+
 function SummonView({ token }: { token: string }) {
     const [status, setStatus] = useState<SummonStatusResponse | null>(null);
     const [loading, setLoading] = useState(true);
@@ -1490,7 +1492,7 @@ function SummonView({ token }: { token: string }) {
         setLoading(true);
         setError(null);
         try {
-            const res = await apiFetch('/monsters/summon/status', token);
+            const res = await apiFetch('/summon/state', token);
             const data = (await res.json().catch(() => ({}))) as SummonStatusResponse & { message?: string };
             if (!res.ok) throw new Error(data.message || 'Не удалось загрузить статус призыва');
             setStatus({
@@ -1512,14 +1514,14 @@ function SummonView({ token }: { token: string }) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token]);
 
-    const handleSummon = async (count: 1 | 10) => {
+    const handleSummon = async (mode: SummonMode) => {
         if (summoning) return;
         setSummoning(true);
         setError(null);
         try {
-            const res = await apiFetch('/monsters/summon', token, {
+            const res = await apiFetch('/summon/execute', token, {
                 method: 'POST',
-                body: JSON.stringify({ count }),
+                body: JSON.stringify({ mode }),
             });
             const data = (await res.json().catch(() => ({}))) as SummonResponse & { message?: string };
             if (!res.ok) throw new Error(data.message || 'Не удалось выполнить призыв');
@@ -1586,7 +1588,7 @@ function SummonView({ token }: { token: string }) {
                             type="button"
                             className="summon-btn"
                             disabled={summoning}
-                            onClick={() => handleSummon(1)}
+                            onClick={() => handleSummon('BASIC')}
                         >
                             {summoning ? '...' : '🎲 Призыв x1'}
                         </button>
@@ -1594,7 +1596,7 @@ function SummonView({ token }: { token: string }) {
                             type="button"
                             className="summon-btn summon-btn--gold"
                             disabled={summoning}
-                            onClick={() => handleSummon(10)}
+                            onClick={() => handleSummon('PREMIUM')}
                         >
                             {summoning ? '...' : '🔥 Призыв x10'}
                         </button>
