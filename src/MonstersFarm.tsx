@@ -1125,7 +1125,7 @@ function FusionLabView({ token }: { token: string }) {
             try {
                 const [collRes, optRes] = await Promise.all([
                     apiFetch('/monsters/collection', token),
-                    apiFetch('/monsters/fusion/options', token).catch(() => null),
+                    apiFetch('/fusion/tokens', token).catch(() => null),
                 ]);
 
                 const collData = await collRes.json().catch(() => ({}));
@@ -1183,7 +1183,7 @@ function FusionLabView({ token }: { token: string }) {
                 body.tokenId = secondaryTokenId;
             }
 
-            const res = await apiFetch('/monsters/fusion/preview', token, {
+            const res = await apiFetch('/fusion/preview', token, {
                 method: 'POST',
                 body: JSON.stringify(body),
             });
@@ -1227,7 +1227,7 @@ function FusionLabView({ token }: { token: string }) {
                 body.tokenId = secondaryTokenId;
             }
 
-            const res = await apiFetch('/monsters/fusion/execute', token, {
+            const res = await apiFetch('/fusion/execute', token, {
                 method: 'POST',
                 body: JSON.stringify(body),
             });
