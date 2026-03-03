@@ -63,6 +63,11 @@ export default function MonstersFarm({ token, onBack }: Props) {
     const railRef = useRef<HTMLDivElement | null>(null);
     const rafRef = useRef<number | null>(null);
 
+    // ✅ fast-feed refs (Hamster style)
+    const feedLockRef = useRef(false); // prevents parallel requests
+    const lastFeedAtRef = useRef(0); // tap throttle
+    const refreshTimerRef = useRef<number | null>(null); // debounce refresh
+
     const [hunt, setHunt] = useState<HuntInfo | null>(null);
     const [slots, setSlots] = useState<FarmSlot[]>([]);
     const [meat, setMeat] = useState<number>(0);
@@ -72,7 +77,7 @@ export default function MonstersFarm({ token, onBack }: Props) {
     // no full-screen loading label; show skeleton
     const [initialLoaded, setInitialLoaded] = useState(false);
 
-    const [busy, setBusy] = useState(false);
+    const [busy, setBusy] = useState(false); // keep for unlock/assign/hunt actions
     const [error, setError] = useState<string | null>(null);
 
     // picker
@@ -101,8 +106,10 @@ export default function MonstersFarm({ token, onBack }: Props) {
     const canUnlock = !!activeSlot && !activeSlot.isUnlocked && !busy;
 
     const huntBlocksFeed = hunt?.status === 'RUNNING' && (hunt?.secondsLeft ?? 0) > 0;
+
+    // NOTE: we intentionally DON'T use "busy" here for feeding
     const canFeedActive =
-        !!activeSlot?.isUnlocked && !!activeMonster && meat >= 1 && !busy && !huntBlocksFeed;
+        !!activeSlot?.isUnlocked && !!activeMonster && meat >= 1 && !huntBlocksFeed;
 
     const showHuntPanel =
         !!activeSlot?.isUnlocked &&
@@ -181,7 +188,6 @@ export default function MonstersFarm({ token, onBack }: Props) {
             setShowPicker(false);
             setPickerSlotIndex(null);
 
-            // quiet refresh
             await loadFarm(true);
             haptic('light');
         } catch (e: any) {
@@ -224,6 +230,7 @@ export default function MonstersFarm({ token, onBack }: Props) {
     useEffect(() => {
         return () => {
             if (rafRef.current) cancelAnimationFrame(rafRef.current);
+            if (refreshTimerRef.current) window.clearTimeout(refreshTimerRef.current);
         };
     }, []);
 
@@ -336,31 +343,125 @@ export default function MonstersFarm({ token, onBack }: Props) {
         haptic('light');
     };
 
-    async function feedSlot(slotIndex: number) {
+    // ─────────────────────────────────────────────
+    // ✅ HAMSTER FAST FEED (optimistic)
+    // - instant UI (no busy)
+    // - request in background
+    // - debounce refresh
+    // ─────────────────────────────────────────────
+
+    function applyLocalFeed(slotIndex: number) {
+        // flash now
+        setTapFx(Date.now());
+
+        setSlots((prev) =>
+            prev.map((s) => {
+                if (s.slotIndex !== slotIndex) return s;
+                if (!s.monster) return s;
+
+                const m: any = { ...s.monster };
+                const lvl = Number(m.level ?? 1);
+
+                if (lvl >= 5) {
+                    const cur = Number(m.feedCountForHunt ?? 0);
+                    m.feedCountForHunt = Math.min(100, cur + 1);
+                } else {
+                    const xpNext = Number(m.xpNext ?? 0);
+                    const nextXp = Number(m.xp ?? 0) + 1;
+
+                    if (xpNext > 0) {
+                        if (nextXp >= xpNext) {
+                            m.level = Math.min(5, lvl + 1);
+                            m.xp = 0;
+                        } else {
+                            m.xp = nextXp;
+                        }
+                    } else {
+                        m.xp = nextXp;
+                    }
+                }
+
+                return { ...s, monster: m };
+            }),
+        );
+
+        // keep hunt panel counter synced when active monster is this slot monster
+        const cur = activeSlot?.slotIndex === slotIndex ? activeMonster : null;
+        const curId = (cur as any)?.userMonsterId;
+        const slotMonsterId = (slots.find((s) => s.slotIndex === slotIndex)?.monster as any)?.userMonsterId;
+        if (curId && slotMonsterId && curId === slotMonsterId) {
+            setHunt((prev) => {
+                if (!prev) return prev;
+                if (prev.status !== 'IDLE') return prev;
+                // increase only if level 5 (hunt prep)
+                if ((cur as any)?.level >= 5) {
+                    const next = Math.min(100, Number(prev.feedCountForHunt ?? 0) + 1);
+                    return { ...prev, feedCountForHunt: next };
+                }
+                return prev;
+            });
+        }
+    }
+
+    async function feedSlotFast(slotIndex: number) {
+        // throttle taps (Hamster feel)
+        const now = Date.now();
+        if (now - lastFeedAtRef.current < 120) return;
+        lastFeedAtRef.current = now;
+
+        const slot = slots.find((s) => s.slotIndex === slotIndex);
+        if (!slot?.isUnlocked || !slot.monster) return;
+
+        if (meat < 1) {
+            tg?.showAlert?.('Нет мяса 🍖');
+            return;
+        }
+
+        // only block if this exact slot monster is hunting and it’s the active one
+        if (huntBlocksFeed && activeSlot?.slotIndex === slotIndex) {
+            tg?.showAlert?.('Монстр на охоте ⏳');
+            return;
+        }
+
+        // ✅ instant feedback
+        haptic('light');
+        setMeat((m) => Math.max(0, m - 1));
+        applyLocalFeed(slotIndex);
+
+        // send request in background (one at a time)
+        if (feedLockRef.current) return;
+        feedLockRef.current = true;
+
         try {
-            if (busy) return;
-
-            setBusy(true);
-            haptic('medium');
-
-            // tap FX instead of loading
-            setTapFx(Date.now());
-
             const res = await apiFetch('/monsters/farm/feed', token, {
                 method: 'POST',
                 body: JSON.stringify({ slotIndex }),
             });
 
             const data = await res.json().catch(() => ({}));
-            if (!res.ok) throw new Error(data.message || 'Feed failed');
+            if (!res.ok) {
+                // rollback meat (simple rollback; state will be re-synced by refresh too)
+                setMeat((m) => m + 1);
+                tg?.showAlert?.(data.message || 'Feed failed');
+                // re-sync soon
+                if (refreshTimerRef.current) window.clearTimeout(refreshTimerRef.current);
+                refreshTimerRef.current = window.setTimeout(() => loadFarm(true), 350);
+                return;
+            }
 
-            if (typeof data.meatLeft === 'number') setMeat(data.meatLeft);
+            if (typeof data.meatLeft === 'number') setMeat(Number(data.meatLeft));
 
-            await loadFarm(true);
-        } catch (e: any) {
-            tg?.showAlert?.(e?.message || 'Feed failed');
+            // debounce refresh (so you can tap spam)
+            if (refreshTimerRef.current) window.clearTimeout(refreshTimerRef.current);
+            refreshTimerRef.current = window.setTimeout(() => {
+                loadFarm(true);
+                if (activeMonsterId) loadHuntStatus(activeMonsterId).catch(() => {});
+            }, 900);
         } finally {
-            setBusy(false);
+            // tiny delay so taps feel free but we don't spam parallel calls
+            window.setTimeout(() => {
+                feedLockRef.current = false;
+            }, 90);
         }
     }
 
@@ -481,6 +582,14 @@ export default function MonstersFarm({ token, onBack }: Props) {
                             ? 'READY_FEED'
                             : 'IDLE';
 
+    const localFeedCount =
+        (activeMonster as any)?.level >= 5 ? Number((activeMonster as any)?.feedCountForHunt ?? 0) : 0;
+
+    const huntFeedShown =
+        typeof hunt?.feedCountForHunt === 'number'
+            ? hunt.feedCountForHunt
+            : localFeedCount;
+
     return (
         <div className="monsters-farm">
             <div className="farm-top">
@@ -530,14 +639,14 @@ export default function MonstersFarm({ token, onBack }: Props) {
                                 tg?.showAlert?.('Нет мяса 🍖');
                                 return;
                             }
-                            if (busy) return;
 
                             if (huntBlocksFeed && idx === activeIndex) {
                                 tg?.showAlert?.('Монстр на охоте ⏳');
                                 return;
                             }
 
-                            feedSlot(slot.slotIndex);
+                            // ✅ FAST FEED
+                            feedSlotFast(slot.slotIndex);
                         }}
                     />
                 ))}
@@ -567,13 +676,13 @@ export default function MonstersFarm({ token, onBack }: Props) {
                         <div className="farm-hunt-row" data-status={hunt?.status || 'IDLE'}>
                             <div className="farm-hunt-info">
                                 {hunt?.status === 'RUNNING' ? (
-                                    <span className="farm-hunt-running">🏹 On hunt · ⏳ {formatLeft(hunt.secondsLeft)}</span>
+                                    <span className="farm-hunt-running">
+                    🏹 On hunt · ⏳ {formatLeft(hunt.secondsLeft)}
+                  </span>
                                 ) : hunt?.status === 'READY' ? (
                                     <span className="farm-hunt-ready">🏹 Finished · 🎁 Claim reward</span>
                                 ) : (
-                                    <span className="farm-hunt-feed">
-                    🏹 Feed for hunt {hunt?.feedCountForHunt ?? 0}/100
-                  </span>
+                                    <span className="farm-hunt-feed">🏹 Feed for hunt {huntFeedShown}/100</span>
                                 )}
                             </div>
 
@@ -611,7 +720,6 @@ export default function MonstersFarm({ token, onBack }: Props) {
                             : `Slot #${activeSlot?.slotIndex}`}
                     </div>
 
-                    {/* ✅ one clean status line, no spam */}
                     <div className="farm-bottom-sub">
                         {!activeSlot?.isUnlocked
                             ? `Locked · ${activeSlot?.unlockPrice ?? 0} 🪙`
@@ -622,11 +730,10 @@ export default function MonstersFarm({ token, onBack }: Props) {
                                     : meat < 1
                                         ? 'No meat 🍖'
                                         : activeMonster.level >= 5
-                                            ? `Feed for hunt: ${(hunt?.feedCountForHunt ?? (activeMonster as any)?.feedCountForHunt ?? 0)}/100`
+                                            ? `Feed for hunt: ${huntFeedShown}/100`
                                             : 'Tap monster card to feed'}
                     </div>
 
-                    {/* small inline pill */}
                     {activeSlot?.isUnlocked && activeMonster && (
                         <div className="farm-inline-pills">
                             <div className="pill">
@@ -644,9 +751,7 @@ export default function MonstersFarm({ token, onBack }: Props) {
                             {activeMonster.level >= 5 && (
                                 <div className="pill pill--soft">
                                     <span className="pill-ico">🏹</span>
-                                    <span className="pill-val">
-                    {(hunt?.feedCountForHunt ?? (activeMonster as any)?.feedCountForHunt ?? 0)}/100
-                  </span>
+                                    <span className="pill-val">{huntFeedShown}/100</span>
                                 </div>
                             )}
                         </div>
@@ -669,17 +774,15 @@ export default function MonstersFarm({ token, onBack }: Props) {
                     </button>
                 ) : (
                     <button type="button" className="farm-ghost" disabled aria-label="hint" title="Tap monster card">
-                        {busy
-                            ? '…'
-                            : canFeedActive
-                                ? activeMonster?.level >= 5
-                                    ? 'Feed for hunt'
-                                    : 'Feed'
-                                : meat < 1
-                                    ? 'Need meat'
-                                    : huntBlocksFeed
-                                        ? 'Hunt'
-                                        : 'Ready'}
+                        {canFeedActive
+                            ? activeMonster?.level >= 5
+                                ? 'Feed for hunt'
+                                : 'Feed'
+                            : meat < 1
+                                ? 'Need meat'
+                                : huntBlocksFeed
+                                    ? 'Hunt'
+                                    : 'Ready'}
                     </button>
                 )}
             </div>
@@ -743,7 +846,8 @@ function Slide({
             ? Math.max(0, Math.min(100, (xpNow / xpNext) * 100))
             : 0;
 
-    const isFeedable = !!slot.isUnlocked && !!m && meat >= 1 && !busy && !huntBlocksFeed;
+    // note: keep busy only for visuals; feed itself is not blocked by busy in parent
+    const isFeedable = !!slot.isUnlocked && !!m && meat >= 1 && !huntBlocksFeed;
 
     return (
         <div className={`farm-slide ${isActive ? 'farm-slide--active' : ''}`}>
@@ -753,11 +857,10 @@ function Slide({
                     isFeedable ? 'farm-card--tap' : ''
                 }`}
                 onClick={onClick}
+                data-prog={isMaxLevel ? 'hunt' : 'xp'} // ✅ allows hunt-specific styling if you add CSS
             >
-                {/* subtle background */}
                 <div className="farm-card-bg" />
 
-                {/* tap FX only for active */}
                 {isActive && <div key={tapFx} className="farm-tap-flash" />}
 
                 <div className="farm-card-top">
@@ -831,17 +934,15 @@ function Slide({
                                     busy ? 'is-busy' : isFeedable ? 'is-good' : meat < 1 ? 'is-warn' : 'is-idle'
                                 }`}
                             >
-                                {busy
-                                    ? '…'
-                                    : huntBlocksFeed
-                                        ? 'On hunt ⏳'
-                                        : isFeedable
-                                            ? isMaxLevel
-                                                ? 'Feed for hunt'
-                                                : 'Tap to feed'
-                                            : meat < 1
-                                                ? 'Need meat 🍖'
-                                                : 'Tap'}
+                                {huntBlocksFeed
+                                    ? 'On hunt ⏳'
+                                    : isFeedable
+                                        ? isMaxLevel
+                                            ? 'Feed for hunt'
+                                            : 'Tap to feed'
+                                        : meat < 1
+                                            ? 'Need meat 🍖'
+                                            : 'Tap'}
                             </div>
                         </div>
                     </>
