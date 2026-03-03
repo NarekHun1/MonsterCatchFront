@@ -761,3 +761,16 @@ button { font-family: inherit; }
     }
     .farm-card{ padding: 9px 11px 11px; }
 }
+/* ===== HUNT progress styling (LVL5 feedCountForHunt) ===== */
+.farm-card[data-prog="hunt"] .farm-xpfill{
+    background: linear-gradient(90deg, #ffd36a, #ffb703);
+    box-shadow: 0 0 18px rgba(255,183,3,0.22);
+}
+.farm-card[data-prog="hunt"] .farm-xpglow{
+    background: radial-gradient(circle, rgba(255,211,106,0.18), rgba(255,211,106,0) 55%);
+    opacity: 0.75;
+}
+.farm-card[data-prog="hunt"] .farm-xpbar{
+    border-color: rgba(255,211,106,0.18);
+    background: rgba(255,211,106,0.10);
+}
