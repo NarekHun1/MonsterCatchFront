@@ -15,7 +15,7 @@ interface GameProps {
     t: (key: string) => string;
     onStarsChange?: (stars: number) => void;
     onStatsChange?: (stats: { stars: number; level: number; xp: number }) => void;
-    tournamentId?: number; // ✅ ЕДИНСТВЕННЫЙ ИСТОЧНИК
+    tournamentId?: number;
 }
 
 type GameStatus = 'idle' | 'running' | 'finished';
@@ -23,7 +23,7 @@ type GamePhase = 'intro' | 'playing';
 type MonsterRarity = 'common' | 'rare' | 'epic' | 'legendary' | 'meet';
 
 interface MonsterDef {
-    img: string; // ✅ SVG файл
+    img: string;
     rarity: MonsterRarity;
     score: number;
     weight: number;
@@ -41,8 +41,6 @@ const MONSTERS: MonsterDef[] = [
     { img: rareImg, rarity: 'rare', score: 3, weight: 25 },
     { img: epicImg, rarity: 'epic', score: 5, weight: 10 },
     { img: legendaryImg, rarity: 'legendary', score: 10, weight: 5 },
-
-    // ✅ MEAT monster (MELAS/MEAT)
     { img: melasImg, rarity: 'meet', score: 1, weight: 8 },
 ];
 
@@ -50,16 +48,18 @@ function pickRandomMonster(): MonsterDef {
     const totalWeight = MONSTERS.reduce((sum, m) => sum + m.weight, 0);
     const rnd = Math.random() * totalWeight;
     let acc = 0;
+
     for (const m of MONSTERS) {
         acc += m.weight;
         if (rnd <= acc) return m;
     }
+
     return MONSTERS[0];
 }
 
 function randomPosition() {
-    const x = 15 + Math.random() * 70; // 15–85%
-    const y = 20 + Math.random() * 60; // 20–80%
+    const x = 15 + Math.random() * 70;
+    const y = 20 + Math.random() * 60;
     return { x, y };
 }
 
@@ -82,8 +82,6 @@ export function Game({
     const [epicCount, setEpicCount] = useState<number>(0);
     const [error, setError] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
-
-    // ✅ meat counter (only when 'meet' monster is caught)
     const [melasCount, setMelasCount] = useState<number>(0);
 
     const [monster, setMonster] = useState<MonsterDef>(MONSTERS[0]);
@@ -96,69 +94,105 @@ export function Game({
 
     const timerRef = useRef<number | null>(null);
     const finishSentRef = useRef(false);
-
-    // ✅ SFX: monster click (один раз создаём, потом переиспользуем)
+    const hitLockRef = useRef(false);
     const catchAudioRef = useRef<HTMLAudioElement | null>(null);
+
+    const scoreRef = useRef(0);
+    const clicksRef = useRef(0);
+    const epicCountRef = useRef(0);
+    const melasCountRef = useRef(0);
+    const gameIdRef = useRef<number | null>(null);
+
+    useEffect(() => {
+        scoreRef.current = score;
+    }, [score]);
+
+    useEffect(() => {
+        clicksRef.current = clicks;
+    }, [clicks]);
+
+    useEffect(() => {
+        epicCountRef.current = epicCount;
+    }, [epicCount]);
+
+    useEffect(() => {
+        melasCountRef.current = melasCount;
+    }, [melasCount]);
+
+    useEffect(() => {
+        gameIdRef.current = gameId;
+    }, [gameId]);
 
     const playCatchSound = async () => {
         try {
             if (!catchAudioRef.current) {
                 const a = new Audio(catchSfx);
                 a.preload = 'auto';
-                a.volume = 0.7; // подстрой
+                a.volume = 0.7;
                 catchAudioRef.current = a;
             }
+
             const a = catchAudioRef.current;
-            a.currentTime = 0; // чтобы можно было часто кликать
+            a.currentTime = 0;
             await a.play();
         } catch {
-            // если звук заблокирован — просто молчим
+            // ignore autoplay/mobile audio errors
         }
     };
 
-    const clearTimer = () => {
+    const clearTimer = useCallback(() => {
         if (timerRef.current !== null) {
             window.clearInterval(timerRef.current);
             timerRef.current = null;
         }
-    };
-
-    const startLocalTimer = useCallback((durationMs: number) => {
-        clearTimer();
-        const start = Date.now();
-        setRemainingMs(durationMs);
-
-        timerRef.current = window.setInterval(() => {
-            const elapsed = Date.now() - start;
-            const left = durationMs - elapsed;
-
-            if (left <= 0) {
-                setRemainingMs(0);
-                clearTimer();
-                setStatus('finished');
-            } else {
-                setRemainingMs(left);
-            }
-        }, 100);
     }, []);
 
-    // ✅ /game/finish
-    const finishGame = useCallback(async () => {
-        if (!gameId || finishSentRef.current) return;
-        finishSentRef.current = true;
+    const startLocalTimer = useCallback(
+        (durationMs: number) => {
+            clearTimer();
 
+            const startAt = Date.now();
+            setRemainingMs(durationMs);
+
+            timerRef.current = window.setInterval(() => {
+                const elapsed = Date.now() - startAt;
+                const left = durationMs - elapsed;
+
+                if (left <= 0) {
+                    setRemainingMs(0);
+                    clearTimer();
+                    setStatus('finished');
+                    return;
+                }
+
+                // men'she renderov, no tajmer vsyo ravno gladkiy
+                setRemainingMs(left);
+            }, 200);
+        },
+        [clearTimer],
+    );
+
+    const finishGame = useCallback(async () => {
+        const currentGameId = gameIdRef.current;
+        if (!currentGameId || finishSentRef.current) return;
+
+        finishSentRef.current = true;
         setLoading(true);
 
         try {
-            // 1️⃣ Завершаем игру
+            const finalScore = scoreRef.current;
+            const finalClicks = clicksRef.current;
+            const finalEpicCount = epicCountRef.current;
+            const finalMelasCount = melasCountRef.current;
+
             const res = await apiFetch('/game/finish', token, {
                 method: 'POST',
                 body: JSON.stringify({
-                    gameId,
-                    score,
-                    clicks,
-                    epicCount,
-                    melasCount, // ✅ отправляем
+                    gameId: currentGameId,
+                    score: finalScore,
+                    clicks: finalClicks,
+                    epicCount: finalEpicCount,
+                    melasCount: finalMelasCount,
                 }),
             });
 
@@ -168,8 +202,9 @@ export function Game({
                 throw new Error((data as any)?.message || 'Не удалось завершить игру');
             }
 
-            // 2️⃣ Локальные обновления
-            setBestScore((prev) => (prev === null || score > prev ? score : prev));
+            setBestScore((prev) =>
+                prev === null || finalScore > prev ? finalScore : prev,
+            );
 
             if (typeof (data as any).totalStars === 'number') {
                 onStarsChange?.((data as any).totalStars);
@@ -186,13 +221,12 @@ export function Game({
                 });
             }
 
-            // 3️⃣ 🔥 ОТПРАВКА РЕЗУЛЬТАТА В ТУРНИР (НОВЫЙ КОНТРАКТ)
             if (tournamentId) {
                 const tRes = await apiFetch('/tournament/submit-score', token, {
                     method: 'POST',
                     body: JSON.stringify({
-                        tournamentId, // ✅ ЧИСЛО
-                        score,
+                        tournamentId,
+                        score: finalScore,
                     }),
                 });
 
@@ -215,26 +249,32 @@ export function Game({
         } finally {
             setLoading(false);
         }
-    }, [
-        gameId,
-        score,
-        clicks,
-        epicCount,
-        melasCount, // ✅ ОБЯЗАТЕЛЬНО
-        token,
-        tournamentId,
-        onStarsChange,
-        onStatsChange,
-    ]);
+    }, [token, tournamentId, onStarsChange, onStatsChange]);
 
-    // ✅ ПРАВИЛЬНЫЙ /game/start
     const startGame = useCallback(async () => {
         try {
             setError('');
             setLoading(true);
-            setScore(0);
+            setPhase('intro');
             setStatus('idle');
+
             finishSentRef.current = false;
+            hitLockRef.current = false;
+
+            setScore(0);
+            scoreRef.current = 0;
+
+            setClicks(0);
+            clicksRef.current = 0;
+
+            setEpicCount(0);
+            epicCountRef.current = 0;
+
+            setMelasCount(0);
+            melasCountRef.current = 0;
+
+            setHits([]);
+            setIsHit(false);
 
             const res = await apiFetch('/game/start', token, {
                 method: 'POST',
@@ -248,18 +288,16 @@ export function Game({
             }
 
             const duration = (data as any).roundDurationMs ?? 60_000;
+            const startedGameId = (data as any).gameId;
 
-            setGameId((data as any).gameId);
+            setGameId(startedGameId);
+            gameIdRef.current = startedGameId;
+
             setTotalMs(duration);
             setRemainingMs(duration);
 
             setMonster(pickRandomMonster());
             setMonsterPos(randomPosition());
-
-            setScore(0);
-            setClicks(0);
-            setEpicCount(0);
-            setMelasCount(0); // ✅ reset
 
             setStatus('running');
             setPhase('playing');
@@ -272,19 +310,27 @@ export function Game({
         }
     }, [startLocalTimer, token]);
 
-    // когда статус finished — шлём результат один раз
     useEffect(() => {
-        if (status === 'finished' && gameId) {
+        if (status === 'finished' && gameIdRef.current) {
             clearTimer();
             void finishGame();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [status]);
+    }, [status, finishGame, clearTimer]);
 
     useEffect(() => {
+        const imgs = [commonImg, rareImg, epicImg, legendaryImg, melasImg];
+        imgs.forEach((src) => {
+            const img = new Image();
+            img.src = src;
+        });
+
+        const audio = new Audio(catchSfx);
+        audio.preload = 'auto';
+        catchAudioRef.current = audio;
+
         return () => {
             clearTimer();
-            // ✅ cleanup audio
+
             if (catchAudioRef.current) {
                 try {
                     catchAudioRef.current.pause();
@@ -292,38 +338,91 @@ export function Game({
                 catchAudioRef.current = null;
             }
         };
-    }, []);
+    }, [clearTimer]);
 
-    const handleCatch = () => {
+    const handleCatch = useCallback(() => {
         if (status !== 'running') return;
+        if (hitLockRef.current) return;
 
+        hitLockRef.current = true;
         void playCatchSound();
 
+        const currentMonster = monster;
+        const currentPos = monsterPos;
+
         setIsHit(true);
-        setTimeout(() => setIsHit(false), 120);
+        window.setTimeout(() => {
+            setIsHit(false);
+        }, 120);
 
-        setClicks((c) => c + 1);
+        setClicks((prev) => {
+            const next = prev + 1;
+            clicksRef.current = next;
+            return next;
+        });
 
-        // ✅ meat monster counter (ВАЖНО: rarity === 'meet', НЕ 'melas')
-        if (monster.rarity === 'meet') {
-            setMelasCount((m) => m + 1);
+        if (currentMonster.rarity === 'meet') {
+            setMelasCount((prev) => {
+                const next = prev + 1;
+                melasCountRef.current = next;
+                return next;
+            });
         }
 
-        if (monster.rarity === 'epic') {
-            setEpicCount((e) => e + 1);
+        if (currentMonster.rarity === 'epic') {
+            setEpicCount((prev) => {
+                const next = prev + 1;
+                epicCountRef.current = next;
+                return next;
+            });
         }
 
-        setScore((s) => s + monster.score);
+        setScore((prev) => {
+            const next = prev + currentMonster.score;
+            scoreRef.current = next;
+            return next;
+        });
 
         const hitId = Date.now() + Math.random();
-        const { x, y } = monsterPos;
-        setHits((prev) => [...prev, { id: hitId, x, y, amount: monster.score }]);
-        setTimeout(() => {
+
+        setHits((prev) => [
+            ...prev,
+            {
+                id: hitId,
+                x: currentPos.x,
+                y: currentPos.y,
+                amount: currentMonster.score,
+            },
+        ]);
+
+        window.setTimeout(() => {
             setHits((prev) => prev.filter((h) => h.id !== hitId));
         }, 500);
 
         setMonster(pickRandomMonster());
         setMonsterPos(randomPosition());
+
+        requestAnimationFrame(() => {
+            hitLockRef.current = false;
+        });
+    }, [status, monster, monsterPos]);
+
+    const handleBack = () => {
+        clearTimer();
+        onBack();
+    };
+
+    const handleRestartToIntro = () => {
+        clearTimer();
+        hitLockRef.current = false;
+        finishSentRef.current = false;
+        setPhase('intro');
+        setStatus('idle');
+        setGameId(null);
+        gameIdRef.current = null;
+        setRemainingMs(totalMs);
+        setHits([]);
+        setIsHit(false);
     };
 
     const secondsLeft = Math.ceil(remainingMs / 1000);
@@ -332,15 +431,12 @@ export function Game({
 
     return (
         <div className="game-fullscreen">
-            {/* Верхняя панель */}
             <div className="game-topbar">
                 <button
                     className="game-back-btn"
-                    onClick={() => {
-                        clearTimer();
-                        onBack();
-                    }}
+                    onClick={handleBack}
                     disabled={loading}
+                    type="button"
                 >
                     ← {t('back')}
                 </button>
@@ -351,12 +447,14 @@ export function Game({
                             <span className="game-hud-label">{t('score')}</span>
                             <span className="game-hud-value">{score}</span>
                         </div>
+
                         <div className="game-hud-item">
                             <span className="game-hud-label">{t('best')}</span>
                             <span className="game-hud-value">
                 {bestScore !== null ? bestScore : '—'}
               </span>
                         </div>
+
                         <div className="game-hud-item">
                             <span className="game-hud-label">{t('time')}</span>
                             <span className="game-hud-value">
@@ -367,7 +465,6 @@ export function Game({
                 )}
             </div>
 
-            {/* Таймер — только в игре */}
             {phase === 'playing' && (
                 <div className="game-timer-bar game-timer-bar--overlay">
                     <div
@@ -377,7 +474,6 @@ export function Game({
                 </div>
             )}
 
-            {/* Интро-экран */}
             {phase === 'intro' && (
                 <div className="game-intro">
                     <div className="game-intro-top">
@@ -402,13 +498,13 @@ export function Game({
                         className="game-start-btn"
                         onClick={() => void startGame()}
                         disabled={loading}
+                        type="button"
                     >
                         {loading ? t('loading') : t('startGame')}
                     </button>
                 </div>
             )}
 
-            {/* Полноэкранная арена */}
             {phase === 'playing' && (
                 <div className="game-arena game-arena--fullscreen">
                     <div
@@ -423,13 +519,19 @@ export function Game({
                         style={{
                             left: `${monsterPos.x}%`,
                             top: `${monsterPos.y}%`,
+                            touchAction: 'manipulation',
+                            WebkitTapHighlightColor: 'transparent',
                         }}
-                        onClick={handleCatch}
+                        onPointerDown={handleCatch}
+                        role="button"
+                        tabIndex={0}
+                        aria-label="Catch monster"
                     >
                         <img
                             className="game-monster-img game-monster-img--arena"
                             src={monster.img}
                             alt={monster.rarity}
+                            draggable={false}
                         />
                     </div>
 
@@ -460,16 +562,13 @@ export function Game({
                         <div className="game-finish-actions">
                             <button
                                 className="game-restart-btn"
-                                onClick={() => {
-                                    setPhase('intro');
-                                    setStatus('idle');
-                                    setGameId(null);
-                                }}
+                                onClick={handleRestartToIntro}
+                                type="button"
                             >
                                 🔄 {t('restart')}
                             </button>
 
-                            <button className="game-back-btn" onClick={onBack}>
+                            <button className="game-back-btn" onClick={handleBack} type="button">
                                 ⬅ {t('back')}
                             </button>
                         </div>
