@@ -1,42 +1,31 @@
 // src/App.tsx
-import { useCallback, useEffect, useState } from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import { Game } from './Game';
 import './App.css';
 import { InviteFriends } from './InviteFriends';
 import { HeroCard } from './HeroCard';
 import { apiFetch } from './api';
-import HeroViewer from './HeroViewer';
+import HeroViewer from './HeroViewer'; // 😈 3D демон
 import { initAuth } from './auth/initAuth';
 import { Wallet } from './Wallet';
-import { WalletIcon } from './styles/WalletIcon.tsx';
-import { TournamentCard } from './TournamentCard.tsx';
+import {WalletIcon} from "./styles/WalletIcon.tsx";
+import {TournamentCard} from "./TournamentCard.tsx";
 import { ExchangeTicket } from './ExchangeTicket';
-import { BlueStarIcon } from './styles/BlueStarIcon.tsx';
-import { CashCupCard } from './CashCupCard.tsx';
+import {BlueStarIcon} from "./styles/BlueStarIcon.tsx";
+import {CashCupCard} from "./CashCupCard.tsx";
 import { RouletteWheel } from './RouletteWheel';
 import { translations } from './i18n';
 import type { Lang } from './i18n';
-import { Quests } from './Quests.tsx';
+import {Quests} from "./Quests.tsx";
 import { BottomNav } from './BottomNav';
 import LevelsMap from './match3/LevelsMap.tsx';
 import Match3Level from './match3/Match3Level.tsx';
-import MonstersFarm from './MonstersFarm.tsx';
+import MonstersFarm from "./MonstersFarm.tsx";
 import { Market } from './Market';
 import { EventTournamentCard } from './EventTournamentCard';
 
-type Page =
-    | 'menu'
-    | 'game'
-    | 'leaderboard'
-    | 'invite'
-    | 'tournament'
-    | 'wallet'
-    | 'cashcup'
-    | 'roulette'
-    | 'quests'
-    | 'match3'
-    | 'monsters'
-    | 'market';
+
+type Page = 'menu' | 'game' | 'leaderboard' | 'invite' | 'tournament' | 'wallet' | 'cashcup'| 'roulette' | 'quests'| 'match3'| 'monsters'|'market';
 
 interface MeResponse {
     id: number;
@@ -60,41 +49,29 @@ interface LeaderboardItem {
     };
 }
 
-function Leaderboard({ reloadKey }: { reloadKey: number }) {
+function Leaderboard() {
     const [items, setItems] = useState<LeaderboardItem[]>([]);
     const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
-
-    const loadLeaderboard = useCallback(async () => {
-        try {
-            setLoading(true);
-            setError('');
-
-            const res = await apiFetch('/game/leaderboard');
-            const data = await res.json().catch(() => ({}));
-
-            if (!res.ok) {
-                throw new Error(data.message || 'Не удалось загрузить таблицу лидеров');
-            }
-
-            setItems(Array.isArray(data) ? data : []);
-        } catch (e: any) {
-            console.error('Leaderboard load failed:', e);
-            setError(e.message || 'Ошибка загрузки лидеров');
-        } finally {
-            setLoading(false);
-        }
-    }, []);
 
     useEffect(() => {
-        void loadLeaderboard();
-    }, [loadLeaderboard, reloadKey]);
+        apiFetch('/game/leaderboard')
+            .then(async (res) => {
+                if (!res.ok) {
+                    const data = await res.json().catch(() => ({}));
+                    throw new Error(data.message || 'Не удалось загрузить таблицу лидеров');
+                }
+                return res.json();
+            })
+            .then((data) => setItems(data))
+            .catch((e: any) => {
+                setError(e.message || 'Ошибка загрузки лидеров');
+            });
+    }, []);
 
     return (
         <div className="leaderboard-container">
             <h2 className="leaderboard-title">🏆 Таблица лидеров</h2>
 
-            {loading && <p className="panel-muted">Загрузка...</p>}
             {error && <p className="panel-error">{error}</p>}
 
             <div className="leaderboard-big-list">
@@ -133,7 +110,7 @@ interface Quest {
 function DailyQuests({
                          token,
                          onStarsChange,
-                         t,
+                         t
                      }: {
     token: string;
     onStarsChange?: (stars: number) => void;
@@ -180,7 +157,7 @@ function DailyQuests({
         return () => {
             canceled = true;
         };
-    }, [token, onStarsChange]);
+    }, [token]);
 
     const handleClaim = async (questId: string) => {
         try {
@@ -224,9 +201,7 @@ function DailyQuests({
         return (
             <div className="panel">
                 <h2 className="panel-title">{t('dailyQuests')}</h2>
-                <p className="panel-muted">
-                    {t('error')}: {error}
-                </p>
+                <p className="panel-muted">{t('error')}: {error}</p>
             </div>
         );
     }
@@ -242,8 +217,8 @@ function DailyQuests({
                             <div className="daily-row">
                                 <span>{q.title}</span>
                                 <span className="daily-progress-text">
-                  {Math.min(q.current, q.target)} / {q.target}
-                </span>
+                                        {Math.min(q.current, q.target)} / {q.target}
+                                    </span>
                             </div>
                             <div className="daily-bar">
                                 <div
@@ -265,8 +240,8 @@ function DailyQuests({
                                     </button>
                                 ) : (
                                     <span className="daily-badge daily-badge--grey">
-                    {t('inProgress')}
-                  </span>
+                                            {t('inProgress')}
+                                        </span>
                                 )}
                             </div>
                         </div>
@@ -286,13 +261,8 @@ interface ShopItem {
     canBuy: boolean;
 }
 
-function Shop({
-                  token,
-                  translate,
-              }: {
-    token: string;
-    translate: (key: string) => string;
-}) {
+function Shop({ token, translate }: { token: string ,translate: (key: string) => string; })
+{
     const [items, setItems] = useState<ShopItem[]>([]);
     const [stars, setStars] = useState<number>(0);
     const [error, setError] = useState('');
@@ -361,16 +331,10 @@ function Shop({
     return (
         <div className="panel">
             <h2 className="panel-title">🛒 {translate('shopTitle')}</h2>
-            <p className="panel-muted">
-                {translate('yourStars')}: <BlueStarIcon size={16} /> {stars}
-            </p>
+            <p className="panel-muted">{translate('yourStars')}:  <BlueStarIcon size={16} /> {stars}</p>
 
             {loading && <p className="panel-muted">{translate('loading')}</p>}
-            {error && (
-                <p className="panel-error">
-                    {translate('error')}:{error}
-                </p>
-            )}
+            {error && <p className="panel-error">{translate('error')}:{error}</p>}
 
             <div className="shop-list">
                 {items.map((item) => (
@@ -378,13 +342,11 @@ function Shop({
                         <div className="shop-row">
                             <span className="shop-title">{item.title}</span>
                             <span className="shop-level">
-                Уровень: {item.level} / {item.maxLevel}
-              </span>
+                                    Уровень: {item.level} / {item.maxLevel}
+                                </span>
                         </div>
                         <div className="shop-row">
-              <span className="shop-price">
-                {translate('price')}: {item.price} <BlueStarIcon size={16} />
-              </span>
+                            <span className="shop-price">{translate('price')}: {item.price}  <BlueStarIcon size={16}/></span>
                             <button
                                 className="shop-buy-btn"
                                 onClick={() => handleBuy(item.id)}
@@ -430,7 +392,8 @@ function App() {
     const [currentPage, setCurrentPage] = useState<Page>('menu');
     const [showHero, setShowHero] = useState(false);
     const [tournamentGameId, setTournamentGameId] = useState<number | null>(null);
-    const [, setTournamentType] = useState<'HOURLY' | 'DAILY' | null>(null);
+    const [,setTournamentType] =
+        useState<'HOURLY' | 'DAILY' | null>(null);
     const [isBooting, setIsBooting] = useState(true);
     const [showRoulette, setShowRoulette] = useState(false);
     const [minDelayPassed, setMinDelayPassed] = useState(false);
@@ -440,11 +403,10 @@ function App() {
     const [questsDot, setQuestsDot] = useState(false);
     const [match3Level, setMatch3Level] = useState<number | null>(null);
     const [showEventAd, setShowEventAd] = useState(false);
-    const [showCoinShop, setShowCoinShop] = useState(false);
-
-    const [leaderboardReloadKey, setLeaderboardReloadKey] = useState(0);
 
     const t = (key: string) => translations[lang][key] || key;
+
+// ───────────────── EVENT AD CONTROL ─────────────────
 
     const EVENT_SLUG = 'big-march-2026';
 
@@ -474,11 +436,13 @@ function App() {
             setLang('ru');
         }
     }, []);
-
     useEffect(() => {
         if (isBooting) return;
+
+        // ✅ если юзер уже участвовал/играл Big March — НЕ показываем никогда
         if (isEventDone(EVENT_SLUG)) return;
 
+        // дальше твоя логика "раз в день"
         const today = new Date().toISOString().slice(0, 10);
         const lastSeen = localStorage.getItem('mc_event_ad_last_seen');
         if (lastSeen === today) return;
@@ -487,15 +451,23 @@ function App() {
         localStorage.setItem('mc_event_ad_last_seen', today);
     }, [isBooting]);
 
+    // 👇 состояние для магазина монет
+    const [showCoinShop, setShowCoinShop] = useState(false);
+
+    // минимальная длительность сплэша — 1500 мс
     useEffect(() => {
         const timer = setTimeout(() => {
             setMinDelayPassed(true);
-        }, 2000);
+        }, 2000); // можешь поставить 2000, если хочешь ещё дольше
 
         return () => clearTimeout(timer);
     }, []);
 
+
     useEffect(() => {
+        // прятать сплэш только когда:
+        // 1) либо авторизовались (есть token) либо ошибка (error)
+        // 2) и прошла минимальная задержка
         if ((token || error) && minDelayPassed) {
             setIsBooting(false);
         }
@@ -514,12 +486,15 @@ function App() {
             } catch {}
         };
 
+        // 1) сразу
         doExpand();
 
+        // 2) чуть позже — на iOS это часто решает “не фулл”
         const t1 = setTimeout(doExpand, 120);
         const t2 = setTimeout(doExpand, 350);
         const t3 = setTimeout(doExpand, 900);
 
+        // 3) ещё и на resize (когда телега пересчитает размеры)
         const onResize = () => doExpand();
         tg.onEvent?.('viewportChanged', onResize);
 
@@ -536,14 +511,18 @@ function App() {
         const tg = (window as any).Telegram?.WebApp;
         if (!tg) return;
 
+        // когда приложение реально показало UI
         tg.expand?.();
     }, [isBooting]);
+
+
 
     useEffect(() => {
         if (currentPage !== 'menu') {
             setShowHero(false);
         }
     }, [currentPage]);
+
 
     useEffect(() => {
         if (!token) return;
@@ -604,9 +583,10 @@ function App() {
 
     useEffect(() => {
         if (!token) return;
-        void refreshQuestsDot();
+        refreshQuestsDot();
     }, [token, refreshQuestsDot]);
 
+    // кнопка "Купить монеты" в меню
     const buyCoinsMenu = () => {
         setShowCoinShop(true);
     };
@@ -620,6 +600,7 @@ function App() {
                 import.meta.env.VITE_API_BASE_URL ||
                 'https://monstercatch-production.up.railway.app';
 
+            // ❗ вызываем свой backend, а НЕ бота через sendData
             const res = await fetch(`${backendUrl}/payment/create-stars-invoice`, {
                 method: 'POST',
                 headers: {
@@ -635,6 +616,7 @@ function App() {
                 throw new Error(data.message || 'Не удалось создать оплату');
             }
 
+            // 🔥 открываем Stars-оплату ПРЯМО в игре
             tg.openInvoice(data.invoiceLink, (status: string) => {
                 console.log('Invoice status:', status);
             });
@@ -643,22 +625,25 @@ function App() {
             tg.showAlert?.(e.message || 'Ошибка создания платежа');
         }
     };
-
     useEffect(() => {
         (async () => {
-            const tkn = await initAuth();
+            const t = await initAuth();
 
-            if (!tkn) {
+            if (!t) {
                 setError(
                     'Запусти игру через Telegram (кнопка «Играть» в боте или через раздел Игр).',
                 );
+                // setIsBooting(false);
                 return;
             }
 
-            setToken(tkn);
+            setToken(t);
         })();
     }, []);
 
+
+
+    // 🔁 обновляем профиль после закрытия invoice (после оплаты Stars)
     useEffect(() => {
         const tg = (window as any).Telegram?.WebApp;
         if (!tg) return;
@@ -675,9 +660,13 @@ function App() {
                             ? {
                                 ...prev,
                                 coins:
-                                    typeof data.coins === 'number' ? data.coins : prev.coins,
+                                    typeof data.coins === 'number'
+                                        ? data.coins
+                                        : prev.coins,
                                 stars:
-                                    typeof data.stars === 'number' ? data.stars : prev.stars,
+                                    typeof data.stars === 'number'
+                                        ? data.stars
+                                        : prev.stars,
                             }
                             : data,
                     );
@@ -715,22 +704,6 @@ function App() {
         );
     };
 
-    const refreshLeaderboard = useCallback(async () => {
-        setLeaderboardReloadKey((prev) => prev + 1);
-
-        if (!token) return;
-
-        try {
-            const meRes = await apiFetch('/users/me', token);
-            const meData = await meRes.json().catch(() => ({}));
-            if (meRes.ok) {
-                setMe((prev) => (prev ? { ...prev, ...meData } : meData));
-            }
-        } catch (e) {
-            console.error('refreshLeaderboard profile sync failed:', e);
-        }
-    }, [token]);
-
     if (isBooting && !error) {
         return (
             <div className="splash-root">
@@ -750,10 +723,12 @@ function App() {
         );
     }
 
+
     return (
         <div className="app-root">
             <div className="app-bg-glow" />
 
+            {/* ХЕДЕР НА ВЕСЬ ЭКРАН */}
             {currentPage !== 'game' && (
                 <header className="app-header">
                     {me && userId && (
@@ -777,6 +752,7 @@ function App() {
                                     <span className="user-pill-value">{me.stars}</span>
                                 </div>
 
+
                                 <div className="user-pill user-pill--coins">
                                     <span className="user-pill-icon">🪙</span>
                                     <span className="user-pill-value">{me.coins}</span>
@@ -797,7 +773,7 @@ function App() {
                                     <div className="header-lang-wrapper">
                                         <button
                                             className="lang-glass-btn"
-                                            onClick={() => setShowLangMenu((v) => !v)}
+                                            onClick={() => setShowLangMenu(v => !v)}
                                         >
                                             🌍
                                         </button>
@@ -826,12 +802,15 @@ function App() {
                                         )}
                                     </div>
                                 </div>
+
+
                             </div>
                         </div>
                     )}
                 </header>
             )}
 
+            {/* ВСЯ ОСТАЛЬНАЯ ИГРА — ВНУТРИ КАРТОЧКИ */}
             <main className={`app-shell ${currentPage === 'game' ? 'game-active' : ''}`}>
                 {error && (
                     <div className="panel panel-error-box">
@@ -866,7 +845,6 @@ function App() {
                                 <div className="tab-icon">🎯</div>
                                 <div className="tab-label">{t('tournaments')}</div>
                             </button>
-
                             <button
                                 className={`menu-tab ${currentPage === 'leaderboard' ? 'menu-tab--active' : ''}`}
                                 onClick={() => goTo('leaderboard')}
@@ -874,6 +852,7 @@ function App() {
                                 <div className="tab-icon">📊</div>
                                 <div className="tab-label">{t('leaderboard')}</div>
                             </button>
+
                         </nav>
 
                         {currentPage === 'cashcup' && token && (
@@ -888,14 +867,12 @@ function App() {
                             />
                         )}
 
+
                         {currentPage === 'menu' && me && (
                             <div className="panel panel-menu">
                                 <HeroCard level={me.level} xp={me.xp} />
 
-                                <button
-                                    className="play-main-btn"
-                                    onClick={() => setCurrentPage('game')}
-                                >
+                                <button className="play-main-btn" onClick={() => setCurrentPage('game')}>
                                     <span className="play-glow" />
                                     <span className="play-shine" />
 
@@ -904,22 +881,28 @@ function App() {
                                 </button>
 
                                 <div className="menu-actions">
+                                    {/* КУПИТЬ МОНЕТЫ */}
                                     <div className="buy-coins-card" onClick={buyCoinsMenu}>
                                         <div className="buy-coins-glow" />
 
                                         <div className="buy-coins-icon">🪙</div>
 
                                         <div className="buy-coins-content">
-                                            <div className="buy-coins-title">{t('buyCoins')}</div>
+                                            <div className="buy-coins-title">
+                                                {t('buyCoins')}
+                                            </div>
 
                                             <div className="buy-coins-subtitle">
                                                 {t('buyCoinsSubtitle')}
                                             </div>
 
-                                            <div className="buy-coins-note">{t('buyCoinsNote')}</div>
+                                            <div className="buy-coins-note">
+                                                {t('buyCoinsNote')}
+                                            </div>
                                         </div>
                                     </div>
 
+                                    {/* 💰 CASH CUP */}
                                     <div
                                         className="cashcup-card"
                                         onClick={() => setCurrentPage('cashcup')}
@@ -944,12 +927,9 @@ function App() {
                                         <div className="cashcup-footer">
                                             <span>▶ {t('enterAndWin')}</span>
                                         </div>
-                                    </div>
 
-                                    <div
-                                        className="menu-card menu-card--gold"
-                                        onClick={() => setShowRoulette(true)}
-                                    >
+                                    </div>
+                                    <div className="menu-card menu-card--gold" onClick={() => setShowRoulette(true)}>
                                         <div className="menu-icon">🎰</div>
                                         <div className="menu-card-title">{t('rouletteDesc')}</div>
                                         <div className="menu-card-text">{t('rouletteDesc')}</div>
@@ -962,16 +942,20 @@ function App() {
                             {currentPage === 'menu' && (
                                 <div className="panel panel-menu">
                                     <h2 className="panel-title">{t('mainMenuTitle')}</h2>
-                                    <p className="panel-muted">{t('mainMenuDesc')}</p>
-
+                                    <p className="panel-muted">
+                                        {t('mainMenuDesc')}
+                                    </p>
                                     <div className="menu-grid">
+
                                         <button
                                             className="menu-card"
                                             onClick={() => setCurrentPage('wallet')}
                                         >
                                             <div className="menu-icon">👛</div>
                                             <div className="menu-card-title">{t('wallet')}</div>
-                                            <div className="menu-card-text">{t('walletDesc')}</div>
+                                            <div className="menu-card-text">
+                                                {t('walletDesc')}
+                                            </div>
                                         </button>
 
                                         <button
@@ -979,20 +963,23 @@ function App() {
                                             onClick={() => setCurrentPage('quests')}
                                         >
                                             <div className="menu-icon">✅</div>
-                                            <div className="menu-card-title">
-                                                {t('tasks') || 'Задания'}
-                                            </div>
+                                            <div className="menu-card-title">{t('tasks') || 'Задания'}</div>
                                             <div className="menu-card-text">
                                                 {t('tasksDesc') || 'Подпишись и получи 🎟 билеты'}
                                             </div>
                                         </button>
 
-                                        <button className="menu-card" onClick={() => goTo('game')}>
+                                        <button
+                                            className="menu-card"
+                                            onClick={() => goTo('game')}
+                                        >
                                             <div className="menu-icon">🎮</div>
-                                            <div className="menu-card-title">{t('singleGame')}</div>
-                                            <div className="menu-card-text">{t('singleGameDesc')}</div>
+                                            <div className="menu-card-title">
+                                                {t('singleGame')}                                            </div>
+                                            <div className="menu-card-text">
+                                                {t('singleGameDesc')}
+                                            </div>
                                         </button>
-
                                         <button
                                             className="menu-card"
                                             onClick={() => {
@@ -1013,25 +1000,25 @@ function App() {
                                         >
                                             👥 {t('inviteFriend')}
                                         </button>
-
                                         <button
                                             className="menu-card"
                                             onClick={() => goTo('leaderboard')}
                                         >
                                             <div className="menu-icon">🏆</div>
                                             <div className="menu-card-title">{t('leaderboardTitle')}</div>
-                                            <div className="menu-card-text">{t('leaderboardDesc')}</div>
+                                            <div className="menu-card-text">
+                                                {t('leaderboardDesc')}                                            </div>
                                         </button>
-
                                         <button
                                             className="menu-card"
                                             onClick={() => goTo('tournament')}
                                         >
                                             <div className="menu-icon">🎯</div>
                                             <div className="menu-card-title">{t('tournaments')}</div>
-                                            <div className="menu-card-text">{t('tournamentDesc')}</div>
+                                            <div className="menu-card-text">
+                                                {t('tournamentDesc')}
+                                            </div>
                                         </button>
-
                                         {me && token && (
                                             <ExchangeTicket
                                                 stars={me.stars}
@@ -1041,6 +1028,7 @@ function App() {
                                                     setTickets((prev) => prev + delta)
                                                 }
                                             />
+
                                         )}
                                     </div>
 
@@ -1053,20 +1041,23 @@ function App() {
                                     )}
                                     {token && <Shop token={token} translate={t} />}
                                 </div>
-                            )}
 
+                            )}
                             {showRoulette && (
                                 <RouletteWheel
                                     token={token}
                                     onClose={() => setShowRoulette(false)}
                                     onReward={(r) => {
+                                        // ✅ мгновенное обновление UI
                                         setMe((prev) => {
                                             if (!prev) return prev;
 
                                             const next = { ...prev };
 
+                                            // списание coins за платный спин
                                             next.coins = Math.max(0, next.coins - (r.costCoins ?? 0));
 
+                                            // начисление приза
                                             if (r.type === 'COINS' || r.type === 'JACKPOT') {
                                                 next.coins = next.coins + (r.amount ?? 0);
                                             }
@@ -1081,18 +1072,23 @@ function App() {
                                         if (r.type === 'TICKETS') {
                                             setTickets((prev) => prev + (r.amount ?? 0));
                                         }
+
+                                        // (опционально) тихо синхронизировать с сервером через 400-700мс
+                                        // чтобы 100% совпало даже если на бэке что-то иначе
+                                        // setTimeout(async () => { ... apiFetch('/users/me'), apiFetch('/tickets/count') ... }, 600);
                                     }}
                                 />
                             )}
-
                             {currentPage === 'quests' && token && (
                                 <div className="panel panel-menu">
+                                    {/* 🔥 ЕЖЕДНЕВНЫЕ ЗАДАНИЯ */}
                                     <DailyQuests
                                         token={token}
                                         onStarsChange={handleStarsChange}
                                         t={t}
                                     />
 
+                                    {/* 🔽 ТВОИ ОСТАЛЬНЫЕ ЗАДАНИЯ */}
                                     <Quests
                                         token={token}
                                         t={t}
@@ -1111,6 +1107,7 @@ function App() {
                                                     setMe((prev) => (prev ? { ...prev, ...meData } : meData));
                                                 }
 
+                                                // ✅ после сбора пересчитать точку
                                                 await refreshQuestsDot();
                                             } catch (e) {
                                                 console.error(e);
@@ -1118,9 +1115,11 @@ function App() {
                                         }}
                                     />
                                 </div>
-                            )}
 
-                            {currentPage === 'monsters' && token && <MonstersFarm token={token} />}
+                            )}
+                            {currentPage === 'monsters' && token && (
+                                <MonstersFarm token={token} />
+                            )}
 
                             {currentPage === 'match3' && (
                                 <div className="panel panel-menu">
@@ -1148,8 +1147,8 @@ function App() {
                                         />
                                     )}
                                 </div>
-                            )}
 
+                            )}
                             {currentPage === 'market' && token && (
                                 <Market
                                     token={token}
@@ -1173,16 +1172,19 @@ function App() {
                                     onBack={() => {
                                         setCurrentPage('menu');
                                         setTournamentGameId(null);
-                                        setTournamentType(null);
+                                        setTournamentType(null); // 🔥 очистка
                                     }}
                                     onStarsChange={handleStarsChange}
                                     onStatsChange={handleStatsChange}
-                                    onLeaderboardRefresh={refreshLeaderboard}
                                 />
                             )}
 
+
                             {currentPage === 'wallet' && token && (
-                                <Wallet token={token} onBack={() => setCurrentPage('menu')} />
+                                <Wallet
+                                    token={token}
+                                    onBack={() => setCurrentPage('menu')}
+                                />
                             )}
 
                             {currentPage === 'invite' && token && (
@@ -1192,12 +1194,13 @@ function App() {
                                 />
                             )}
 
-                            {currentPage === 'leaderboard' && (
-                                <Leaderboard reloadKey={leaderboardReloadKey} />
-                            )}
+                            {currentPage === 'leaderboard' && <Leaderboard />}
+
+
 
                             {currentPage === 'tournament' && token && (
                                 <div className="tournament-page">
+
                                     <EventTournamentCard
                                         slug="big-march-2026"
                                         token={token}
@@ -1206,7 +1209,7 @@ function App() {
                                             setMe((prev) => (prev ? { ...prev, coins } : prev))
                                         }
                                         onStartGame={(tournamentId) => {
-                                            markEventDone('big-march-2026');
+                                            markEventDone('big-march-2026'); // 🔥 вот тут
                                             setTournamentGameId(tournamentId);
                                             setTournamentType(null);
                                             setCurrentPage('game');
@@ -1224,6 +1227,7 @@ function App() {
                                         }}
                                     />
 
+
                                     <TournamentCard
                                         type="DAILY"
                                         token={token}
@@ -1240,19 +1244,30 @@ function App() {
                                         t={t}
                                         onStartGame={(tournamentId) => {
                                             setTournamentGameId(tournamentId);
-                                            setTournamentType(null);
+                                            setTournamentType(null); // или 'CASH_CUP' если хочешь
                                             setCurrentPage('game');
                                         }}
                                     />
+                                    {/* ✅ EVENT TOURNAMENT — ВНИЗУ */}
+
+
                                 </div>
                             )}
+
                         </section>
                     </>
                 )}
 
+                {/* POPUP магазина монет */}
                 {showCoinShop && (
-                    <div className="shop-overlay" onClick={() => setShowCoinShop(false)}>
-                        <div className="shop-popup" onClick={(e) => e.stopPropagation()}>
+                    <div
+                        className="shop-overlay"
+                        onClick={() => setShowCoinShop(false)}
+                    >
+                        <div
+                            className="shop-popup"
+                            onClick={(e) => e.stopPropagation()}
+                        >
                             <h3 className="panel-title">🪙 {t('buyCoinsTitle')}</h3>
 
                             <button className="menu-btn" onClick={() => buyCoinsPack('coins_500')}>
@@ -1322,17 +1337,18 @@ function App() {
                         )}
                     </>
                 )}
-
+                {/* FIXED BOTTOM NAV */}
                 {token && (
                     <div
                         style={{
                             position: 'fixed',
-                            bottom: 84,
+                            bottom: 84, // ⬅️ выше BottomNav
                             left: 16,
                             right: 16,
                             zIndex: 50,
                         }}
-                    />
+                    >
+                    </div>
                 )}
 
                 {!error && (
@@ -1352,18 +1368,17 @@ function App() {
                         eggsBadge={0}
                         onShop={() => setCurrentPage('market')}
                         onQuests={async () => {
-                            await refreshQuestsDot();
-                            setCurrentPage('quests');
+                            await refreshQuestsDot()
+                            setCurrentPage('quests')
                         }}
                         onMonster={() => {
-                            setCurrentPage('monsters');
-                            setShowHero(false);
+                            setCurrentPage('monsters') // ✅ Monster Farm page
+                            setShowHero(false) // на всякий (если было открыто)
                         }}
                         onFriends={() => setCurrentPage('invite')}
                         onTournaments={() => setCurrentPage('tournament')}
                     />
                 )}
-
                 {showEventAd && (
                     <div className="event-ad-overlay" onClick={() => setShowEventAd(false)}>
                         <div className="event-ad-card" onClick={(e) => e.stopPropagation()}>
@@ -1391,7 +1406,7 @@ function App() {
                                     className="event-ad-btn event-ad-btn--primary"
                                     onClick={() => {
                                         setShowEventAd(false);
-                                        setCurrentPage('tournament');
+                                        setCurrentPage('tournament'); // кидаем в турниры
                                     }}
                                 >
                                     🎮 Играть
@@ -1405,7 +1420,9 @@ function App() {
                                 </button>
                             </div>
 
-                            <div className="event-ad-foot">*Успей войти до дедлайна</div>
+                            <div className="event-ad-foot">
+                                *Успей войти до дедлайна
+                            </div>
                         </div>
                     </div>
                 )}
