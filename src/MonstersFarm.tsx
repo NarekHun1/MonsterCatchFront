@@ -10,6 +10,10 @@ import rareImg from './assets/monsters/rare.svg';
 import epicImg from './assets/monsters/epic.svg';
 import legendaryImg from './assets/monsters/legendary.svg';
 
+// ✅ test monster mood images
+import testMonsterHappyImg from './assets/monsters/happy.svg';
+import testMonsterSadImg from './assets/monsters/sad.svg';
+
 interface Props {
     token: string;
     onBack?: () => void;
@@ -28,8 +32,12 @@ type CollectionMonster = {
     level: number;
     xp: number;
     xpNext: number | null;
-    feedCountForHunt?: number; // ✅ used after level 5
+    feedCountForHunt?: number;
+    lastFedAt?: string | null; // ✅ added
 };
+
+const TEST_MONSTER_ID = 1;
+const ONE_HOUR_MS = 60 * 60 * 1000;
 
 function fallbackByRarity(rarity?: string) {
     switch (rarity) {
@@ -42,6 +50,27 @@ function fallbackByRarity(rarity?: string) {
         default:
             return commonImg;
     }
+}
+
+function getMonsterMood(lastFedAt?: string | null): 'happy' | 'sad' {
+    if (!lastFedAt) return 'sad';
+
+    const fedAt = new Date(lastFedAt).getTime();
+    if (Number.isNaN(fedAt)) return 'sad';
+
+    return Date.now() - fedAt >= ONE_HOUR_MS ? 'sad' : 'happy';
+}
+
+function getMonsterImage(monster: any) {
+    if (!monster) return commonImg;
+
+    // ✅ only one test monster uses happy/sad images
+    if (Number(monster.monsterId) === TEST_MONSTER_ID) {
+        const mood = getMonsterMood(monster.lastFedAt);
+        return mood === 'happy' ? testMonsterHappyImg : testMonsterSadImg;
+    }
+
+    return monster.imgUrl || fallbackByRarity(monster.rarity);
 }
 
 export default function MonstersFarm({ token, onBack }: Props) {
@@ -65,13 +94,7 @@ export default function MonstersFarm({ token, onBack }: Props) {
     const railRef = useRef<HTMLDivElement | null>(null);
     const rafRef = useRef<number | null>(null);
 
-    // ─────────────────────────────────────────────
-    // ✅ FIX: queue-based Hamster feed (no rollback)
-    // - every tap goes to queue
-    // - one pump sends ALL taps to backend
-    // - UI is instant
-    // ─────────────────────────────────────────────
-    const feedQueueRef = useRef<Record<number, number>>({}); // slotIndex -> pending taps
+    const feedQueueRef = useRef<Record<number, number>>({});
     const feedingRef = useRef(false);
     const lastTapRef = useRef(0);
     const refreshTimerRef = useRef<number | null>(null);
@@ -83,19 +106,19 @@ export default function MonstersFarm({ token, onBack }: Props) {
     const [activeIndex, setActiveIndex] = useState(0);
     const [view, setView] = useState<MonsterCenterView>('farm');
 
-    // no full-screen loading label; show skeleton
     const [initialLoaded, setInitialLoaded] = useState(false);
 
-    const [busy, setBusy] = useState(false); // keep for unlock/assign/hunt actions
+    const [busy, setBusy] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // picker
     const [showPicker, setShowPicker] = useState(false);
     const [collection, setCollection] = useState<CollectionMonster[]>([]);
     const [pickerSlotIndex, setPickerSlotIndex] = useState<number | null>(null);
 
-    // tap flash trigger
     const [tapFx, setTapFx] = useState(0);
+
+    // ✅ re-render every 30 sec so mood changes automatically after 1 hour
+    const [, setNowTick] = useState(0);
 
     const hasSlots = slots.length > 0;
 
@@ -116,7 +139,6 @@ export default function MonstersFarm({ token, onBack }: Props) {
 
     const huntBlocksFeed = hunt?.status === 'RUNNING' && (hunt?.secondsLeft ?? 0) > 0;
 
-    // NOTE: we intentionally DON'T use "busy" here for feeding
     const canFeedActive = !!activeSlot?.isUnlocked && !!activeMonster && meat >= 1 && !huntBlocksFeed;
 
     const showHuntPanel =
@@ -235,11 +257,19 @@ export default function MonstersFarm({ token, onBack }: Props) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    // ✅ timer for auto mood update
+    useEffect(() => {
+        const t = setInterval(() => {
+            setNowTick(Date.now());
+        }, 30000);
+
+        return () => clearInterval(t);
+    }, []);
+
     useEffect(() => {
         return () => {
             if (rafRef.current) cancelAnimationFrame(rafRef.current);
             if (refreshTimerRef.current) window.clearTimeout(refreshTimerRef.current);
-            // clear queue on unmount (safe)
             feedQueueRef.current = {};
             feedingRef.current = false;
         };
@@ -354,13 +384,9 @@ export default function MonstersFarm({ token, onBack }: Props) {
         haptic('light');
     };
 
-    // ─────────────────────────────────────────────
-    // ✅ Local optimistic state (XP or Hunt progress)
-    // ─────────────────────────────────────────────
     function applyLocalFeed(slotIndex: number) {
         setTapFx(Date.now());
 
-        // update slots (XP or feedCountForHunt)
         setSlots((prev) =>
             prev.map((s) => {
                 if (s.slotIndex !== slotIndex) return s;
@@ -368,6 +394,9 @@ export default function MonstersFarm({ token, onBack }: Props) {
 
                 const m: any = { ...s.monster };
                 const lvl = Number(m.level ?? 1);
+
+                // ✅ instantly becomes happy after feeding
+                m.lastFedAt = new Date().toISOString();
 
                 if (lvl >= 5) {
                     const cur = Number(m.feedCountForHunt ?? 0);
@@ -388,15 +417,10 @@ export default function MonstersFarm({ token, onBack }: Props) {
             }),
         );
 
-        // sync hunt panel counter for ACTIVE monster too
         setHunt((prev) => {
             if (!prev) return prev;
             if (prev.status !== 'IDLE') return prev;
-
-            // only for active slot
             if (activeSlot?.slotIndex !== slotIndex) return prev;
-
-            // only if level 5
             if (Number((activeMonster as any)?.level ?? 0) < 5) return prev;
 
             const next = Math.min(100, Number(prev.feedCountForHunt ?? 0) + 1);
@@ -404,11 +428,7 @@ export default function MonstersFarm({ token, onBack }: Props) {
         });
     }
 
-    // ─────────────────────────────────────────────
-    // ✅ FEED FAST: enqueue tap -> pump sends ALL
-    // ─────────────────────────────────────────────
     async function feedSlotFast(slotIndex: number) {
-        // hamster throttle (feel free to lower to 25-40)
         const now = Date.now();
         if (now - lastTapRef.current < 35) return;
         lastTapRef.current = now;
@@ -421,21 +441,17 @@ export default function MonstersFarm({ token, onBack }: Props) {
             return;
         }
 
-        // only block if this exact slot is active and hunting
         if (huntBlocksFeed && activeSlot?.slotIndex === slotIndex) {
             tg?.showAlert?.('Монстр на охоте ⏳');
             return;
         }
 
-        // ✅ instant UI
         haptic('light');
         setMeat((m) => Math.max(0, m - 1));
         applyLocalFeed(slotIndex);
 
-        // ✅ enqueue ALWAYS (this fixes your rollback 100 -> 75)
         feedQueueRef.current[slotIndex] = (feedQueueRef.current[slotIndex] ?? 0) + 1;
 
-        // already pumping
         if (feedingRef.current) return;
 
         feedingRef.current = true;
@@ -445,11 +461,9 @@ export default function MonstersFarm({ token, onBack }: Props) {
                 const entries = Object.entries(feedQueueRef.current).filter(([, v]) => v > 0);
                 if (entries.length === 0) break;
 
-                // prioritize current tapped slot
                 const pickKey = feedQueueRef.current[slotIndex] ? String(slotIndex) : entries[0][0];
                 const si = Number(pickKey);
 
-                // consume 1 tap
                 feedQueueRef.current[si] = Math.max(0, (feedQueueRef.current[si] ?? 0) - 1);
 
                 const res = await apiFetch('/monsters/farm/feed', token, {
@@ -460,7 +474,6 @@ export default function MonstersFarm({ token, onBack }: Props) {
                 const data = await res.json().catch(() => ({}));
 
                 if (!res.ok) {
-                    // backend rejected -> hard resync & clear queue
                     feedQueueRef.current = {};
                     tg?.showAlert?.(data.message || 'Feed failed');
                     await loadFarm(true);
@@ -468,14 +481,11 @@ export default function MonstersFarm({ token, onBack }: Props) {
                     break;
                 }
 
-                // keep meat synced if backend returns it
                 if (typeof data.meatLeft === 'number') setMeat(Number(data.meatLeft));
 
-                // tiny delay keeps DB happy but still super fast
                 await new Promise((r) => setTimeout(r, 10));
             }
 
-            // one quiet resync after burst
             if (refreshTimerRef.current) window.clearTimeout(refreshTimerRef.current);
             refreshTimerRef.current = window.setTimeout(() => {
                 loadFarm(true);
@@ -510,7 +520,6 @@ export default function MonstersFarm({ token, onBack }: Props) {
         }
     }
 
-    // ===== Skeleton (no "Loading..." text)
     if (!initialLoaded) {
         return (
             <div className="monsters-farm">
@@ -603,7 +612,6 @@ export default function MonstersFarm({ token, onBack }: Props) {
                             ? 'READY_FEED'
                             : 'IDLE';
 
-    // show hunt feed progress correctly (never 0/0)
     const localFeedCount =
         Number((activeMonster as any)?.level ?? 0) >= 5 ? Number((activeMonster as any)?.feedCountForHunt ?? 0) : 0;
 
@@ -653,7 +661,6 @@ export default function MonstersFarm({ token, onBack }: Props) {
 
             {view === 'farm' && (
                 <>
-                    {/* ===== Carousel ===== */}
                     <div className="farm-rail" ref={railRef} onScroll={onRailScroll}>
                         {slots.map((slot, idx) => (
                             <Slide
@@ -692,7 +699,6 @@ export default function MonstersFarm({ token, onBack }: Props) {
                         ))}
                     </div>
 
-                    {/* ===== Dots ===== */}
                     <div className="farm-dots">
                         {slots.map((s, i) => {
                             const cls = i === activeIndex ? 'dot dot--active' : s.isUnlocked ? 'dot' : 'dot dot--locked';
@@ -708,7 +714,6 @@ export default function MonstersFarm({ token, onBack }: Props) {
                         })}
                     </div>
 
-                    {/* ===== Bottom bar ===== */}
                     <div className="farm-bottom" data-status={bottomStatus}>
                         <div className="farm-bottom-left">
                             {showHuntPanel && (
@@ -795,7 +800,6 @@ export default function MonstersFarm({ token, onBack }: Props) {
                             )}
                         </div>
 
-                        {/* right action */}
                         {activeSlot && !activeSlot.isUnlocked ? (
                             <button type="button" className="farm-primary" disabled={!canUnlock} onClick={unlockActive}>
                                 Unlock
@@ -841,7 +845,6 @@ export default function MonstersFarm({ token, onBack }: Props) {
             )}
 
             {view === 'fusion' && <FusionLabView token={token} />}
-
             {view === 'summon' && <SummonView token={token} />}
         </div>
     );
@@ -889,8 +892,10 @@ function Slide({
             ? Math.max(0, Math.min(100, (xpNow / xpNext) * 100))
             : 0;
 
-    // note: keep busy only for visuals; feed itself is not blocked by busy in parent
     const isFeedable = !!slot.isUnlocked && !!m && meat >= 1 && !huntBlocksFeed;
+
+    const isTestMonster = Number(m?.monsterId) === TEST_MONSTER_ID;
+    const mood = isTestMonster ? getMonsterMood(m?.lastFedAt) : null;
 
     return (
         <div className={`farm-slide ${isActive ? 'farm-slide--active' : ''}`}>
@@ -944,16 +949,27 @@ function Slide({
                     <>
                         <img
                             className="farm-monster-img"
-                            src={m.imgUrl || fallbackByRarity(m.rarity)}
+                            src={getMonsterImage(m)}
                             alt={m.name}
                             onError={(e) => {
-                                (e.currentTarget as HTMLImageElement).src = fallbackByRarity(m.rarity);
+                                (e.currentTarget as HTMLImageElement).src =
+                                    Number(m?.monsterId) === TEST_MONSTER_ID
+                                        ? getMonsterMood(m?.lastFedAt) === 'happy'
+                                            ? testMonsterHappyImg
+                                            : testMonsterSadImg
+                                        : fallbackByRarity(m?.rarity);
                             }}
                         />
 
                         <div className="farm-name-wrap">
                             <div className={`farm-monster-name ${rarityClass}`}>{m.name}</div>
                             <div className="farm-monster-level">LVL {Number(m.level)}</div>
+
+                            {isTestMonster && (
+                                <div className={`farm-monster-mood ${mood === 'happy' ? 'is-happy' : 'is-sad'}`}>
+                                    {mood === 'happy' ? '😊 Весёлый' : '😢 Грустный'}
+                                </div>
+                            )}
                         </div>
 
                         <div className="farm-xpbar">
@@ -963,13 +979,9 @@ function Slide({
 
                         <div className="farm-xptext">
                             {isMaxLevel ? (
-                                <>
-                                    🏹 Feed for hunt {feedNow} / {feedMax}
-                                </>
+                                <>🏹 Feed for hunt {feedNow} / {feedMax}</>
                             ) : (
-                                <>
-                                    XP {xpNow} / {xpNext || '—'}
-                                </>
+                                <>XP {xpNow} / {xpNext || '—'}</>
                             )}
                         </div>
 
@@ -1081,7 +1093,7 @@ interface FusionPreviewResponse {
     costStars?: number;
     message?: string;
     result?: FusionPreviewOutcome | null;
-    options?: FusionPreviewOutcome[]; // for PREMIUM (3 options)
+    options?: FusionPreviewOutcome[];
 }
 
 interface FusionExecuteResponse {
@@ -1320,9 +1332,7 @@ function FusionLabView({ token }: { token: string }) {
                         <select
                             className="farm-select"
                             value={secondaryMonsterId === '' ? '' : String(secondaryMonsterId)}
-                            onChange={(e) =>
-                                setSecondaryMonsterId(e.target.value ? Number(e.target.value) : '')
-                            }
+                            onChange={(e) => setSecondaryMonsterId(e.target.value ? Number(e.target.value) : '')}
                         >
                             <option value="">— выбери монстра B —</option>
                             {collection
@@ -1530,10 +1540,7 @@ function SummonView({ token }: { token: string }) {
             setStatus({
                 pityCurrent: Number(data.pityCurrent ?? status?.pityCurrent ?? 0),
                 pityMax: Number(data.pityMax ?? status?.pityMax ?? 1),
-                history: [
-                    ...(data.pulls ?? []),
-                    ...(status?.history ?? []),
-                ].slice(0, 50),
+                history: [...(data.pulls ?? []), ...(status?.history ?? [])].slice(0, 50),
             });
 
             const names = (data.pulls ?? []).map((p) => `${p.name} [${p.rarity}]`).join('\n');

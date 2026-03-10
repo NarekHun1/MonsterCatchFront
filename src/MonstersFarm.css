@@ -1094,3 +1094,17 @@ button { font-family: inherit; }
     border-color: rgba(255,211,106,0.18);
     background: rgba(255,211,106,0.10);
 }
+.farm-monster-mood {
+    margin-top: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.farm-monster-mood.is-happy {
+    color: #59d97c;
+}
+
+.farm-monster-mood.is-sad {
+    color: #ff7f7f;
+}
