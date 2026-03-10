@@ -1,4 +1,3 @@
-// src/Game.tsx
 import { useCallback, useEffect, useRef, useState } from 'react';
 import './Game.css';
 import { apiFetch } from './api';
@@ -15,7 +14,6 @@ interface GameProps {
     t: (key: string) => string;
     onStarsChange?: (stars: number) => void;
     onStatsChange?: (stats: { stars: number; level: number; xp: number }) => void;
-    onLeaderboardRefresh?: () => Promise<void> | void;
     tournamentId?: number;
 }
 
@@ -48,8 +46,8 @@ const MONSTERS: MonsterDef[] = [
 function pickRandomMonster(): MonsterDef {
     const totalWeight = MONSTERS.reduce((sum, m) => sum + m.weight, 0);
     const rnd = Math.random() * totalWeight;
-
     let acc = 0;
+
     for (const m of MONSTERS) {
         acc += m.weight;
         if (rnd <= acc) return m;
@@ -69,7 +67,6 @@ export function Game({
                          onBack,
                          onStarsChange,
                          onStatsChange,
-                         onLeaderboardRefresh,
                          t,
                          tournamentId,
                      }: GameProps) {
@@ -82,9 +79,9 @@ export function Game({
     const [bestScore, setBestScore] = useState<number | null>(null);
     const [clicks, setClicks] = useState<number>(0);
     const [epicCount, setEpicCount] = useState<number>(0);
-    const [melasCount, setMelasCount] = useState<number>(0);
     const [error, setError] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
+    const [melasCount, setMelasCount] = useState<number>(0);
 
     const [monster, setMonster] = useState<MonsterDef>(MONSTERS[0]);
     const [monsterPos, setMonsterPos] = useState<{ x: number; y: number }>({
@@ -137,9 +134,7 @@ export function Game({
             const a = catchAudioRef.current;
             a.currentTime = 0;
             await a.play();
-        } catch {
-            // mobile autoplay errors ignore
-        }
+        } catch {}
     };
 
     const clearTimer = useCallback(() => {
@@ -149,31 +144,13 @@ export function Game({
         }
     }, []);
 
-    const safeRefreshLeaderboard = useCallback(async () => {
-        try {
-            await onLeaderboardRefresh?.();
-        } catch (e) {
-            console.error('Leaderboard refresh failed:', e);
-        }
-    }, [onLeaderboardRefresh]);
-
     const finishGame = useCallback(async () => {
         const currentGameId = gameIdRef.current;
-
-        if (!currentGameId) {
-            console.warn('finishGame skipped: no gameId');
-            return;
-        }
-
-        if (finishSentRef.current) {
-            console.warn('finishGame skipped: already sent');
-            return;
-        }
+        if (!currentGameId || finishSentRef.current) return;
 
         finishSentRef.current = true;
         setStatus('finishing');
         setLoading(true);
-        setError('');
 
         try {
             const finalScore = scoreRef.current;
@@ -181,8 +158,8 @@ export function Game({
             const finalEpicCount = epicCountRef.current;
             const finalMelasCount = melasCountRef.current;
 
-            console.log('🎯 finishGame start', {
-                gameId: currentGameId,
+            console.log('🎯 finishGame', {
+                currentGameId,
                 tournamentId,
                 finalScore,
                 finalClicks,
@@ -203,48 +180,40 @@ export function Game({
 
             const data = await res.json().catch(() => ({}));
 
-            console.log('✅ /game/finish response', {
-                ok: res.ok,
-                status: res.status,
-                data,
-            });
+            console.log('✅ /game/finish', { ok: res.ok, data });
 
             if (!res.ok) {
                 throw new Error((data as any)?.message || 'Не удалось завершить игру');
             }
 
             const finalServerScore =
-                typeof (data as any)?.serverScore === 'number'
+                typeof (data as any).serverScore === 'number'
                     ? (data as any).serverScore
                     : finalScore;
 
             setScore(finalServerScore);
-            scoreRef.current = finalServerScore;
 
             setBestScore((prev) =>
                 prev === null || finalServerScore > prev ? finalServerScore : prev,
             );
 
-            if (typeof (data as any)?.totalStars === 'number') {
+            if (typeof (data as any).totalStars === 'number') {
                 onStarsChange?.((data as any).totalStars);
             }
 
             if (
-                typeof (data as any)?.level === 'number' &&
-                typeof (data as any)?.xp === 'number'
+                typeof (data as any).level === 'number' &&
+                typeof (data as any).xp === 'number'
             ) {
                 onStatsChange?.({
-                    stars:
-                        typeof (data as any)?.totalStars === 'number'
-                            ? (data as any).totalStars
-                            : 0,
+                    stars: (data as any).totalStars,
                     level: (data as any).level,
                     xp: (data as any).xp,
                 });
             }
 
             if (typeof tournamentId === 'number') {
-                console.log('🏆 submit tournament score', {
+                console.log('🚀 submit tournament score', {
                     tournamentId,
                     score: finalServerScore,
                 });
@@ -259,9 +228,8 @@ export function Game({
 
                 const tData = await tRes.json().catch(() => ({}));
 
-                console.log('🏆 /tournament/submit-score response', {
+                console.log('🏆 /tournament/submit-score', {
                     ok: tRes.ok,
-                    status: tRes.status,
                     data: tData,
                 });
 
@@ -272,31 +240,18 @@ export function Game({
                     );
                 }
             } else {
-                console.log('ℹ️ No tournamentId, skipping tournament submit');
+                console.warn('⚠️ tournamentId missing');
             }
 
-            await safeRefreshLeaderboard();
             setStatus('finished');
         } catch (e: any) {
             console.error('finishGame failed:', e);
             setError(e?.message || 'Ошибка завершения игры');
-
-            // Даже при ошибке показываем финальный экран
             setStatus('finished');
-
-            // Иногда полезно всё равно попробовать обновить leaderboard,
-            // вдруг score сохранился, а ошибка была уже после.
-            await safeRefreshLeaderboard();
         } finally {
             setLoading(false);
         }
-    }, [
-        token,
-        tournamentId,
-        onStarsChange,
-        onStatsChange,
-        safeRefreshLeaderboard,
-    ]);
+    }, [token, tournamentId, onStarsChange, onStatsChange]);
 
     const startLocalTimer = useCallback(
         (durationMs: number) => {
@@ -326,12 +281,11 @@ export function Game({
         try {
             setError('');
             setLoading(true);
+            setPhase('intro');
+            setStatus('idle');
 
             finishSentRef.current = false;
             hitLockRef.current = false;
-
-            setPhase('intro');
-            setStatus('idle');
 
             setScore(0);
             scoreRef.current = 0;
@@ -354,23 +308,14 @@ export function Game({
 
             const data = await res.json().catch(() => ({}));
 
-            console.log('🎮 /game/start response', {
-                ok: res.ok,
-                status: res.status,
-                data,
-                tournamentId,
-            });
-
             if (!res.ok) {
                 throw new Error((data as any)?.message || 'Не удалось начать игру');
             }
 
-            const duration = (data as any)?.roundDurationMs ?? 60_000;
-            const startedGameId = (data as any)?.gameId;
+            const duration = (data as any).roundDurationMs ?? 60_000;
+            const startedGameId = (data as any).gameId;
 
-            if (typeof startedGameId !== 'number') {
-                throw new Error('gameId не пришёл с сервера');
-            }
+            console.log('🎮 startGame', { startedGameId, duration, tournamentId });
 
             setGameId(startedGameId);
             gameIdRef.current = startedGameId;
@@ -381,9 +326,8 @@ export function Game({
             setMonster(pickRandomMonster());
             setMonsterPos(randomPosition());
 
-            setPhase('playing');
             setStatus('running');
-
+            setPhase('playing');
             startLocalTimer(duration);
         } catch (e: any) {
             console.error('startGame failed:', e);
@@ -391,7 +335,7 @@ export function Game({
         } finally {
             setLoading(false);
         }
-    }, [token, tournamentId, startLocalTimer]);
+    }, [startLocalTimer, token, tournamentId]);
 
     useEffect(() => {
         const imgs = [commonImg, rareImg, epicImg, legendaryImg, melasImg];
@@ -495,7 +439,6 @@ export function Game({
         clearTimer();
         hitLockRef.current = false;
         finishSentRef.current = false;
-
         setPhase('intro');
         setStatus('idle');
         setGameId(null);
@@ -503,7 +446,6 @@ export function Game({
         setRemainingMs(totalMs);
         setHits([]);
         setIsHit(false);
-        setError('');
     };
 
     const secondsLeft = Math.ceil(remainingMs / 1000);
@@ -532,15 +474,15 @@ export function Game({
                         <div className="game-hud-item">
                             <span className="game-hud-label">{t('best')}</span>
                             <span className="game-hud-value">
-                {bestScore !== null ? bestScore : '—'}
-              </span>
+                                {bestScore !== null ? bestScore : '—'}
+                            </span>
                         </div>
 
                         <div className="game-hud-item">
                             <span className="game-hud-label">{t('time')}</span>
                             <span className="game-hud-value">
-                {status === 'running' ? `${secondsLeft}s` : '—'}
-              </span>
+                                {status === 'running' ? `${secondsLeft}s` : '—'}
+                            </span>
                         </div>
                     </div>
                 )}
@@ -566,11 +508,7 @@ export function Game({
                         {MONSTERS.map((m) => (
                             <div key={m.rarity} className="game-intro-monster-card">
                                 <div className="game-intro-monster-emoji">
-                                    <img
-                                        className="game-monster-img"
-                                        src={m.img}
-                                        alt={m.rarity}
-                                    />
+                                    <img className="game-monster-img" src={m.img} alt={m.rarity} />
                                 </div>
                                 <div className="game-intro-monster-score">
                                     +{m.score} {t('points')}.
@@ -596,9 +534,7 @@ export function Game({
                         className={[
                             'game-monster-emoji-wrapper',
                             status === 'running' ? 'game-monster-emoji-wrapper--active' : '',
-                            status === 'finished'
-                                ? 'game-monster-emoji-wrapper--finished'
-                                : '',
+                            status === 'finished' ? 'game-monster-emoji-wrapper--finished' : '',
                             isHit ? 'game-monster-emoji-wrapper--hit' : '',
                         ]
                             .filter(Boolean)
@@ -613,12 +549,6 @@ export function Game({
                         role="button"
                         tabIndex={0}
                         aria-label="Catch monster"
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                                e.preventDefault();
-                                handleCatch();
-                            }
-                        }}
                     >
                         <img
                             className="game-monster-img game-monster-img--arena"
@@ -670,11 +600,7 @@ export function Game({
                                 🔄 {t('restart')}
                             </button>
 
-                            <button
-                                className="game-back-btn"
-                                onClick={handleBack}
-                                type="button"
-                            >
+                            <button className="game-back-btn" onClick={handleBack} type="button">
                                 ⬅ {t('back')}
                             </button>
                         </div>
