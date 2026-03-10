@@ -33,7 +33,7 @@ type CollectionMonster = {
     xp: number;
     xpNext: number | null;
     feedCountForHunt?: number;
-    lastFedAt?: string | null; // ✅ added
+    lastFedAt?: string | null;
 };
 
 const TEST_MONSTER_ID = 1;
@@ -64,7 +64,6 @@ function getMonsterMood(lastFedAt?: string | null): 'happy' | 'sad' {
 function getMonsterImage(monster: any) {
     if (!monster) return commonImg;
 
-    // ✅ only one test monster uses happy/sad images
     if (Number(monster.monsterId) === TEST_MONSTER_ID) {
         const mood = getMonsterMood(monster.lastFedAt);
         return mood === 'happy' ? testMonsterHappyImg : testMonsterSadImg;
@@ -141,11 +140,11 @@ export default function MonstersFarm({ token, onBack }: Props) {
 
     const canFeedActive = !!activeSlot?.isUnlocked && !!activeMonster && meat >= 1 && !huntBlocksFeed;
 
+    // ✅ panel hunt vsegda vidna dlya monstera 5 lvl i vishe
     const showHuntPanel =
         !!activeSlot?.isUnlocked &&
         !!activeMonster &&
-        (activeMonster as any).level >= 5 &&
-        (hunt?.status === 'RUNNING' || hunt?.status === 'READY' || !!hunt?.canStart);
+        Number((activeMonster as any)?.level ?? 0) >= 5;
 
     async function loadFarm(keepIndex = true) {
         try {
@@ -232,6 +231,7 @@ export default function MonstersFarm({ token, onBack }: Props) {
             setHunt(null);
             return;
         }
+
         loadHuntStatus(activeMonsterId).catch(() => setHunt(null));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [activeMonsterId]);
@@ -245,7 +245,13 @@ export default function MonstersFarm({ token, onBack }: Props) {
                 if (!prev) return prev;
                 const next = Math.max(0, prev.secondsLeft - 1);
                 const status: HuntStatusUI = next === 0 ? 'READY' : 'RUNNING';
-                return { ...prev, secondsLeft: next, status, canClaim: next === 0 };
+                return {
+                    ...prev,
+                    secondsLeft: next,
+                    status,
+                    canClaim: next === 0,
+                    canStart: false,
+                };
             });
         }, 1000);
 
@@ -257,7 +263,6 @@ export default function MonstersFarm({ token, onBack }: Props) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // ✅ timer for auto mood update
     useEffect(() => {
         const t = setInterval(() => {
             setNowTick(Date.now());
@@ -395,7 +400,7 @@ export default function MonstersFarm({ token, onBack }: Props) {
                 const m: any = { ...s.monster };
                 const lvl = Number(m.level ?? 1);
 
-                // ✅ instantly becomes happy after feeding
+                // ✅ srazu stanovitsya happy posle feed
                 m.lastFedAt = new Date().toISOString();
 
                 if (lvl >= 5) {
@@ -406,8 +411,13 @@ export default function MonstersFarm({ token, onBack }: Props) {
                     const nextXp = Number(m.xp ?? 0) + 1;
 
                     if (xpNext > 0 && nextXp >= xpNext) {
-                        m.level = Math.min(5, lvl + 1);
+                        const nextLevel = Math.min(5, lvl + 1);
+                        m.level = nextLevel;
                         m.xp = 0;
+
+                        if (nextLevel >= 5 && typeof m.feedCountForHunt !== 'number') {
+                            m.feedCountForHunt = 0;
+                        }
                     } else {
                         m.xp = nextXp;
                     }
@@ -424,7 +434,14 @@ export default function MonstersFarm({ token, onBack }: Props) {
             if (Number((activeMonster as any)?.level ?? 0) < 5) return prev;
 
             const next = Math.min(100, Number(prev.feedCountForHunt ?? 0) + 1);
-            return { ...prev, feedCountForHunt: next };
+
+            return {
+                ...prev,
+                feedCountForHunt: next,
+                canStart: next >= 100,
+                canClaim: false,
+                status: 'IDLE',
+            };
         });
     }
 
@@ -477,7 +494,6 @@ export default function MonstersFarm({ token, onBack }: Props) {
                     feedQueueRef.current = {};
                     tg?.showAlert?.(data.message || 'Feed failed');
                     await loadFarm(true);
-                    if (activeMonsterId) await loadHuntStatus(activeMonsterId).catch(() => {});
                     break;
                 }
 
@@ -489,7 +505,6 @@ export default function MonstersFarm({ token, onBack }: Props) {
             if (refreshTimerRef.current) window.clearTimeout(refreshTimerRef.current);
             refreshTimerRef.current = window.setTimeout(() => {
                 loadFarm(true);
-                if (activeMonsterId) loadHuntStatus(activeMonsterId).catch(() => {});
             }, 250);
         } finally {
             feedingRef.current = false;
@@ -617,6 +632,11 @@ export default function MonstersFarm({ token, onBack }: Props) {
 
     const huntFeedShown = typeof hunt?.feedCountForHunt === 'number' ? hunt.feedCountForHunt : localFeedCount;
 
+    const canStartHunt =
+        !!hunt &&
+        hunt.status === 'IDLE' &&
+        (Number(hunt.feedCountForHunt ?? 0) >= 100 || !!hunt.canStart);
+
     return (
         <div className="monsters-farm">
             <div className="farm-top">
@@ -671,7 +691,7 @@ export default function MonstersFarm({ token, onBack }: Props) {
                                 meat={meat}
                                 tapFx={tapFx}
                                 huntBlocksFeed={huntBlocksFeed && idx === activeIndex}
-                                showCornerHunt={idx === activeIndex && showHuntPanel && hunt?.status === 'IDLE' && !!hunt?.canStart}
+                                showCornerHunt={idx === activeIndex && showHuntPanel && !!canStartHunt}
                                 cornerHuntText="HUNT READY"
                                 onAssign={() => {
                                     setActiveIndex(idx);
@@ -733,7 +753,7 @@ export default function MonstersFarm({ token, onBack }: Props) {
                                             <button
                                                 type="button"
                                                 className="farm-mini"
-                                                disabled={busy || !hunt?.canStart}
+                                                disabled={busy || !canStartHunt}
                                                 onClick={() => activeMonsterId && startHunt(activeMonsterId)}
                                             >
                                                 Start
