@@ -1020,11 +1020,16 @@ function MonsterPicker({
 }) {
     if (!open) return null;
 
+    const totalCount = monsters.reduce((sum, m) => sum + Number(m.count ?? 0), 0);
+
     return (
         <div className="picker-overlay" onClick={onClose}>
             <div className="picker-card" onClick={(e) => e.stopPropagation()}>
                 <div className="picker-top">
-                    <div className="picker-title">My Monsters</div>
+                    <div className="picker-title">
+                        My Monsters ({monsters.length} types · {totalCount} total)
+                    </div>
+
                     <button type="button" className="picker-close" onClick={onClose}>
                         ✕
                     </button>
@@ -1043,7 +1048,7 @@ function MonsterPicker({
                                 type="button"
                                 key={m.userMonsterId}
                                 className="picker-item"
-                                disabled={busy || (m.count ?? 0) <= 0}
+                                disabled={busy || Number(m.count ?? 0) <= 0}
                                 onClick={() => onPick(m.userMonsterId)}
                             >
                                 <img
@@ -1054,12 +1059,14 @@ function MonsterPicker({
                                         (e.currentTarget as HTMLImageElement).src = fallbackByRarity(m.rarity);
                                     }}
                                 />
+
                                 <div className="picker-mid">
                                     <div className="picker-name">{m.name}</div>
                                     <div className="picker-sub">
-                                        LVL {m.level} · x{m.count} · {m.rarity}
+                                        ID {m.monsterId} · LVL {m.level} · x{m.count} · {m.rarity}
                                     </div>
                                 </div>
+
                                 <div className="picker-cta">{busy ? '…' : 'Select'}</div>
                             </button>
                         ))
