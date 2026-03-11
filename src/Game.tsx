@@ -73,16 +73,17 @@ export function Game({
                      }: GameProps) {
     const [phase, setPhase] = useState<GamePhase>('intro');
     const [status, setStatus] = useState<GameStatus>('idle');
-    const [gameId, setGameId] = useState<number | null>(null);
+    const [, setGameId] = useState<number | null>(null);
     const [totalMs, setTotalMs] = useState<number>(60_000);
     const [remainingMs, setRemainingMs] = useState<number>(60_000);
     const [score, setScore] = useState<number>(0);
+    const [finalScore, setFinalScore] = useState<number | null>(null);
     const [bestScore, setBestScore] = useState<number | null>(null);
-    const [clicks, setClicks] = useState<number>(0);
-    const [epicCount, setEpicCount] = useState<number>(0);
+    const [, setClicks] = useState<number>(0);
+    const [, setEpicCount] = useState<number>(0);
     const [error, setError] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
-    const [melasCount, setMelasCount] = useState<number>(0);
+    const [, setMelasCount] = useState<number>(0);
 
     const [monster, setMonster] = useState<MonsterDef>(MONSTERS[0]);
     const [monsterPos, setMonsterPos] = useState<{ x: number; y: number }>({
@@ -95,6 +96,7 @@ export function Game({
     const timerRef = useRef<number | null>(null);
     const finishSentRef = useRef(false);
     const hitLockRef = useRef(false);
+    const gameEndedRef = useRef(false);
     const catchAudioRef = useRef<HTMLAudioElement | null>(null);
 
     const scoreRef = useRef(0);
@@ -102,26 +104,6 @@ export function Game({
     const epicCountRef = useRef(0);
     const melasCountRef = useRef(0);
     const gameIdRef = useRef<number | null>(null);
-
-    useEffect(() => {
-        scoreRef.current = score;
-    }, [score]);
-
-    useEffect(() => {
-        clicksRef.current = clicks;
-    }, [clicks]);
-
-    useEffect(() => {
-        epicCountRef.current = epicCount;
-    }, [epicCount]);
-
-    useEffect(() => {
-        melasCountRef.current = melasCount;
-    }, [melasCount]);
-
-    useEffect(() => {
-        gameIdRef.current = gameId;
-    }, [gameId]);
 
     const playCatchSound = async () => {
         try {
@@ -147,51 +129,40 @@ export function Game({
         }
     }, []);
 
-    const startLocalTimer = useCallback(
-        (durationMs: number) => {
-            clearTimer();
-
-            const startAt = Date.now();
-            setRemainingMs(durationMs);
-
-            timerRef.current = window.setInterval(() => {
-                const elapsed = Date.now() - startAt;
-                const left = durationMs - elapsed;
-
-                if (left <= 0) {
-                    setRemainingMs(0);
-                    clearTimer();
-                    setStatus('finished');
-                    return;
-                }
-
-                setRemainingMs(left);
-            }, 200);
-        },
-        [clearTimer],
-    );
-
     const finishGame = useCallback(async () => {
         const currentGameId = gameIdRef.current;
         if (!currentGameId || finishSentRef.current) return;
 
         finishSentRef.current = true;
+        gameEndedRef.current = true;
+        hitLockRef.current = true;
+        clearTimer();
         setLoading(true);
 
         try {
-            const finalScore = scoreRef.current;
-            const finalClicks = clicksRef.current;
-            const finalEpicCount = epicCountRef.current;
-            const finalMelasCount = melasCountRef.current;
+            const finalScoreValue = scoreRef.current;
+            const finalClicksValue = clicksRef.current;
+            const finalEpicCountValue = epicCountRef.current;
+            const finalMelasCountValue = melasCountRef.current;
+
+            setFinalScore(finalScoreValue);
+
+            console.log('🎯 finishGame send:', {
+                gameId: currentGameId,
+                score: finalScoreValue,
+                clicks: finalClicksValue,
+                epicCount: finalEpicCountValue,
+                melasCount: finalMelasCountValue,
+            });
 
             const res = await apiFetch('/game/finish', token, {
                 method: 'POST',
                 body: JSON.stringify({
                     gameId: currentGameId,
-                    score: finalScore,
-                    clicks: finalClicks,
-                    epicCount: finalEpicCount,
-                    melasCount: finalMelasCount,
+                    score: finalScoreValue,
+                    clicks: finalClicksValue,
+                    epicCount: finalEpicCountValue,
+                    melasCount: finalMelasCountValue,
                 }),
             });
 
@@ -202,7 +173,7 @@ export function Game({
             }
 
             setBestScore((prev) =>
-                prev === null || finalScore > prev ? finalScore : prev,
+                prev === null || finalScoreValue > prev ? finalScoreValue : prev,
             );
 
             if (typeof (data as any).totalStars === 'number') {
@@ -210,6 +181,7 @@ export function Game({
             }
 
             if (
+                typeof (data as any).totalStars === 'number' &&
                 typeof (data as any).level === 'number' &&
                 typeof (data as any).xp === 'number'
             ) {
@@ -225,7 +197,7 @@ export function Game({
                     method: 'POST',
                     body: JSON.stringify({
                         tournamentId,
-                        score: finalScore,
+                        score: finalScoreValue,
                     }),
                 });
 
@@ -245,23 +217,56 @@ export function Game({
         } catch (e: any) {
             console.error('finishGame failed:', e);
             setError(e?.message || 'Ошибка завершения игры');
+            setStatus('finished');
         } finally {
             setLoading(false);
         }
-    }, [token, tournamentId, onStarsChange, onStatsChange]);
+    }, [clearTimer, token, tournamentId, onStarsChange, onStatsChange]);
+
+    const startLocalTimer = useCallback(
+        (durationMs: number) => {
+            clearTimer();
+
+            const startAt = Date.now();
+            setRemainingMs(durationMs);
+
+            timerRef.current = window.setInterval(() => {
+                const elapsed = Date.now() - startAt;
+                const left = durationMs - elapsed;
+
+                if (left <= 0) {
+                    gameEndedRef.current = true;
+                    setRemainingMs(0);
+                    clearTimer();
+                    setStatus('finished');
+                    return;
+                }
+
+                setRemainingMs(left);
+            }, 100);
+        },
+        [clearTimer],
+    );
 
     const startGame = useCallback(async () => {
         try {
             setError('');
             setLoading(true);
+
             setPhase('intro');
             setStatus('idle');
 
             finishSentRef.current = false;
             hitLockRef.current = false;
+            gameEndedRef.current = false;
+
+            setGameId(null);
+            gameIdRef.current = null;
 
             setScore(0);
             scoreRef.current = 0;
+
+            setFinalScore(null);
 
             setClicks(0);
             clicksRef.current = 0;
@@ -310,11 +315,10 @@ export function Game({
     }, [startLocalTimer, token]);
 
     useEffect(() => {
-        if (status === 'finished' && gameIdRef.current) {
-            clearTimer();
+        if (status === 'finished' && gameIdRef.current && !finishSentRef.current) {
             void finishGame();
         }
-    }, [status, finishGame, clearTimer]);
+    }, [status, finishGame]);
 
     useEffect(() => {
         const imgs = [commonImg, rareImg, epicImg, legendaryImg, melasImg];
@@ -341,6 +345,8 @@ export function Game({
 
     const handleCatch = useCallback(() => {
         if (status !== 'running') return;
+        if (gameEndedRef.current) return;
+        if (finishSentRef.current) return;
         if (hitLockRef.current) return;
 
         hitLockRef.current = true;
@@ -354,33 +360,25 @@ export function Game({
             setIsHit(false);
         }, 120);
 
-        setClicks((prev) => {
-            const next = prev + 1;
-            clicksRef.current = next;
-            return next;
-        });
+        const nextClicks = clicksRef.current + 1;
+        clicksRef.current = nextClicks;
+        setClicks(nextClicks);
 
         if (currentMonster.rarity === 'meet') {
-            setMelasCount((prev) => {
-                const next = prev + 1;
-                melasCountRef.current = next;
-                return next;
-            });
+            const nextMelas = melasCountRef.current + 1;
+            melasCountRef.current = nextMelas;
+            setMelasCount(nextMelas);
         }
 
         if (currentMonster.rarity === 'epic') {
-            setEpicCount((prev) => {
-                const next = prev + 1;
-                epicCountRef.current = next;
-                return next;
-            });
+            const nextEpic = epicCountRef.current + 1;
+            epicCountRef.current = nextEpic;
+            setEpicCount(nextEpic);
         }
 
-        setScore((prev) => {
-            const next = prev + currentMonster.score;
-            scoreRef.current = next;
-            return next;
-        });
+        const nextScore = scoreRef.current + currentMonster.score;
+        scoreRef.current = nextScore;
+        setScore(nextScore);
 
         const hitId = Date.now() + Math.random();
 
@@ -402,11 +400,19 @@ export function Game({
         setMonsterPos(randomPosition());
 
         requestAnimationFrame(() => {
-            hitLockRef.current = false;
+            if (!gameEndedRef.current && !finishSentRef.current) {
+                hitLockRef.current = false;
+            }
         });
     }, [status, monster, monsterPos]);
 
     const handleBack = () => {
+        if (status === 'running' && gameIdRef.current && !finishSentRef.current) {
+            gameEndedRef.current = true;
+            setStatus('finished');
+            return;
+        }
+
         clearTimer();
         onBack();
     };
@@ -415,13 +421,17 @@ export function Game({
         clearTimer();
         hitLockRef.current = false;
         finishSentRef.current = false;
+        gameEndedRef.current = false;
+
         setPhase('intro');
         setStatus('idle');
         setGameId(null);
         gameIdRef.current = null;
+
         setRemainingMs(totalMs);
         setHits([]);
         setIsHit(false);
+        setFinalScore(null);
     };
 
     const secondsLeft = Math.ceil(remainingMs / 1000);
@@ -450,15 +460,15 @@ export function Game({
                         <div className="game-hud-item">
                             <span className="game-hud-label">{t('best')}</span>
                             <span className="game-hud-value">
-                {bestScore !== null ? bestScore : '—'}
-              </span>
+                                {bestScore !== null ? bestScore : '—'}
+                            </span>
                         </div>
 
                         <div className="game-hud-item">
                             <span className="game-hud-label">{t('time')}</span>
                             <span className="game-hud-value">
-                {status === 'running' ? `${secondsLeft}s` : '—'}
-              </span>
+                                {status === 'running' ? `${secondsLeft}s` : '—'}
+                            </span>
                         </div>
                     </div>
                 )}
@@ -555,7 +565,7 @@ export function Game({
                         <h2>🎉 Congratulations!</h2>
 
                         <p className="game-finish-score">
-                            {t('youScored')} <strong>{score}</strong> {t('points')}
+                            {t('youScored')} <strong>{finalScore ?? score}</strong> {t('points')}
                         </p>
 
                         <div className="game-finish-actions">
