@@ -301,3 +301,62 @@
     justify-content: space-between;
     align-items: center;
 }
+.tc-progress {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin: 14px 0 16px;
+}
+
+.tc-progress-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 12px;
+    text-align: center;
+}
+
+.tc-progress-label {
+    font-size: 12px;
+    opacity: 0.75;
+    margin-bottom: 6px;
+}
+
+.tc-progress-value {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.tc-replay-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tc-replay-main {
+    background: linear-gradient(135deg, #ff9f1a, #ff6b00);
+}
+
+.tc-replay-note {
+    font-size: 13px;
+    text-align: center;
+    opacity: 0.8;
+}
+
+.tc-my-rank {
+    margin: 10px 0;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.tc-motivation {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(255, 170, 0, 0.12);
+    border: 1px solid rgba(255, 170, 0, 0.22);
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+}

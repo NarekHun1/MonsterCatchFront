@@ -24,6 +24,11 @@ interface TournamentData {
     ticketsCount: number;
     coins: number;
     timeLeftSec: number;
+    replayCount: number;
+    usedAttempts: number;
+    attemptsLeft: number;
+    nextReplayPrice: number | null;
+    bestScore: number
 }
 
 export function TournamentCard({
@@ -43,9 +48,41 @@ export function TournamentCard({
     const [data, setData] = useState<TournamentData | null>(null);
     const [loading, setLoading] = useState(true);
     const [joining, setJoining] = useState(false);
+    const [buyingReplay, setBuyingReplay] = useState(false);
     const [hint, setHint] = useState<string | null>(null);
     const [error, setError] = useState('');
     const [timeLeft, setTimeLeft] = useState(0);
+
+    const handleBuyReplay = async () => {
+        if (!data) return;
+
+        try {
+            setBuyingReplay(true);
+            setError('');
+            setHint(null);
+
+            const res = await apiFetch(`/tournament/${data.tournamentId}/replay`, token, {
+                method: 'POST',
+            });
+
+            const json = await res.json().catch(() => ({}));
+
+            if (!res.ok) {
+                throw new Error(json.message || 'Failed to buy replay');
+            }
+
+            await load(false);
+
+            // можно сразу запускать игру после покупки
+            onStartGame(data.tournamentId);
+        } catch (e: any) {
+            console.error('Replay buy failed:', e);
+            setHint(e.message || 'Ошибка покупки попытки');
+            setTimeout(() => setHint(null), 2500);
+        } finally {
+            setBuyingReplay(false);
+        }
+    };
 
     const load = useCallback(
         async (first = false) => {
@@ -135,6 +172,21 @@ export function TournamentCard({
 
     const canJoin = data?.status === 'ACTIVE' && !data.joined;
 
+    const canPlay = !!data?.joined && (data?.attemptsLeft ?? 0) > 0;
+    const canBuyReplay =
+        !!data?.joined &&
+        (data?.attemptsLeft ?? 0) <= 0 &&
+        data?.nextReplayPrice !== null &&
+        data?.status === 'ACTIVE';
+
+    const replayLocked =
+        canBuyReplay && (data?.coins ?? 0) < (data?.nextReplayPrice ?? 0);
+
+    const replayLimitReached =
+        !!data?.joined &&
+        (data?.attemptsLeft ?? 0) <= 0 &&
+        data?.nextReplayPrice === null;
+
     const title =
         type === 'HOURLY'
             ? t('hourlyTournament')
@@ -179,17 +231,72 @@ export function TournamentCard({
                     <span className="tc-badge tc-badge--finished">🏁 {t('finished')}</span>
                 )}
             </div>
+            {data.joined && (
+                <div className="tc-progress">
+                    <div className="tc-progress-card">
+                        <div className="tc-progress-label">🏆 Best Score</div>
+                        <div className="tc-progress-value">{data.bestScore ?? 0}</div>
+                    </div>
 
+                    <div className="tc-progress-card">
+                        <div className="tc-progress-label">🎮 Attempts Left</div>
+                        <div className="tc-progress-value">{data.attemptsLeft ?? 0}</div>
+                    </div>
+
+                    <div className="tc-progress-card">
+                        <div className="tc-progress-label">🔁 Replays</div>
+                        <div className="tc-progress-value">{data.replayCount ?? 0}/3</div>
+                    </div>
+
+                    <div className="tc-progress-card">
+                        <div className="tc-progress-label">🪙 Next Try</div>
+                        <div className="tc-progress-value">
+                            {data.nextReplayPrice !== null ? `${data.nextReplayPrice} coins` : 'Max'}
+                        </div>
+                    </div>
+                </div>
+            )}
             <div className="tc-actions">
                 {data.joined ? (
-                    <button
-                        className="tc-play-main"
-                        onClick={() => onStartGame(data.tournamentId)}
-                        disabled={joining}
-                    >
-                        <span className="glow" />
-                        🎮 {t('play')}
-                    </button>
+                    <>
+                        {canPlay ? (
+                            <button
+                                className="tc-play-main"
+                                onClick={() => onStartGame(data.tournamentId)}
+                                disabled={joining || buyingReplay}
+                            >
+                                <span className="glow" />
+                                🎮 {t('play')}
+                            </button>
+                        ) : canBuyReplay ? (
+                            <div className="tc-replay-wrap">
+                                <button
+                                    className="tc-play-main tc-replay-main"
+                                    onClick={() => {
+                                        if (replayLocked) {
+                                            setHint(`❌ Нужно ещё ${(data.nextReplayPrice ?? 0) - data.coins} 🪙`);
+                                            setTimeout(() => setHint(null), 2500);
+                                            return;
+                                        }
+
+                                        void handleBuyReplay();
+                                    }}
+                                    disabled={buyingReplay}
+                                >
+                                    <span className="glow" />
+                                    🔥 Play Again for {data.nextReplayPrice} Coins
+                                </button>
+
+                                <div className="tc-replay-note">
+                                    Improve your best score and increase your chance to win
+                                </div>
+                            </div>
+                        ) : replayLimitReached ? (
+                            <div className="tc-closed">⛔ Replay limit reached</div>
+                        ) : (
+                            <div className="tc-closed">⌛ No attempts left</div>
+                        )}
+                    </>
                 ) : canJoin ? (
                     <div className="tc-entry-cards">
                         <div
