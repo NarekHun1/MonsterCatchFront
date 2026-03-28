@@ -864,6 +864,7 @@ function App() {
                                     setTournamentType(null);
                                     setCurrentPage('game');
                                 }}
+                                onOpenCoinsShop={() => setShowCoinShop(true)} // 🔥 ВОТ ЭТО
                             />
                         )}
 

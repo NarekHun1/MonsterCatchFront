@@ -53,12 +53,14 @@ function getApiMessage(x: unknown): string | null {
 
 export function CashCupCard({
                                 token,
-                                onStartGame,
                                 t,
+                                onStartGame,
+                                onOpenCoinsShop, // 🔥 ДОБАВИЛИ
                             }: {
     token: string;
     t: (key: string) => string;
-    onStartGame: (tournamentId: number) => void;
+    onStartGame: (id: number) => void;
+    onOpenCoinsShop?: () => void; // 🔥
 }) {
     const [data, setData] = useState<CashCupData | null>(null);
     const [loading, setLoading] = useState(true);
@@ -149,13 +151,19 @@ export function CashCupCard({
 
             if (payWith === 'tickets' && !canByTickets) {
                 setHint(`❌ Нужно ещё ${10 - data.ticketsCount} 🎟`);
-                setTimeout(() => setHint(null), 2500);
+                setTimeout(() => setHint(null), 1200);
+
+                onOpenCoinsShop?.(); // 🔥 ДОБАВИЛИ
+
                 return;
             }
 
             if (payWith === 'coins' && !canByCoins) {
                 setHint(`❌ Нужно ещё ${10 - data.coins} 🪙`);
-                setTimeout(() => setHint(null), 2500);
+                setTimeout(() => setHint(null), 1200);
+
+                onOpenCoinsShop?.(); // 🔥
+
                 return;
             }
 
@@ -232,8 +240,13 @@ export function CashCupCard({
                     <button
                         className={`cashcup-join-card ticket ${!canByTickets ? 'locked' : ''}`}
                         disabled={!canByTickets || joining}
-                        onClick={() => join('tickets')}
-                    >
+                        onClick={() => {
+                            if (!canByTickets) {
+                                onOpenCoinsShop?.(); // 🔥
+                                return;
+                            }
+                            join('tickets');
+                        }}                    >
                         <div className="join-icon">🎟</div>
                         <div className="join-title">{t('joinWithTickets')}</div>
                         <div className="join-sub">
@@ -246,8 +259,13 @@ export function CashCupCard({
                     <button
                         className={`cashcup-join-card coin ${!canByCoins ? 'locked' : ''}`}
                         disabled={!canByCoins || joining}
-                        onClick={() => join('coins')}
-                    >
+                        onClick={() => {
+                            if (!canByCoins) {
+                                onOpenCoinsShop?.(); // 🔥
+                                return;
+                            }
+                            join('coins');
+                        }}                    >
                         <div className="join-icon">🪙</div>
                         <div className="join-title">{t('joinWithCoins')}</div>
                         <div className="join-sub">
@@ -303,7 +321,10 @@ export function CashCupCard({
                                 onClick={() => {
                                     if (replayLocked) {
                                         setHint(`❌ Нужно ещё ${(data.nextReplayPrice ?? 0) - data.coins} 🪙`);
-                                        setTimeout(() => setHint(null), 2500);
+                                        setTimeout(() => setHint(null), 1200);
+
+                                        onOpenCoinsShop?.(); // 🔥 ВОТ ЭТО ДОБАВИТЬ
+
                                         return;
                                     }
 
