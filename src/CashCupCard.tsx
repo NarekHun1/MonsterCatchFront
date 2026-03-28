@@ -239,7 +239,7 @@ export function CashCupCard({
                 <div className="cashcup-join-grid">
                     <button
                         className={`cashcup-join-card ticket ${!canByTickets ? 'locked' : ''}`}
-                        disabled={!canByTickets || joining}
+                        disabled={joining}
                         onClick={() => {
                             if (!canByTickets) {
                                 onOpenCoinsShop?.(); // 🔥
@@ -258,7 +258,7 @@ export function CashCupCard({
 
                     <button
                         className={`cashcup-join-card coin ${!canByCoins ? 'locked' : ''}`}
-                        disabled={!canByCoins || joining}
+                        disabled={joining}
                         onClick={() => {
                             if (!canByCoins) {
                                 onOpenCoinsShop?.(); // 🔥
