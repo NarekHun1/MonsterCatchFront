@@ -147,7 +147,7 @@ export function CashCupCard({
             setError('');
             setInviteHint(null);
 
-            const res = await apiFetch(`/tournaments/${data.tournamentId}/invite-online`, token, {
+            const res = await apiFetch(`/tournament/${data.tournamentId}/invite-online`, token, {
                 method: 'POST',
             });
 
