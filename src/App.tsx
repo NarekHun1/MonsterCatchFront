@@ -583,6 +583,27 @@ function App() {
 
     useEffect(() => {
         if (!token) return;
+
+        const sendPing = async () => {
+            try {
+                await apiFetch('/presence/ping', token, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        screen: 'cashcup',
+                        inGame: false,
+                    }),
+                });
+            } catch {}
+        };
+
+        sendPing();
+        const interval = setInterval(sendPing, 15000);
+
+        return () => clearInterval(interval);
+    }, [token]);
+
+    useEffect(() => {
+        if (!token) return;
         refreshQuestsDot();
     }, [token, refreshQuestsDot]);
 
