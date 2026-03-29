@@ -69,6 +69,8 @@ export function CashCupCard({
     const [timeLeft, setTimeLeft] = useState(0);
     const [joining, setJoining] = useState(false);
     const [buyingReplay, setBuyingReplay] = useState(false);
+    const [inviting, setInviting] = useState(false);
+    const [inviteHint, setInviteHint] = useState<string | null>(null);
 
     const handleBuyReplay = async () => {
         if (!data) return;
@@ -135,6 +137,51 @@ export function CashCupCard({
         const i = setInterval(tick, 1000);
         return () => clearInterval(i);
     }, [data?.endsAt]);
+
+    const handleInviteOnline = async () => {
+        if (!data) return;
+        if (!data.joined) return;
+
+        try {
+            setInviting(true);
+            setError('');
+            setInviteHint(null);
+
+            const res = await apiFetch(`/tournaments/${data.tournamentId}/invite-online`, token, {
+                method: 'POST',
+            });
+
+            const json: unknown = await res.json().catch(() => ({}));
+
+            if (!res.ok) {
+                throw new Error(getApiMessage(json) ?? 'Invite failed');
+            }
+
+            const result = json as {
+                success?: boolean;
+                reason?: string;
+            };
+
+            if (!result.success) {
+                if (result.reason === 'NO_ONLINE_PLAYERS') {
+                    setInviteHint('Сейчас нет подходящих онлайн игроков');
+                } else {
+                    setInviteHint('Не удалось отправить приглашение');
+                }
+
+                setTimeout(() => setInviteHint(null), 2500);
+                return;
+            }
+
+            setInviteHint('✅ Приглашение отправлено онлайн игроку');
+            setTimeout(() => setInviteHint(null), 2500);
+        } catch (e: unknown) {
+            setInviteHint(getErrorMessage(e, 'Ошибка приглашения'));
+            setTimeout(() => setInviteHint(null), 2500);
+        } finally {
+            setInviting(false);
+        }
+    };
 
     /* ───────────────── JOIN (🎟 or 🪙) ───────────────── */
     const join = async (payWith: 'tickets' | 'coins') => {
@@ -276,6 +323,7 @@ export function CashCupCard({
             )}
 
             {hint && <div className="tc-hint">{hint}</div>}
+            {inviteHint && <div className="tc-hint">{inviteHint}</div>}
             {data.joined && (
                 <div className="tc-progress">
                     <div className="tc-progress-card">
@@ -305,15 +353,25 @@ export function CashCupCard({
                 <div className="tc-actions">
                     {data.status !== 'ACTIVE' ? (
                         <div className="tc-closed">🚫 {t('tournamentFinished')}</div>
-                    ) : canPlay ? (
+                    ) :  canPlay ? (
+                        <div className="tc-main-actions">
                         <button
-                            className="tc-play-main"
-                            onClick={() => onStartGame(data.tournamentId)}
-                            disabled={buyingReplay}
-                        >
-                            🎮 {t('play')}
-                        </button>
-                    ) : canBuyReplay ? (
+                        className="tc-play-main"
+                        onClick={() => onStartGame(data.tournamentId)}
+                    disabled={buyingReplay || inviting}
+                >
+                    🎮 {t('play')}
+                </button>
+
+                <button
+                className="tc-invite-btn"
+                onClick={() => void handleInviteOnline()}
+            disabled={inviting}
+        >
+            {inviting ? '⏳ Поиск игрока...' : '⚔️ Invite Online Player'}
+        </button>
+</div>
+) : canBuyReplay ? (
                         <div className="tc-replay-wrap">
                             <button
                                 className="tc-play-main tc-replay-main"
