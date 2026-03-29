@@ -403,6 +403,7 @@ function App() {
     const [questsDot, setQuestsDot] = useState(false);
     const [match3Level, setMatch3Level] = useState<number | null>(null);
     const [showEventAd, setShowEventAd] = useState(false);
+    const [incomingInvite, setIncomingInvite] = useState<any | null>(null);
 
     const t = (key: string) => translations[lang][key] || key;
 
@@ -425,7 +426,81 @@ function App() {
             localStorage.setItem(eventDoneKey(slug), '1');
         } catch {}
     };
+    const handleAcceptInvite = async (
+        inviteId: number,
+        payWith: 'coins' | 'tickets'
+    ) => {
+        try {
+            const res = await apiFetch(
+                `/tournament/invite/${inviteId}/accept`,
+                token ?? undefined,
+                {
+                    method: 'POST',
+                    body: JSON.stringify({ payWith }),
+                }
+            );
 
+            const json = await res.json().catch(() => ({}));
+
+            if (!res.ok) {
+                throw new Error(json?.message || 'Failed to accept invite');
+            }
+
+            setIncomingInvite(null);
+
+            // 🔥 можно сразу перейти в турнир
+            if (json?.tournamentId) {
+                setTournamentGameId(json.tournamentId);
+                setCurrentPage('game');
+            } else {
+                setCurrentPage('tournament');
+            }        } catch (e: any) {
+            alert(e.message);
+        }
+    };
+
+
+    const handleDeclineInvite = async () => {
+        if (!incomingInvite || !token) return;
+
+        try {
+            const res = await apiFetch(
+                `/tournament/invite/${incomingInvite.id}/decline`,
+                token,
+                { method: 'POST' }
+            );
+
+            if (!res.ok) {
+                const json = await res.json().catch(() => ({}));
+                throw new Error(json?.message || 'Failed to decline invite');
+            }
+
+            setIncomingInvite(null);
+        } catch (e: any) {
+            alert(e.message);
+        }
+    };
+    useEffect(() => {
+        if (!token) return;
+
+        const checkInvite = async () => {
+            try {
+                const res = await apiFetch('/tournament/invite/pending', token);
+                const json = await res.json().catch(() => ({}));
+
+                if (json?.invite) {
+                    setIncomingInvite(json.invite);
+                } else {
+                    setIncomingInvite(null);
+                }
+            } catch {}
+        };
+
+        checkInvite();
+        const i = setInterval(checkInvite, 2000);
+
+        return () => clearInterval(i);
+    }, [token]);
     useEffect(() => {
         const tgLang =
             (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.language_code;
@@ -1449,6 +1524,43 @@ function App() {
                     </div>
                 )}
             </main>
+
+            {incomingInvite && (
+                <div className="invite-overlay">
+                    <div className="invite-card">
+                        <h3>🎯 Вас пригласили в турнир</h3>
+
+                        <p>Выберите способ входа:</p>
+
+                        <div className="invite-actions">
+                            <button
+                                className="invite-btn coins"
+                                onClick={() =>
+                                    handleAcceptInvite(incomingInvite.id, 'coins')
+                                }
+                            >
+                                🪙 Coins
+                            </button>
+
+                            <button
+                                className="invite-btn tickets"
+                                onClick={() =>
+                                    handleAcceptInvite(incomingInvite.id, 'tickets')
+                                }
+                            >
+                                🎟 Tickets
+                            </button>
+
+                            <button
+                                className="invite-btn decline"
+                                onClick={handleDeclineInvite}
+                            >
+                                ❌ Отказаться
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

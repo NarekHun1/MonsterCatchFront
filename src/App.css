@@ -1447,3 +1447,50 @@ button{ font-family: inherit; }
 .app-userchip{
     margin-top: 50px !important; /* регулируй тут */
 }
+
+.invite-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.invite-card {
+    background: #111;
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    color: white;
+    width: 280px;
+}
+
+.invite-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.invite-btn {
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    font-weight: bold;
+}
+
+.invite-btn.coins {
+    background: gold;
+}
+
+.invite-btn.tickets {
+    background: #6c5ce7;
+    color: white;
+}
+
+.invite-btn.decline {
+    background: #444;
+    color: white;
+}
