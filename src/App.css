@@ -1494,3 +1494,128 @@ button{ font-family: inherit; }
     background: #444;
     color: white;
 }
+.invite-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.62);
+    backdrop-filter: blur(8px);
+    animation: inviteOverlayFade 0.25s ease-out;
+}
+
+.invite-card {
+    width: min(92vw, 420px);
+    border-radius: 24px;
+    padding: 22px 18px;
+    background:
+            linear-gradient(180deg, rgba(35, 20, 60, 0.96), rgba(16, 10, 30, 0.98));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+            0 20px 60px rgba(0, 0, 0, 0.45),
+            0 0 30px rgba(155, 89, 255, 0.18);
+    text-align: center;
+    color: #fff;
+    animation: inviteCardPop 0.38s cubic-bezier(.2, .9, .2, 1);
+    transform-origin: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.invite-card::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(
+            135deg,
+            rgba(255,255,255,0.14),
+            rgba(255,255,255,0.02),
+            rgba(255,215,0,0.10)
+    );
+    pointer-events: none;
+}
+
+.invite-card h3 {
+    margin: 0 0 12px;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+}
+
+.invite-card p {
+    margin: 8px 0;
+    color: rgba(255,255,255,0.88);
+    line-height: 1.45;
+}
+
+.invite-actions {
+    display: grid;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.invite-btn {
+    border: none;
+    border-radius: 16px;
+    padding: 14px 16px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+            transform 0.16s ease,
+            box-shadow 0.16s ease,
+            opacity 0.16s ease;
+}
+
+.invite-btn:hover {
+    transform: translateY(-2px) scale(1.01);
+}
+
+.invite-btn:active {
+    transform: scale(0.98);
+}
+
+.invite-btn.coins {
+    background: linear-gradient(180deg, #ffcf4d, #ffb300);
+    color: #2b1d00;
+    box-shadow: 0 10px 24px rgba(255, 179, 0, 0.28);
+}
+
+.invite-btn.tickets {
+    background: linear-gradient(180deg, #6ae3ff, #2db7ff);
+    color: #042033;
+    box-shadow: 0 10px 24px rgba(45, 183, 255, 0.26);
+}
+
+.invite-btn.decline {
+    background: linear-gradient(180deg, #3a3148, #261f31);
+    color: #f3d9e6;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
+}
+
+@keyframes inviteOverlayFade {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes inviteCardPop {
+    0% {
+        opacity: 0;
+        transform: translateY(26px) scale(0.88);
+    }
+    60% {
+        opacity: 1;
+        transform: translateY(-4px) scale(1.02);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}

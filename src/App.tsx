@@ -27,6 +27,13 @@ import { EventTournamentCard } from './EventTournamentCard';
 
 type Page = 'menu' | 'game' | 'leaderboard' | 'invite' | 'tournament' | 'wallet' | 'cashcup'| 'roulette' | 'quests'| 'match3'| 'monsters'|'market';
 
+const getTournamentLabel = (type?: string | null) => {
+    if (type === 'CASH_CUP') return '💰 Cash Cup';
+    if (type === 'HOURLY') return '⏱ Hourly Tournament';
+    if (type === 'DAILY') return '📅 Daily Tournament';
+    return '🎯 Турнир';
+};
+
 interface MeResponse {
     id: number;
     username?: string | null;
@@ -1530,7 +1537,14 @@ function App() {
             {incomingInvite && (
                 <div className="invite-overlay">
                     <div className="invite-card">
-                        <h3>🎯 Вас пригласили в турнир</h3>
+                        <h3>🎯 Приглашение</h3>
+
+                        <p>
+                            {incomingInvite.fromUsername || 'Игрок'} вызывает вас в{' '}
+                            <strong>
+                                {getTournamentLabel(incomingInvite.tournamentType)}
+                            </strong>
+                        </p>
 
                         <p>Выберите способ входа:</p>
 

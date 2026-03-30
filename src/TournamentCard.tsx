@@ -54,7 +54,48 @@ export function TournamentCard({
     const [hint, setHint] = useState<string | null>(null);
     const [error, setError] = useState('');
     const [timeLeft, setTimeLeft] = useState(0);
+    const [inviting, setInviting] = useState(false);
+    const [inviteHint, setInviteHint] = useState<string | null>(null);
 
+    const handleInviteOnline = async () => {
+        if (!data) return;
+        if (!data.joined) return;
+
+        try {
+            setInviting(true);
+            setError('');
+            setInviteHint(null);
+
+            const res = await apiFetch(`/tournament/${data.tournamentId}/invite-online`, token, {
+                method: 'POST',
+            });
+
+            const json = await res.json().catch(() => ({}));
+
+            if (!res.ok) {
+                throw new Error(json.message || 'Invite failed');
+            }
+
+            if (!json.success) {
+                if (json.reason === 'NO_ONLINE_PLAYERS') {
+                    setInviteHint('Сейчас нет подходящих онлайн игроков');
+                } else {
+                    setInviteHint('Не удалось отправить приглашение');
+                }
+
+                setTimeout(() => setInviteHint(null), 2500);
+                return;
+            }
+
+            setInviteHint('✅ Приглашение отправлено онлайн игроку');
+            setTimeout(() => setInviteHint(null), 2500);
+        } catch (e: any) {
+            setInviteHint(e.message || 'Ошибка приглашения');
+            setTimeout(() => setInviteHint(null), 2500);
+        } finally {
+            setInviting(false);
+        }
+    };
     const handleBuyReplay = async () => {
         if (!data) return;
 
@@ -262,14 +303,24 @@ export function TournamentCard({
                 {data.joined ? (
                     <>
                         {canPlay ? (
-                            <button
-                                className="tc-play-main"
-                                onClick={() => onStartGame(data.tournamentId)}
-                                disabled={joining || buyingReplay}
-                            >
-                                <span className="glow" />
-                                🎮 {t('play')}
-                            </button>
+                            <div className="tc-main-actions">
+                                <button
+                                    className="tc-play-main"
+                                    onClick={() => onStartGame(data.tournamentId)}
+                                    disabled={joining || buyingReplay || inviting}
+                                >
+                                    <span className="glow" />
+                                    🎮 {t('play')}
+                                </button>
+
+                                <button
+                                    className="tc-invite-btn"
+                                    onClick={() => void handleInviteOnline()}
+                                    disabled={inviting}
+                                >
+                                    {inviting ? '⏳ Поиск игрока...' : '⚔️ Invite Online Player'}
+                                </button>
+                            </div>
                         ) : canBuyReplay ? (
                             <div className="tc-replay-wrap">
                                 <button
@@ -345,6 +396,8 @@ export function TournamentCard({
                         </div>
 
                         {hint && <div className="tc-hint">{hint}</div>}
+                        {inviteHint && <div className="tc-hint">{inviteHint}</div>}
+
                     </div>
                 ) : (
                     <div className="tc-closed">🚫 {t('tournamentFinished')}</div>
