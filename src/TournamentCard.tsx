@@ -36,12 +36,14 @@ export function TournamentCard({
                                    token,
                                    onStartGame,
                                    t,
+                                   onOpenCoinsShop,
                                    reloadKey = 0,
                                }: {
     type: TournamentType;
     token: string;
     onStartGame: (tournamentId: number) => void;
     onCoinsChange?: (coins: number) => void;
+    onOpenCoinsShop?: () => void;
     t: (key: string) => string;
     reloadKey?: number;
 }) {
@@ -274,8 +276,7 @@ export function TournamentCard({
                                     className="tc-play-main tc-replay-main"
                                     onClick={() => {
                                         if (replayLocked) {
-                                            setHint(`❌ Нужно ещё ${(data.nextReplayPrice ?? 0) - data.coins} 🪙`);
-                                            setTimeout(() => setHint(null), 2500);
+                                            onOpenCoinsShop?.();
                                             return;
                                         }
 
@@ -305,8 +306,7 @@ export function TournamentCard({
                                 if (joining) return;
 
                                 if (data.ticketsCount < 50) {
-                                    setHint(`❌ Нужно ещё ${50 - data.ticketsCount} 🎟`);
-                                    setTimeout(() => setHint(null), 2500);
+                                    onOpenCoinsShop?.();
                                     return;
                                 }
 
@@ -329,8 +329,7 @@ export function TournamentCard({
                                 if (joining) return;
 
                                 if (data.coins < data.entryFee) {
-                                    setHint(`❌ Нужно ещё ${data.entryFee - data.coins} 🪙`);
-                                    setTimeout(() => setHint(null), 2500);
+                                    onOpenCoinsShop?.(); // 🔥 ПЕРЕХОД В МАГАЗИН
                                     return;
                                 }
 

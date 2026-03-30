@@ -1322,6 +1322,7 @@ function App() {
                                             setTournamentType('HOURLY');
                                             setCurrentPage('game');
                                         }}
+                                        onOpenCoinsShop={() => setShowCoinShop(true)}
                                     />
 
 
@@ -1334,6 +1335,7 @@ function App() {
                                             setTournamentType('DAILY');
                                             setCurrentPage('game');
                                         }}
+                                        onOpenCoinsShop={() => setShowCoinShop(true)}
                                     />
 
                                     <CashCupCard
