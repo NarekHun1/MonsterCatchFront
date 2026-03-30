@@ -299,6 +299,9 @@ export function TournamentCard({
                     </div>
                 </div>
             )}
+            {hint && <div className="tc-hint">{hint}</div>}
+            {inviteHint && <div className="tc-hint">{inviteHint}</div>}
+
             <div className="tc-actions">
                 {data.joined ? (
                     <>
