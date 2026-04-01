@@ -20,7 +20,7 @@ interface GameProps {
 
 type GameStatus = 'idle' | 'running' | 'finished';
 type GamePhase = 'intro' | 'playing';
-type MonsterRarity = 'common' | 'rare' | 'epic' | 'legendary' | 'meet';
+type MonsterRarity = 'common' | 'rare' | 'epic' | 'legendary' | 'melas';
 
 interface MonsterDef {
     img: string;
@@ -47,11 +47,10 @@ type RawTap = {
 
 const MONSTERS: MonsterDef[] = [
     { img: commonImg, rarity: 'common', score: 1, weight: 60 },
-    { img: rareImg, rarity: 'rare', score: 1, weight: 25 },
+    { img: rareImg, rarity: 'rare', score: 3, weight: 25 },
     { img: epicImg, rarity: 'epic', score: 10, weight: 10 },
-    { img: legendaryImg, rarity: 'legendary', score: 1, weight: 5 },
-    { img: melasImg, rarity: 'meet', score: 1, weight: 8 },
-];
+    { img: legendaryImg, rarity: 'legendary', score: 5, weight: 5 },
+    { img: melasImg, rarity: 'melas', score: 1, weight: 8 },];
 
 function pickRandomMonster(): MonsterDef {
     const totalWeight = MONSTERS.reduce((sum, m) => sum + m.weight, 0);
@@ -74,7 +73,9 @@ function randomPosition() {
 
 function mapMonsterToTargetType(rarity: MonsterRarity): string {
     if (rarity === 'epic') return 'EPIC';
-    if (rarity === 'meet') return 'MELAS';
+    if (rarity === 'melas') return 'MELAS';
+    if (rarity === 'rare') return 'RARE';
+    if (rarity === 'legendary') return 'LEGENDARY';
     return 'COMMON';
 }
 
@@ -429,7 +430,7 @@ export function Game({
             clicksRef.current = nextClicks;
             setClicks(nextClicks);
 
-            if (currentMonster.rarity === 'meet') {
+            if (currentMonster.rarity === 'melas') {
                 const nextMelas = melasCountRef.current + 1;
                 melasCountRef.current = nextMelas;
                 setMelasCount(nextMelas);
