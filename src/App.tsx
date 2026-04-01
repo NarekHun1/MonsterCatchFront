@@ -450,22 +450,35 @@ function App() {
             const json = await res.json().catch(() => ({}));
 
             if (!res.ok) {
+                const msg = String(json?.message || 'Failed to accept invite').toLowerCase();
+
+                if (
+                    msg.includes('not enough') ||
+                    msg.includes('insufficient') ||
+                    msg.includes('недостаточно') ||
+                    msg.includes('need') ||
+                    msg.includes('ticket') ||
+                    msg.includes('coin')
+                ) {
+                    setShowCoinShop(true);
+                    return;
+                }
+
                 throw new Error(json?.message || 'Failed to accept invite');
             }
 
             setIncomingInvite(null);
 
-            // 🔥 можно сразу перейти в турнир
             if (json?.tournamentId) {
                 setTournamentGameId(json.tournamentId);
                 setCurrentPage('game');
             } else {
                 setCurrentPage('tournament');
-            }        } catch (e: any) {
-            alert(e.message);
+            }
+        } catch (e: any) {
+            alert(e.message || 'Failed to accept invite');
         }
     };
-
 
     const handleDeclineInvite = async () => {
         if (!incomingInvite || !token) return;
