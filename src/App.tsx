@@ -1353,6 +1353,7 @@ function App() {
                                             setTournamentType(null); // или 'CASH_CUP' если хочешь
                                             setCurrentPage('game');
                                         }}
+                                        onOpenCoinsShop={() => setShowCoinShop(true)}
                                     />
                                     {/* ✅ EVENT TOURNAMENT — ВНИЗУ */}
 
