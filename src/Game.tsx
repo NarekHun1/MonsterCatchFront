@@ -1,5 +1,5 @@
 // src/Game.tsx
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import './Game.css';
 import { apiFetch } from './api';
 import commonImg from './assets/monsters/common.svg';
@@ -47,9 +47,9 @@ type RawTap = {
 
 const MONSTERS: MonsterDef[] = [
     { img: commonImg, rarity: 'common', score: 1, weight: 60 },
-    { img: rareImg, rarity: 'rare', score: 3, weight: 25 },
-    { img: epicImg, rarity: 'epic', score: 5, weight: 10 },
-    { img: legendaryImg, rarity: 'legendary', score: 10, weight: 5 },
+    { img: rareImg, rarity: 'rare', score: 1, weight: 25 },
+    { img: epicImg, rarity: 'epic', score: 10, weight: 10 },
+    { img: legendaryImg, rarity: 'legendary', score: 1, weight: 5 },
     { img: melasImg, rarity: 'meet', score: 1, weight: 8 },
 ];
 
@@ -96,9 +96,9 @@ export function Game({
     const [bestScore, setBestScore] = useState<number | null>(null);
     const [, setClicks] = useState<number>(0);
     const [, setEpicCount] = useState<number>(0);
+    const [, setMelasCount] = useState<number>(0);
     const [error, setError] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
-    const [, setMelasCount] = useState<number>(0);
 
     const [monster, setMonster] = useState<MonsterDef>(MONSTERS[0]);
     const [monsterPos, setMonsterPos] = useState<{ x: number; y: number }>({
@@ -115,12 +115,11 @@ export function Game({
     const catchAudioRef = useRef<HTMLAudioElement | null>(null);
 
     const scoreRef = useRef(0);
-    const clicksRef = useRef(0);
+    const clicksRef = useRef(0); // только хиты, для UI
     const epicCountRef = useRef(0);
     const melasCountRef = useRef(0);
     const gameIdRef = useRef<number | null>(null);
 
-    // anti-cheat refs
     const tapsRef = useRef<RawTap[]>([]);
     const gameStartAtRef = useRef<number>(0);
     const monsterSpawnedAtRef = useRef<number>(0);
@@ -128,17 +127,17 @@ export function Game({
     const playCatchSound = async () => {
         try {
             if (!catchAudioRef.current) {
-                const a = new Audio(catchSfx);
-                a.preload = 'auto';
-                a.volume = 0.7;
-                catchAudioRef.current = a;
+                const audio = new Audio(catchSfx);
+                audio.preload = 'auto';
+                audio.volume = 0.7;
+                catchAudioRef.current = audio;
             }
 
-            const a = catchAudioRef.current;
-            a.currentTime = 0;
-            await a.play();
+            const audio = catchAudioRef.current;
+            audio.currentTime = 0;
+            await audio.play();
         } catch {
-            // ignore autoplay/mobile audio errors
+            // ignore
         }
     };
 
@@ -167,20 +166,11 @@ export function Game({
 
         try {
             const finalScoreValue = scoreRef.current;
-            const finalClicksValue = clicksRef.current;
+            const finalClicksValue = tapsRef.current.length; // все тапы, а не только хиты
             const finalEpicCountValue = epicCountRef.current;
             const finalMelasCountValue = melasCountRef.current;
 
             setFinalScore(finalScoreValue);
-
-            console.log('🎯 finishGame send:', {
-                gameId: currentGameId,
-                score: finalScoreValue,
-                clicks: finalClicksValue,
-                epicCount: finalEpicCountValue,
-                melasCount: finalMelasCountValue,
-                rawTaps: tapsRef.current.length,
-            });
 
             const res = await apiFetch('/game/finish', token, {
                 method: 'POST',
@@ -200,8 +190,16 @@ export function Game({
                 throw new Error((data as any)?.message || 'Не удалось завершить игру');
             }
 
+            const serverScore =
+                typeof (data as any)?.serverScore === 'number'
+                    ? (data as any).serverScore
+                    : finalScoreValue;
+
+            setFinalScore(serverScore);
+            setScore(serverScore);
+
             setBestScore((prev) =>
-                prev === null || finalScoreValue > prev ? finalScoreValue : prev,
+                prev === null || serverScore > prev ? serverScore : prev,
             );
 
             if (typeof (data as any).totalStars === 'number') {
@@ -225,7 +223,7 @@ export function Game({
                     method: 'POST',
                     body: JSON.stringify({
                         tournamentId,
-                        score: finalScoreValue,
+                        score: serverScore,
                     }),
                 });
 
@@ -236,8 +234,6 @@ export function Game({
                         'Tournament submit failed:',
                         (tData as any)?.message || tData,
                     );
-                } else {
-                    console.log('✅ Tournament score submitted:', tData);
                 }
             }
 
@@ -293,7 +289,6 @@ export function Game({
 
             setScore(0);
             scoreRef.current = 0;
-
             setFinalScore(null);
 
             setClicks(0);
@@ -319,7 +314,6 @@ export function Game({
             const data = await res.json().catch(() => ({}));
 
             if (!res.ok) {
-                console.error('startGame error response:', res.status, data);
                 throw new Error((data as any)?.message || 'Не удалось начать игру');
             }
 
@@ -381,9 +375,7 @@ export function Game({
             if (finishSentRef.current) return;
 
             const target = e.target as HTMLElement;
-            if (target.closest('.game-monster-emoji-wrapper')) {
-                return;
-            }
+            if (target.closest('.game-monster-emoji-wrapper')) return;
 
             const at = Math.max(0, Date.now() - gameStartAtRef.current);
 
@@ -510,6 +502,7 @@ export function Game({
         setHits([]);
         setIsHit(false);
         setFinalScore(null);
+        setError('');
     };
 
     const secondsLeft = Math.ceil(remainingMs / 1000);
