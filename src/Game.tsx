@@ -36,6 +36,15 @@ interface HitLabel {
     amount: number;
 }
 
+type RawTap = {
+    at: number;
+    x: number;
+    y: number;
+    hit: boolean;
+    targetType: string | null;
+    spawnedAt: number | null;
+};
+
 const MONSTERS: MonsterDef[] = [
     { img: commonImg, rarity: 'common', score: 1, weight: 60 },
     { img: rareImg, rarity: 'rare', score: 3, weight: 25 },
@@ -61,6 +70,12 @@ function randomPosition() {
     const x = 15 + Math.random() * 70;
     const y = 20 + Math.random() * 60;
     return { x, y };
+}
+
+function mapMonsterToTargetType(rarity: MonsterRarity): string {
+    if (rarity === 'epic') return 'EPIC';
+    if (rarity === 'meet') return 'MELAS';
+    return 'COMMON';
 }
 
 export function Game({
@@ -105,6 +120,11 @@ export function Game({
     const melasCountRef = useRef(0);
     const gameIdRef = useRef<number | null>(null);
 
+    // anti-cheat refs
+    const tapsRef = useRef<RawTap[]>([]);
+    const gameStartAtRef = useRef<number>(0);
+    const monsterSpawnedAtRef = useRef<number>(0);
+
     const playCatchSound = async () => {
         try {
             if (!catchAudioRef.current) {
@@ -127,6 +147,12 @@ export function Game({
             window.clearInterval(timerRef.current);
             timerRef.current = null;
         }
+    }, []);
+
+    const spawnNextMonster = useCallback(() => {
+        setMonster(pickRandomMonster());
+        setMonsterPos(randomPosition());
+        monsterSpawnedAtRef.current = Date.now();
     }, []);
 
     const finishGame = useCallback(async () => {
@@ -153,6 +179,7 @@ export function Game({
                 clicks: finalClicksValue,
                 epicCount: finalEpicCountValue,
                 melasCount: finalMelasCountValue,
+                rawTaps: tapsRef.current.length,
             });
 
             const res = await apiFetch('/game/finish', token, {
@@ -163,6 +190,7 @@ export function Game({
                     clicks: finalClicksValue,
                     epicCount: finalEpicCountValue,
                     melasCount: finalMelasCountValue,
+                    rawTaps: tapsRef.current,
                 }),
             });
 
@@ -277,6 +305,10 @@ export function Game({
             setMelasCount(0);
             melasCountRef.current = 0;
 
+            tapsRef.current = [];
+            gameStartAtRef.current = Date.now();
+            monsterSpawnedAtRef.current = gameStartAtRef.current;
+
             setHits([]);
             setIsHit(false);
 
@@ -300,8 +332,7 @@ export function Game({
             setTotalMs(duration);
             setRemainingMs(duration);
 
-            setMonster(pickRandomMonster());
-            setMonsterPos(randomPosition());
+            spawnNextMonster();
 
             setStatus('running');
             setPhase('playing');
@@ -312,7 +343,7 @@ export function Game({
         } finally {
             setLoading(false);
         }
-    }, [startLocalTimer, token]);
+    }, [startLocalTimer, token, spawnNextMonster]);
 
     useEffect(() => {
         if (status === 'finished' && gameIdRef.current && !finishSentRef.current) {
@@ -343,68 +374,111 @@ export function Game({
         };
     }, [clearTimer]);
 
-    const handleCatch = useCallback(() => {
-        if (status !== 'running') return;
-        if (gameEndedRef.current) return;
-        if (finishSentRef.current) return;
-        if (hitLockRef.current) return;
+    const handleArenaMiss = useCallback(
+        (e: React.PointerEvent<HTMLDivElement>) => {
+            if (status !== 'running') return;
+            if (gameEndedRef.current) return;
+            if (finishSentRef.current) return;
 
-        hitLockRef.current = true;
-        void playCatchSound();
+            const target = e.target as HTMLElement;
+            if (target.closest('.game-monster-emoji-wrapper')) {
+                return;
+            }
 
-        const currentMonster = monster;
-        const currentPos = monsterPos;
+            const at = Math.max(0, Date.now() - gameStartAtRef.current);
 
-        setIsHit(true);
-        window.setTimeout(() => {
-            setIsHit(false);
-        }, 120);
+            tapsRef.current.push({
+                at,
+                x: e.clientX,
+                y: e.clientY,
+                hit: false,
+                targetType: null,
+                spawnedAt: null,
+            });
+        },
+        [status],
+    );
 
-        const nextClicks = clicksRef.current + 1;
-        clicksRef.current = nextClicks;
-        setClicks(nextClicks);
+    const handleCatch = useCallback(
+        (e: React.PointerEvent<HTMLDivElement>) => {
+            e.stopPropagation();
 
-        if (currentMonster.rarity === 'meet') {
-            const nextMelas = melasCountRef.current + 1;
-            melasCountRef.current = nextMelas;
-            setMelasCount(nextMelas);
-        }
+            if (status !== 'running') return;
+            if (gameEndedRef.current) return;
+            if (finishSentRef.current) return;
+            if (hitLockRef.current) return;
 
-        if (currentMonster.rarity === 'epic') {
-            const nextEpic = epicCountRef.current + 1;
-            epicCountRef.current = nextEpic;
-            setEpicCount(nextEpic);
-        }
+            hitLockRef.current = true;
+            void playCatchSound();
 
-        const nextScore = scoreRef.current + currentMonster.score;
-        scoreRef.current = nextScore;
-        setScore(nextScore);
+            const currentMonster = monster;
+            const currentPos = monsterPos;
 
-        const hitId = Date.now() + Math.random();
+            const now = Date.now();
+            const at = Math.max(0, now - gameStartAtRef.current);
+            const spawnedAtAbsolute = monsterSpawnedAtRef.current || now;
+            const spawnedAt = Math.max(0, spawnedAtAbsolute - gameStartAtRef.current);
 
-        setHits((prev) => [
-            ...prev,
-            {
-                id: hitId,
+            tapsRef.current.push({
+                at,
                 x: currentPos.x,
                 y: currentPos.y,
-                amount: currentMonster.score,
-            },
-        ]);
+                hit: true,
+                targetType: mapMonsterToTargetType(currentMonster.rarity),
+                spawnedAt,
+            });
 
-        window.setTimeout(() => {
-            setHits((prev) => prev.filter((h) => h.id !== hitId));
-        }, 500);
+            setIsHit(true);
+            window.setTimeout(() => {
+                setIsHit(false);
+            }, 120);
 
-        setMonster(pickRandomMonster());
-        setMonsterPos(randomPosition());
+            const nextClicks = clicksRef.current + 1;
+            clicksRef.current = nextClicks;
+            setClicks(nextClicks);
 
-        requestAnimationFrame(() => {
-            if (!gameEndedRef.current && !finishSentRef.current) {
-                hitLockRef.current = false;
+            if (currentMonster.rarity === 'meet') {
+                const nextMelas = melasCountRef.current + 1;
+                melasCountRef.current = nextMelas;
+                setMelasCount(nextMelas);
             }
-        });
-    }, [status, monster, monsterPos]);
+
+            if (currentMonster.rarity === 'epic') {
+                const nextEpic = epicCountRef.current + 1;
+                epicCountRef.current = nextEpic;
+                setEpicCount(nextEpic);
+            }
+
+            const nextScore = scoreRef.current + currentMonster.score;
+            scoreRef.current = nextScore;
+            setScore(nextScore);
+
+            const hitId = Date.now() + Math.random();
+
+            setHits((prev) => [
+                ...prev,
+                {
+                    id: hitId,
+                    x: currentPos.x,
+                    y: currentPos.y,
+                    amount: currentMonster.score,
+                },
+            ]);
+
+            window.setTimeout(() => {
+                setHits((prev) => prev.filter((h) => h.id !== hitId));
+            }, 500);
+
+            spawnNextMonster();
+
+            requestAnimationFrame(() => {
+                if (!gameEndedRef.current && !finishSentRef.current) {
+                    hitLockRef.current = false;
+                }
+            });
+        },
+        [status, monster, monsterPos, spawnNextMonster],
+    );
 
     const handleBack = () => {
         if (status === 'running' && gameIdRef.current && !finishSentRef.current) {
@@ -427,6 +501,10 @@ export function Game({
         setStatus('idle');
         setGameId(null);
         gameIdRef.current = null;
+
+        tapsRef.current = [];
+        gameStartAtRef.current = 0;
+        monsterSpawnedAtRef.current = 0;
 
         setRemainingMs(totalMs);
         setHits([]);
@@ -515,7 +593,10 @@ export function Game({
             )}
 
             {phase === 'playing' && (
-                <div className="game-arena game-arena--fullscreen">
+                <div
+                    className="game-arena game-arena--fullscreen"
+                    onPointerDown={handleArenaMiss}
+                >
                     <div
                         className={[
                             'game-monster-emoji-wrapper',
