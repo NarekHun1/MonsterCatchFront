@@ -1549,24 +1549,42 @@ function App() {
                         <p>Выберите способ входа:</p>
 
                         <div className="invite-actions">
+                            {/* 💰 COINS */}
                             <button
                                 className="invite-btn coins"
-                                onClick={() =>
-                                    handleAcceptInvite(incomingInvite.id, 'coins')
-                                }
+                                onClick={() => {
+                                    const coinsNeed = Number(incomingInvite?.entryFeeCoins ?? 0);
+
+                                    // если есть цена и не хватает
+                                    if (coinsNeed > 0 && (me?.coins ?? 0) < coinsNeed) {
+                                        setShowCoinShop(true);
+                                        return;
+                                    }
+
+                                    handleAcceptInvite(incomingInvite.id, 'coins');
+                                }}
                             >
-                                🪙 Coins
+                                🪙 Coins {incomingInvite?.entryFeeCoins ? `(${incomingInvite.entryFeeCoins})` : ''}
                             </button>
 
+                            {/* 🎟 TICKETS */}
                             <button
                                 className="invite-btn tickets"
-                                onClick={() =>
-                                    handleAcceptInvite(incomingInvite.id, 'tickets')
-                                }
+                                onClick={() => {
+                                    const ticketsNeed = Number(incomingInvite?.entryFeeTickets ?? 0);
+
+                                    if (ticketsNeed > 0 && (tickets ?? 0) < ticketsNeed) {
+                                        setShowCoinShop(true); // пока ведём в coin shop
+                                        return;
+                                    }
+
+                                    handleAcceptInvite(incomingInvite.id, 'tickets');
+                                }}
                             >
-                                🎟 Tickets
+                                🎟 Tickets {incomingInvite?.entryFeeTickets ? `(${incomingInvite.entryFeeTickets})` : ''}
                             </button>
 
+                            {/* ❌ DECLINE */}
                             <button
                                 className="invite-btn decline"
                                 onClick={handleDeclineInvite}
