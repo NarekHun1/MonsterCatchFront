@@ -26,42 +26,67 @@ interface EventTournamentData {
     participants: Participant[];
     timeLeftSec: number;
     joinLeftSec: number;
+
+    replayCount: number;
+    usedAttempts: number;
+    attemptsLeft: number;
+    nextReplayPrice: number | null;
+    bestScore: number;
+}
+
+function getApiMessage(x: unknown): string | null {
+    if (typeof x === 'object' && x !== null && 'message' in x) {
+        const m = (x as { message?: unknown }).message;
+        if (typeof m === 'string') return m;
+    }
+    return null;
+}
+
+function getErrorMessage(e: unknown, fallback = 'Something went wrong') {
+    if (e instanceof Error) return e.message;
+    if (typeof e === 'string') return e;
+    return fallback;
 }
 
 export function EventTournamentCard({
                                         token,
                                         onStartGame,
                                         onCoinsChange,
+                                        onOpenCoinsShop,
                                     }: {
     token: string;
     onStartGame: (tournamentId: number) => void;
     onCoinsChange?: (coins: number) => void;
+    onOpenCoinsShop?: () => void;
 }) {
     const slug = 'monster-april-2026';
 
     const [data, setData] = useState<EventTournamentData | null>(null);
     const [loading, setLoading] = useState(true);
-    const [, setJoining] = useState(false);
+    const [joining, setJoining] = useState(false);
+    const [buyingReplay, setBuyingReplay] = useState(false);
     const [hint, setHint] = useState<string | null>(null);
     const [error, setError] = useState('');
     const [timeLeft, setTimeLeft] = useState(0);
     const [joinLeft, setJoinLeft] = useState(0);
 
-    /* ───────── LOAD ───────── */
     const load = async (first = false) => {
         if (first) setLoading(true);
         setError('');
 
         try {
             const res = await apiFetch(`/event-tournament/current?slug=${slug}`, token);
-            const json = await res.json();
+            const json: unknown = await res.json().catch(() => ({}));
 
-            if (!res.ok) throw new Error(json.message);
+            if (!res.ok) {
+                throw new Error(getApiMessage(json) ?? 'Failed to load tournament');
+            }
 
-            setData(json);
-            onCoinsChange?.(json.coins ?? 0);
-        } catch (e: any) {
-            setError(e.message);
+            const tournamentData = json as EventTournamentData;
+            setData(tournamentData);
+            onCoinsChange?.(tournamentData.coins ?? 0);
+        } catch (e: unknown) {
+            setError(getErrorMessage(e, 'Failed to load tournament'));
         } finally {
             if (first) setLoading(false);
         }
@@ -71,9 +96,9 @@ export function EventTournamentCard({
         load(true);
         const i = setInterval(() => load(false), 15000);
         return () => clearInterval(i);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    /* ───────── TIMERS ───────── */
     useEffect(() => {
         if (!data?.endsAt) return;
 
@@ -85,7 +110,7 @@ export function EventTournamentCard({
         tick();
         const i = setInterval(tick, 1000);
         return () => clearInterval(i);
-    }, [data]);
+    }, [data?.endsAt]);
 
     useEffect(() => {
         if (!data?.joinDeadline) return;
@@ -98,7 +123,7 @@ export function EventTournamentCard({
         tick();
         const i = setInterval(tick, 1000);
         return () => clearInterval(i);
-    }, [data]);
+    }, [data?.joinDeadline]);
 
     const formatMs = (ms: number) => {
         if (ms <= 0) return '00:00';
@@ -115,30 +140,58 @@ export function EventTournamentCard({
         return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
     };
 
-    /* ───────── JOIN ───────── */
     const handleJoin = async () => {
-        if (!data) return;
+        if (!data || joining) return;
 
         try {
             setJoining(true);
+            setError('');
+            setHint(null);
 
             const res = await apiFetch('/event-tournament/join', token, {
                 method: 'POST',
                 body: JSON.stringify({ slug }),
             });
 
-            const json = await res.json();
-            if (!res.ok) throw new Error(json.message);
+            const json: unknown = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                throw new Error(getApiMessage(json) ?? 'Join failed');
+            }
 
             await load();
-        } catch (e: any) {
-            setError(e.message);
+        } catch (e: unknown) {
+            setError(getErrorMessage(e, 'Join failed'));
         } finally {
             setJoining(false);
         }
     };
 
-    /* ───────── UI ───────── */
+    const handleBuyReplay = async () => {
+        if (!data || buyingReplay) return;
+
+        try {
+            setBuyingReplay(true);
+            setError('');
+            setHint(null);
+
+            const res = await apiFetch(`/event-tournament/${data.tournamentId}/replay`, token, {
+                method: 'POST',
+            });
+
+            const json: unknown = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                throw new Error(getApiMessage(json) ?? 'Failed to buy replay');
+            }
+
+            await load();
+        } catch (e: unknown) {
+            setHint(getErrorMessage(e, 'Replay purchase failed'));
+            setTimeout(() => setHint(null), 2000);
+        } finally {
+            setBuyingReplay(false);
+        }
+    };
+
     if (loading) return <div className="tournament-card">Loading...</div>;
     if (error) return <div className="tournament-card error">{error}</div>;
     if (!data) return null;
@@ -147,6 +200,26 @@ export function EventTournamentCard({
         data.status === 'ACTIVE' &&
         !data.joined &&
         joinLeft > 0;
+
+    const canPlay =
+        data.joined &&
+        data.status === 'ACTIVE' &&
+        (data.attemptsLeft ?? 0) > 0;
+
+    const canBuyReplay =
+        data.joined &&
+        data.status === 'ACTIVE' &&
+        (data.attemptsLeft ?? 0) <= 0 &&
+        data.nextReplayPrice !== null;
+
+    const replayLocked =
+        canBuyReplay && data.coins < (data.nextReplayPrice ?? 0);
+
+    const replayLimitReached =
+        data.joined &&
+        data.status === 'ACTIVE' &&
+        (data.attemptsLeft ?? 0) <= 0 &&
+        data.nextReplayPrice === null;
 
     return (
         <div className="tournament-card">
@@ -162,16 +235,38 @@ export function EventTournamentCard({
                 <strong>{data.prizePool} 🪙</strong>
             </div>
 
+            {data.joined && (
+                <div className="tc-progress">
+                    <div className="tc-progress-card">
+                        <div className="tc-progress-label">🏆 Best Score</div>
+                        <div className="tc-progress-value">{data.bestScore ?? 0}</div>
+                    </div>
+
+                    <div className="tc-progress-card">
+                        <div className="tc-progress-label">🎮 Attempts Left</div>
+                        <div className="tc-progress-value">{data.attemptsLeft ?? 0}</div>
+                    </div>
+
+                    <div className="tc-progress-card">
+                        <div className="tc-progress-label">🔁 Replays</div>
+                        <div className="tc-progress-value">{data.replayCount ?? 0}/3</div>
+                    </div>
+
+                    <div className="tc-progress-card">
+                        <div className="tc-progress-label">🪙 Next Replay</div>
+                        <div className="tc-progress-value">
+                            {data.nextReplayPrice !== null ? `${data.nextReplayPrice}` : 'Max'}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="tc-status">
                 {data.status === 'ACTIVE' ? (
                     <>
                         <span className="tc-badge tc-badge--active">🟢 Active</span>
-                        <div className="tc-timer">
-                            ⏳ {formatMs(timeLeft)}
-                        </div>
-                        <div className="tc-timer">
-                            🕒 Join left: {formatMs(joinLeft)}
-                        </div>
+                        <div className="tc-timer">⏳ {formatMs(timeLeft)}</div>
+                        <div className="tc-timer">🕒 Join left: {formatMs(joinLeft)}</div>
                     </>
                 ) : data.status === 'PLANNED' ? (
                     <span className="tc-badge tc-badge--planned">🟡 Planned</span>
@@ -180,27 +275,59 @@ export function EventTournamentCard({
                 )}
             </div>
 
-            {/* ───────── ACTIONS ───────── */}
             <div className="tc-actions">
                 {data.joined ? (
-                    <button
-                        className="tc-play-main"
-                        onClick={() => onStartGame(data.tournamentId)}
-                    >
-                        🎮 PLAY
-                    </button>
+                    data.status !== 'ACTIVE' ? (
+                        <div className="tc-closed">🚫 Tournament finished</div>
+                    ) : canPlay ? (
+                        <button
+                            className="tc-play-main"
+                            onClick={() => onStartGame(data.tournamentId)}
+                            disabled={buyingReplay}
+                        >
+                            🎮 PLAY
+                        </button>
+                    ) : canBuyReplay ? (
+                        <div className="tc-replay-wrap">
+                            <button
+                                className="tc-play-main tc-replay-main"
+                                disabled={buyingReplay}
+                                onClick={() => {
+                                    if (replayLocked) {
+                                        setHint(`❌ Need ${(data.nextReplayPrice ?? 0) - data.coins} more coins`);
+                                        setTimeout(() => setHint(null), 1500);
+                                        onOpenCoinsShop?.();
+                                        return;
+                                    }
+
+                                    void handleBuyReplay();
+                                }}
+                            >
+                                {buyingReplay
+                                    ? '⏳ Processing...'
+                                    : `🔥 Play Again for ${data.nextReplayPrice} Coins`}
+                            </button>
+
+                            <div className="tc-replay-note">
+                                Buy one more try and improve your best score
+                            </div>
+                        </div>
+                    ) : replayLimitReached ? (
+                        <div className="tc-closed">⛔ Replay limit reached</div>
+                    ) : (
+                        <div className="tc-closed">⌛ No attempts left</div>
+                    )
                 ) : canJoin ? (
                     <div
-                        className={`cashcup-join-card coin ${
-                            data.coins < data.entryFee ? 'locked' : ''
-                        }`}
+                        className={`cashcup-join-card coin ${data.coins < data.entryFee ? 'locked' : ''}`}
                         onClick={() => {
                             if (data.coins < data.entryFee) {
                                 setHint(`❌ Need ${data.entryFee - data.coins} coins`);
                                 setTimeout(() => setHint(null), 1500);
+                                onOpenCoinsShop?.();
                                 return;
                             }
-                            handleJoin();
+                            void handleJoin();
                         }}
                     >
                         <div className="join-icon">🪙</div>
@@ -218,13 +345,12 @@ export function EventTournamentCard({
                 {hint && <div className="tc-hint">{hint}</div>}
             </div>
 
-            {/* ───────── LEADERBOARD ───────── */}
             <div className="tc-leaderboard">
                 <div className="tc-lb-head">
                     <h4>🏆 TOP PLAYERS</h4>
                     <span className="tc-lb-head-sub">
-            {data.participants.length} player{data.participants.length === 1 ? '' : 's'}
-        </span>
+                        {data.participants.length} player{data.participants.length === 1 ? '' : 's'}
+                    </span>
                 </div>
 
                 {data.participants.length === 0 ? (
