@@ -1,5 +1,5 @@
 /* ───────────────────────────────────────────── */
-/* EVENT TOURNAMENT — NEW STYLE FOR CURRENT TSX */
+/* EVENT TOURNAMENT — CLEAN PREMIUM STYLE */
 /* ───────────────────────────────────────────── */
 
 .tournament-card {
@@ -216,118 +216,323 @@
     border: 1px dashed rgba(255, 255, 255, 0.08);
 }
 
-.tc-leaderboard {
-    margin-top: 24px;
-}
-
-.tc-leaderboard h4,
-.tc-lb-title {
-    margin: 0 0 12px;
-    font-size: 16px;
-    font-weight: 900;
-    color: #ffffff;
-}
-
-.tc-lb-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.tc-lb-row {
-    display: grid;
-    grid-template-columns: 52px 1fr auto auto;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 14px;
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.055);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    transition:
-            transform 0.18s ease,
-            background 0.18s ease,
-            border-color 0.18s ease;
-}
-
-.tc-lb-row:hover {
-    transform: translateY(-1px);
-    background: rgba(255, 255, 255, 0.075);
-    border-color: rgba(255, 255, 255, 0.1);
-}
-
-.tc-lb-rank {
-    font-weight: 900;
-    font-size: 15px;
-    color: #fff0ac;
-}
-
-.tc-lb-name {
-    min-width: 0;
-    font-size: 14px;
-    font-weight: 700;
-    color: #ffffff;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.tc-lb-score {
-    font-size: 14px;
-    font-weight: 900;
-    color: #ffffff;
-    white-space: nowrap;
-}
-
-.tc-lb-score span {
-    color: rgba(255, 255, 255, 0.55);
-    font-weight: 600;
-    margin-left: 4px;
-}
-
-.tc-prize {
-    white-space: nowrap;
-    font-size: 13px;
-    font-weight: 900;
-    color: #1a1600;
-    background: linear-gradient(90deg, #ffe27a 0%, #ffc83d 100%);
-    padding: 7px 10px;
-    border-radius: 999px;
-    box-shadow: 0 6px 18px rgba(255, 200, 61, 0.22);
-}
-
-.tc-lb-empty {
-    padding: 14px;
-    border-radius: 14px;
-    text-align: center;
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.68);
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px dashed rgba(255, 255, 255, 0.08);
-}
-
 .tournament-card.error {
     background: linear-gradient(180deg, rgba(70, 18, 29, 0.96) 0%, rgba(42, 14, 20, 0.96) 100%);
     border-color: rgba(255, 77, 109, 0.25);
     color: #ffd6dd;
 }
 
-/* TOP PLACES EXTRA HIGHLIGHT */
-.tc-lb-row:nth-child(1) {
-    background: linear-gradient(90deg, rgba(255, 215, 0, 0.14), rgba(255, 255, 255, 0.06));
-    border-color: rgba(255, 215, 0, 0.24);
+/* ───────── PREMIUM JOIN CARD ───────── */
+
+.cashcup-join-card {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    border-radius: 28px;
+    padding: 28px 22px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: linear-gradient(180deg, #ffb347, #ff7b1f);
+    color: #1a1205;
+    box-shadow:
+            0 20px 60px rgba(255, 130, 30, 0.35),
+            inset 0 1px 0 rgba(255,255,255,0.25);
+    transition: all 0.25s ease;
 }
 
-.tc-lb-row:nth-child(2) {
-    background: linear-gradient(90deg, rgba(205, 219, 230, 0.12), rgba(255, 255, 255, 0.05));
-    border-color: rgba(205, 219, 230, 0.18);
+.cashcup-join-card::before {
+    content: "";
+    position: absolute;
+    inset: -30%;
+    background: radial-gradient(circle, rgba(255,255,255,0.3), transparent 60%);
+    opacity: 0.2;
+    animation: joinGlow 6s linear infinite;
 }
 
-.tc-lb-row:nth-child(3) {
-    background: linear-gradient(90deg, rgba(255, 166, 77, 0.14), rgba(255, 255, 255, 0.05));
-    border-color: rgba(255, 166, 77, 0.2);
+@keyframes joinGlow {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
-/* MOBILE */
+.cashcup-join-card:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow:
+            0 30px 80px rgba(255, 130, 30, 0.5),
+            inset 0 1px 0 rgba(255,255,255,0.3);
+}
+
+.cashcup-join-card.locked {
+    opacity: 0.6;
+    filter: grayscale(0.2);
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.join-icon {
+    font-size: 52px;
+    margin-bottom: 14px;
+    filter: drop-shadow(0 6px 12px rgba(0,0,0,0.3));
+}
+
+.join-title {
+    font-size: 26px;
+    font-weight: 900;
+    margin-bottom: 8px;
+    line-height: 1.1;
+}
+
+.join-sub {
+    font-size: 15px;
+    opacity: 0.85;
+}
+
+.cashcup-join-card::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -50%;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(
+            120deg,
+            transparent,
+            rgba(255,255,255,0.4),
+            transparent
+    );
+    transform: skewX(-25deg);
+}
+
+.cashcup-join-card:hover::after {
+    left: 120%;
+    transition: 0.8s;
+}
+
+/* ───────── LEADERBOARD ───────── */
+
+.tc-leaderboard {
+    margin-top: 22px;
+    padding: 18px;
+    border-radius: 24px;
+    position: relative;
+    overflow: hidden;
+    background:
+            radial-gradient(circle at top left, rgba(255, 208, 74, 0.12), transparent 35%),
+            radial-gradient(circle at bottom right, rgba(74, 140, 255, 0.12), transparent 35%),
+            linear-gradient(180deg, rgba(13, 18, 38, 0.98) 0%, rgba(18, 25, 49, 0.96) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+            0 16px 40px rgba(0, 0, 0, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.tc-lb-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.tc-lb-head h4 {
+    margin: 0;
+    font-size: 28px;
+    line-height: 1;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: 0.02em;
+}
+
+.tc-lb-head-sub {
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.tc-lb-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.tc-lb-row {
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    border-radius: 20px;
+    background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.03),
+            0 8px 20px rgba(0, 0, 0, 0.2);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.tc-lb-row:hover {
+    transform: translateY(-1px);
+    border-color: rgba(255, 255, 255, 0.14);
+    box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.04),
+            0 12px 26px rgba(0, 0, 0, 0.26);
+}
+
+.tc-lb-row.first {
+    background:
+            radial-gradient(circle at left center, rgba(255, 210, 84, 0.18), transparent 35%),
+            linear-gradient(135deg, rgba(255, 208, 74, 0.08), rgba(255, 255, 255, 0.03));
+    border-color: rgba(255, 208, 74, 0.35);
+    box-shadow:
+            0 0 0 1px rgba(255, 208, 74, 0.08),
+            0 14px 30px rgba(255, 180, 0, 0.12);
+}
+
+.tc-lb-row.second {
+    background:
+            radial-gradient(circle at left center, rgba(195, 206, 220, 0.14), transparent 35%),
+            linear-gradient(135deg, rgba(210, 220, 235, 0.06), rgba(255, 255, 255, 0.03));
+    border-color: rgba(210, 220, 235, 0.2);
+}
+
+.tc-lb-row.third {
+    background:
+            radial-gradient(circle at left center, rgba(205, 127, 50, 0.14), transparent 35%),
+            linear-gradient(135deg, rgba(205, 127, 50, 0.07), rgba(255, 255, 255, 0.03));
+    border-color: rgba(205, 127, 50, 0.2);
+}
+
+.tc-lb-rank-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tc-lb-rank {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+    box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.05),
+            0 8px 18px rgba(0, 0, 0, 0.2);
+}
+
+.tc-lb-user {
+    min-width: 0;
+}
+
+.tc-lb-name {
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1.1;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tc-lb-meta {
+    margin-top: 5px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.58);
+    font-weight: 700;
+}
+
+.tc-lb-stats {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.tc-lb-score-box,
+.tc-lb-prize-box {
+    min-width: 92px;
+    padding: 10px 14px;
+    border-radius: 16px;
+    text-align: center;
+    background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tc-lb-score-label,
+.tc-lb-prize-label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 11px;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 800;
+}
+
+.tc-lb-score {
+    font-size: 24px;
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1;
+}
+
+.tc-prize {
+    font-size: 20px;
+    font-weight: 900;
+    color: #ffd44f;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.tc-lb-empty {
+    padding: 26px 18px;
+    border-radius: 20px;
+    text-align: center;
+    background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+    border: 1px dashed rgba(255, 255, 255, 0.12);
+}
+
+.tc-lb-empty-icon {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.tc-lb-empty-title {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 900;
+}
+
+.tc-lb-empty-sub {
+    margin-top: 6px;
+    color: rgba(255, 255, 255, 0.58);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* ───────── MOBILE ───────── */
+
 @media (max-width: 640px) {
     .tournament-card {
         padding: 16px;
@@ -361,32 +566,83 @@
         border-radius: 16px;
     }
 
+    .cashcup-join-card {
+        border-radius: 22px;
+        padding: 22px 16px;
+    }
+
+    .join-icon {
+        font-size: 44px;
+        margin-bottom: 10px;
+    }
+
+    .join-title {
+        font-size: 21px;
+    }
+
+    .join-sub {
+        font-size: 13px;
+    }
+
+    .tc-leaderboard {
+        padding: 14px;
+        border-radius: 20px;
+    }
+
+    .tc-lb-head {
+        align-items: flex-start;
+    }
+
+    .tc-lb-head h4 {
+        font-size: 18px;
+    }
+
+    .tc-lb-head-sub {
+        font-size: 11px;
+        padding: 7px 10px;
+    }
+
     .tc-lb-row {
-        grid-template-columns: 42px 1fr;
-        gap: 8px;
-        padding: 11px 12px;
+        grid-template-columns: 44px minmax(0, 1fr);
+        gap: 12px;
+        padding: 12px;
+        border-radius: 16px;
     }
 
     .tc-lb-rank {
-        font-size: 14px;
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
+        font-size: 17px;
     }
 
     .tc-lb-name {
-        font-size: 13px;
+        font-size: 17px;
+    }
+
+    .tc-lb-meta {
+        font-size: 12px;
+    }
+
+    .tc-lb-stats {
+        grid-column: 1 / -1;
+        justify-content: flex-start;
+        padding-top: 4px;
+    }
+
+    .tc-lb-score-box,
+    .tc-lb-prize-box {
+        min-width: 84px;
+        padding: 9px 12px;
+        border-radius: 14px;
     }
 
     .tc-lb-score {
-        grid-column: 2;
-        font-size: 13px;
-        color: rgba(255, 255, 255, 0.88);
+        font-size: 20px;
     }
 
     .tc-prize {
-        grid-column: 2;
-        justify-self: start;
-        margin-top: 4px;
-        font-size: 12px;
-        padding: 6px 9px;
+        font-size: 17px;
     }
 
     .tc-hint,
@@ -394,100 +650,4 @@
     .tc-lb-empty {
         font-size: 12px;
     }
-}
-/* ───────── PREMIUM JOIN CARD ───────── */
-
-.cashcup-join-card {
-    position: relative;
-    overflow: hidden;
-    width: 100%;
-    border-radius: 28px;
-    padding: 28px 22px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-
-    background: linear-gradient(180deg, #ffb347, #ff7b1f);
-    color: #1a1205;
-
-    box-shadow:
-            0 20px 60px rgba(255, 130, 30, 0.35),
-            inset 0 1px 0 rgba(255,255,255,0.25);
-
-    transition: all 0.25s ease;
-}
-
-/* 🔥 glow animation */
-.cashcup-join-card::before {
-    content: "";
-    position: absolute;
-    inset: -30%;
-    background: radial-gradient(circle, rgba(255,255,255,0.3), transparent 60%);
-    opacity: 0.2;
-    animation: joinGlow 6s linear infinite;
-}
-
-@keyframes joinGlow {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.cashcup-join-card:hover {
-    transform: translateY(-6px) scale(1.02);
-    box-shadow:
-            0 30px 80px rgba(255, 130, 30, 0.5),
-            inset 0 1px 0 rgba(255,255,255,0.3);
-}
-
-/* LOCKED */
-.cashcup-join-card.locked {
-    opacity: 0.6;
-    filter: grayscale(0.2);
-    cursor: not-allowed;
-    box-shadow: none;
-}
-
-/* ICON */
-.join-icon {
-    font-size: 52px;
-    margin-bottom: 14px;
-    filter: drop-shadow(0 6px 12px rgba(0,0,0,0.3));
-}
-
-/* TITLE */
-.join-title {
-    font-size: 26px;
-    font-weight: 900;
-    margin-bottom: 8px;
-    line-height: 1.1;
-}
-
-/* SUBTEXT */
-.join-sub {
-    font-size: 15px;
-    opacity: 0.85;
-}
-
-/* 🔥 BONUS: subtle shine line */
-.cashcup-join-card::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -50%;
-    width: 40%;
-    height: 100%;
-    background: linear-gradient(
-            120deg,
-            transparent,
-            rgba(255,255,255,0.4),
-            transparent
-    );
-    transform: skewX(-25deg);
-}
-
-.cashcup-join-card:hover::after {
-    left: 120%;
-    transition: 0.8s;
 }
