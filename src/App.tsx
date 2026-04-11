@@ -1319,20 +1319,17 @@ function App() {
                                 <div className="tournament-page">
 
                                     <EventTournamentCard
-                                        slug="big-march-2026"
                                         token={token}
-                                        t={t}
                                         onCoinsChange={(coins) =>
                                             setMe((prev) => (prev ? { ...prev, coins } : prev))
                                         }
                                         onStartGame={(tournamentId) => {
-                                            markEventDone('big-march-2026'); // 🔥 вот тут
+                                            markEventDone('monster-april-2026');
                                             setTournamentGameId(tournamentId);
                                             setTournamentType(null);
                                             setCurrentPage('game');
                                         }}
                                     />
-
                                     <TournamentCard
                                         type="HOURLY"
                                         token={token}
