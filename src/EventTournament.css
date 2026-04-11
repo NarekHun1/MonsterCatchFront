@@ -1,5 +1,5 @@
 /* ───────────────────────────────────────────── */
-/* EVENT TOURNAMENT — CLEAN PREMIUM STYLE */
+/* EVENT TOURNAMENT — FINAL CLEAN VERSION */
 /* ───────────────────────────────────────────── */
 
 .tournament-card {
@@ -33,28 +33,10 @@
                     rgba(255, 215, 0, 0.08)
             );
     animation: tcRotateGlow 12s linear infinite;
-    pointer-events: none;
-}
-
-.tournament-card::after {
-    content: "";
-    position: absolute;
-    inset: 1px;
-    border-radius: 23px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0));
-    pointer-events: none;
-}
-
-.tournament-card > * {
-    position: relative;
-    z-index: 1;
 }
 
 @keyframes tcRotateGlow {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
+    to {
         transform: rotate(360deg);
     }
 }
@@ -62,37 +44,23 @@
 .tournament-card h3 {
     margin: 0 0 16px;
     font-size: 22px;
-    line-height: 1.15;
     font-weight: 900;
-    letter-spacing: 0.4px;
     color: #fff3bf;
-    text-shadow: 0 2px 10px rgba(255, 196, 0, 0.22);
 }
 
 .tc-row {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    gap: 12px;
     padding: 10px 0;
     font-size: 14px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.tc-row:last-of-type {
-    border-bottom: none;
-}
-
-.tc-row span {
-    color: rgba(255, 255, 255, 0.74);
-    font-weight: 500;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
 .tc-row strong {
-    color: #ffffff;
-    font-size: 15px;
     font-weight: 800;
 }
+
+/* ───────── STATUS ───────── */
 
 .tc-status {
     margin-top: 14px;
@@ -102,433 +70,173 @@
 }
 
 .tc-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    width: fit-content;
-    padding: 7px 12px;
+    padding: 6px 10px;
     border-radius: 999px;
     font-size: 12px;
     font-weight: 800;
-    letter-spacing: 0.2px;
 }
 
 .tc-badge--active {
     color: #7dffb3;
-    background: rgba(0, 255, 136, 0.12);
-    border: 1px solid rgba(0, 255, 136, 0.28);
-    box-shadow: 0 0 20px rgba(0, 255, 136, 0.08);
+    background: rgba(0,255,136,0.12);
 }
 
 .tc-badge--planned {
     color: #ffd86b;
-    background: rgba(255, 200, 0, 0.12);
-    border: 1px solid rgba(255, 200, 0, 0.28);
+    background: rgba(255,200,0,0.12);
 }
 
 .tc-badge--finished {
     color: #ff8da1;
-    background: rgba(255, 77, 109, 0.12);
-    border: 1px solid rgba(255, 77, 109, 0.28);
+    background: rgba(255,77,109,0.12);
 }
 
 .tc-timer {
-    padding: 10px 12px;
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.88);
-    font-size: 14px;
-    font-weight: 600;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 8px 10px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.05);
+    font-size: 13px;
 }
 
-.tc-timer strong {
-    color: #ffffff;
-    font-weight: 800;
-}
+/* ───────── ACTIONS ───────── */
 
 .tc-actions {
     margin-top: 18px;
 }
 
-.tc-play-main,
-.tc-join-btn {
-    width: 100%;
-    border: none;
-    border-radius: 18px;
-    padding: 15px 16px;
-    font-size: 15px;
-    font-weight: 900;
-    cursor: pointer;
-    transition:
-            transform 0.22s ease,
-            box-shadow 0.22s ease,
-            opacity 0.22s ease;
-}
-
 .tc-play-main {
-    color: #151515;
-    background: linear-gradient(90deg, #ffe27a 0%, #ffbc2c 100%);
-    box-shadow: 0 10px 28px rgba(255, 190, 44, 0.28);
+    width: 100%;
+    border-radius: 16px;
+    padding: 14px;
+    font-weight: 900;
+    background: linear-gradient(90deg, #ffe27a, #ffbc2c);
 }
 
-.tc-play-main:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 16px 34px rgba(255, 190, 44, 0.38);
-}
-
-.tc-join-btn {
-    color: #111;
-    background: linear-gradient(90deg, #86ffd0 0%, #35e0a1 100%);
-    box-shadow: 0 10px 28px rgba(53, 224, 161, 0.24);
-}
-
-.tc-join-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 16px 34px rgba(53, 224, 161, 0.32);
-}
-
-.tc-play-main:active,
-.tc-join-btn:active {
-    transform: translateY(0);
-}
-
-.tc-hint {
-    margin-top: 10px;
-    padding: 10px 12px;
-    border-radius: 12px;
-    text-align: center;
-    font-size: 13px;
-    font-weight: 700;
-    color: #ffb4b4;
-    background: rgba(255, 77, 109, 0.1);
-    border: 1px solid rgba(255, 77, 109, 0.2);
-}
-
-.tc-closed {
-    padding: 12px;
-    border-radius: 14px;
-    text-align: center;
-    font-size: 14px;
-    font-weight: 700;
-    color: rgba(255, 255, 255, 0.72);
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px dashed rgba(255, 255, 255, 0.08);
-}
-
-.tournament-card.error {
-    background: linear-gradient(180deg, rgba(70, 18, 29, 0.96) 0%, rgba(42, 14, 20, 0.96) 100%);
-    border-color: rgba(255, 77, 109, 0.25);
-    color: #ffd6dd;
-}
-
-/* ───────── PREMIUM JOIN CARD ───────── */
+/* ───────── JOIN CARD ───────── */
 
 .cashcup-join-card {
-    position: relative;
-    overflow: hidden;
     width: 100%;
-    border-radius: 28px;
-    padding: 28px 22px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    border-radius: 22px;
+    padding: 20px;
     text-align: center;
     background: linear-gradient(180deg, #ffb347, #ff7b1f);
     color: #1a1205;
-    box-shadow:
-            0 20px 60px rgba(255, 130, 30, 0.35),
-            inset 0 1px 0 rgba(255,255,255,0.25);
-    transition: all 0.25s ease;
-}
-
-.cashcup-join-card::before {
-    content: "";
-    position: absolute;
-    inset: -30%;
-    background: radial-gradient(circle, rgba(255,255,255,0.3), transparent 60%);
-    opacity: 0.2;
-    animation: joinGlow 6s linear infinite;
-}
-
-@keyframes joinGlow {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-.cashcup-join-card:hover {
-    transform: translateY(-6px) scale(1.02);
-    box-shadow:
-            0 30px 80px rgba(255, 130, 30, 0.5),
-            inset 0 1px 0 rgba(255,255,255,0.3);
-}
-
-.cashcup-join-card.locked {
-    opacity: 0.6;
-    filter: grayscale(0.2);
-    cursor: not-allowed;
-    box-shadow: none;
 }
 
 .join-icon {
-    font-size: 52px;
-    margin-bottom: 14px;
-    filter: drop-shadow(0 6px 12px rgba(0,0,0,0.3));
+    font-size: 40px;
+    margin-bottom: 8px;
 }
 
 .join-title {
-    font-size: 26px;
+    font-size: 20px;
     font-weight: 900;
-    margin-bottom: 8px;
-    line-height: 1.1;
 }
 
 .join-sub {
-    font-size: 15px;
-    opacity: 0.85;
+    font-size: 13px;
 }
 
-.cashcup-join-card::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -50%;
-    width: 40%;
-    height: 100%;
-    background: linear-gradient(
-            120deg,
-            transparent,
-            rgba(255,255,255,0.4),
-            transparent
-    );
-    transform: skewX(-25deg);
-}
-
-.cashcup-join-card:hover::after {
-    left: 120%;
-    transition: 0.8s;
-}
-
-/* ───────── LEADERBOARD ───────── */
+/* ───────── LEADERBOARD (COMPACT) ───────── */
 
 .tc-leaderboard {
-    margin-top: 22px;
-    padding: 18px;
-    border-radius: 24px;
-    position: relative;
-    overflow: hidden;
-    background:
-            radial-gradient(circle at top left, rgba(255, 208, 74, 0.12), transparent 35%),
-            radial-gradient(circle at bottom right, rgba(74, 140, 255, 0.12), transparent 35%),
-            linear-gradient(180deg, rgba(13, 18, 38, 0.98) 0%, rgba(18, 25, 49, 0.96) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow:
-            0 16px 40px rgba(0, 0, 0, 0.35),
-            inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    margin-top: 18px;
+    padding: 14px;
+    border-radius: 20px;
+    background: rgba(12,18,36,0.95);
+    border: 1px solid rgba(255,255,255,0.06);
 }
 
+/* header */
 .tc-lb-head {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 16px;
+    margin-bottom: 10px;
 }
 
 .tc-lb-head h4 {
-    margin: 0;
-    font-size: 28px;
-    line-height: 1;
+    font-size: 16px;
     font-weight: 900;
-    color: #ffffff;
-    letter-spacing: 0.02em;
 }
 
 .tc-lb-head-sub {
-    padding: 8px 12px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.06);
-    color: rgba(255, 255, 255, 0.72);
-    font-size: 13px;
-    font-weight: 700;
-    white-space: nowrap;
+    font-size: 11px;
+    opacity: 0.7;
 }
 
+/* list */
 .tc-lb-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 6px;
+    max-height: 320px;
+    overflow-y: auto;
 }
 
+/* row */
 .tc-lb-row {
     display: grid;
-    grid-template-columns: 56px minmax(0, 1fr) auto;
+    grid-template-columns: 30px 1fr auto auto;
     align-items: center;
-    gap: 14px;
-    padding: 14px;
-    border-radius: 20px;
-    background:
-            linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.03),
-            0 8px 20px rgba(0, 0, 0, 0.2);
-    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.03);
+    font-size: 13px;
 }
 
-.tc-lb-row:hover {
-    transform: translateY(-1px);
-    border-color: rgba(255, 255, 255, 0.14);
-    box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.04),
-            0 12px 26px rgba(0, 0, 0, 0.26);
-}
-
+/* top 3 */
 .tc-lb-row.first {
-    background:
-            radial-gradient(circle at left center, rgba(255, 210, 84, 0.18), transparent 35%),
-            linear-gradient(135deg, rgba(255, 208, 74, 0.08), rgba(255, 255, 255, 0.03));
-    border-color: rgba(255, 208, 74, 0.35);
-    box-shadow:
-            0 0 0 1px rgba(255, 208, 74, 0.08),
-            0 14px 30px rgba(255, 180, 0, 0.12);
+    background: rgba(255,208,74,0.08);
 }
 
 .tc-lb-row.second {
-    background:
-            radial-gradient(circle at left center, rgba(195, 206, 220, 0.14), transparent 35%),
-            linear-gradient(135deg, rgba(210, 220, 235, 0.06), rgba(255, 255, 255, 0.03));
-    border-color: rgba(210, 220, 235, 0.2);
+    background: rgba(200,210,220,0.06);
 }
 
 .tc-lb-row.third {
-    background:
-            radial-gradient(circle at left center, rgba(205, 127, 50, 0.14), transparent 35%),
-            linear-gradient(135deg, rgba(205, 127, 50, 0.07), rgba(255, 255, 255, 0.03));
-    border-color: rgba(205, 127, 50, 0.2);
+    background: rgba(205,127,50,0.06);
 }
 
-.tc-lb-rank-wrap {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
+/* rank */
 .tc-lb-rank {
-    width: 42px;
-    height: 42px;
-    border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background:
-            linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03));
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    font-size: 20px;
-    font-weight: 800;
-    color: #fff;
-    box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.05),
-            0 8px 18px rgba(0, 0, 0, 0.2);
-}
-
-.tc-lb-user {
-    min-width: 0;
-}
-
-.tc-lb-name {
-    font-size: 22px;
+    font-size: 13px;
     font-weight: 900;
-    line-height: 1.1;
-    color: #ffffff;
-    white-space: nowrap;
+}
+
+/* name */
+.tc-lb-name {
+    font-weight: 700;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-.tc-lb-meta {
-    margin-top: 5px;
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.58);
-    font-weight: 700;
-}
-
-.tc-lb-stats {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-}
-
-.tc-lb-score-box,
-.tc-lb-prize-box {
-    min-width: 92px;
-    padding: 10px 14px;
-    border-radius: 16px;
-    text-align: center;
-    background:
-            linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
-    border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.tc-lb-score-label,
-.tc-lb-prize-label {
-    display: block;
-    margin-bottom: 4px;
-    font-size: 11px;
-    line-height: 1;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: rgba(255, 255, 255, 0.5);
-    font-weight: 800;
-}
-
+/* score */
 .tc-lb-score {
-    font-size: 24px;
     font-weight: 900;
-    color: #ffffff;
-    line-height: 1;
 }
 
+/* prize */
 .tc-prize {
-    font-size: 20px;
-    font-weight: 900;
     color: #ffd44f;
-    line-height: 1;
-    white-space: nowrap;
-}
-
-.tc-lb-empty {
-    padding: 26px 18px;
-    border-radius: 20px;
-    text-align: center;
-    background:
-            linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
-    border: 1px dashed rgba(255, 255, 255, 0.12);
-}
-
-.tc-lb-empty-icon {
-    font-size: 32px;
-    margin-bottom: 10px;
-}
-
-.tc-lb-empty-title {
-    color: #ffffff;
-    font-size: 18px;
     font-weight: 900;
 }
 
-.tc-lb-empty-sub {
-    margin-top: 6px;
-    color: rgba(255, 255, 255, 0.58);
-    font-size: 13px;
-    font-weight: 600;
+/* empty */
+.tc-lb-empty {
+    text-align: center;
+    padding: 12px;
+    font-size: 12px;
+    opacity: 0.7;
+}
+
+/* scroll */
+.tc-lb-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.tc-lb-list::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.1);
 }
 
 /* ───────── MOBILE ───────── */
@@ -536,118 +244,13 @@
 @media (max-width: 640px) {
     .tournament-card {
         padding: 16px;
-        border-radius: 20px;
-        margin-bottom: 18px;
-    }
-
-    .tournament-card h3 {
-        font-size: 18px;
-        margin-bottom: 14px;
-    }
-
-    .tc-row {
-        font-size: 13px;
-        padding: 9px 0;
-    }
-
-    .tc-row strong {
-        font-size: 14px;
-    }
-
-    .tc-timer {
-        font-size: 13px;
-        padding: 9px 11px;
-    }
-
-    .tc-play-main,
-    .tc-join-btn {
-        font-size: 14px;
-        padding: 14px;
-        border-radius: 16px;
-    }
-
-    .cashcup-join-card {
-        border-radius: 22px;
-        padding: 22px 16px;
-    }
-
-    .join-icon {
-        font-size: 44px;
-        margin-bottom: 10px;
-    }
-
-    .join-title {
-        font-size: 21px;
-    }
-
-    .join-sub {
-        font-size: 13px;
-    }
-
-    .tc-leaderboard {
-        padding: 14px;
-        border-radius: 20px;
-    }
-
-    .tc-lb-head {
-        align-items: flex-start;
-    }
-
-    .tc-lb-head h4 {
-        font-size: 18px;
-    }
-
-    .tc-lb-head-sub {
-        font-size: 11px;
-        padding: 7px 10px;
     }
 
     .tc-lb-row {
-        grid-template-columns: 44px minmax(0, 1fr);
-        gap: 12px;
-        padding: 12px;
-        border-radius: 16px;
-    }
-
-    .tc-lb-rank {
-        width: 36px;
-        height: 36px;
-        border-radius: 12px;
-        font-size: 17px;
-    }
-
-    .tc-lb-name {
-        font-size: 17px;
-    }
-
-    .tc-lb-meta {
-        font-size: 12px;
-    }
-
-    .tc-lb-stats {
-        grid-column: 1 / -1;
-        justify-content: flex-start;
-        padding-top: 4px;
-    }
-
-    .tc-lb-score-box,
-    .tc-lb-prize-box {
-        min-width: 84px;
-        padding: 9px 12px;
-        border-radius: 14px;
-    }
-
-    .tc-lb-score {
-        font-size: 20px;
+        grid-template-columns: 26px 1fr auto;
     }
 
     .tc-prize {
-        font-size: 17px;
-    }
-
-    .tc-hint,
-    .tc-closed,
-    .tc-lb-empty {
-        font-size: 12px;
+        display: none;
     }
 }
