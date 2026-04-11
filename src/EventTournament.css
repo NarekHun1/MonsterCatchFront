@@ -395,3 +395,99 @@
         font-size: 12px;
     }
 }
+/* ───────── PREMIUM JOIN CARD ───────── */
+
+.cashcup-join-card {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    border-radius: 28px;
+    padding: 28px 22px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+
+    background: linear-gradient(180deg, #ffb347, #ff7b1f);
+    color: #1a1205;
+
+    box-shadow:
+            0 20px 60px rgba(255, 130, 30, 0.35),
+            inset 0 1px 0 rgba(255,255,255,0.25);
+
+    transition: all 0.25s ease;
+}
+
+/* 🔥 glow animation */
+.cashcup-join-card::before {
+    content: "";
+    position: absolute;
+    inset: -30%;
+    background: radial-gradient(circle, rgba(255,255,255,0.3), transparent 60%);
+    opacity: 0.2;
+    animation: joinGlow 6s linear infinite;
+}
+
+@keyframes joinGlow {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.cashcup-join-card:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow:
+            0 30px 80px rgba(255, 130, 30, 0.5),
+            inset 0 1px 0 rgba(255,255,255,0.3);
+}
+
+/* LOCKED */
+.cashcup-join-card.locked {
+    opacity: 0.6;
+    filter: grayscale(0.2);
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* ICON */
+.join-icon {
+    font-size: 52px;
+    margin-bottom: 14px;
+    filter: drop-shadow(0 6px 12px rgba(0,0,0,0.3));
+}
+
+/* TITLE */
+.join-title {
+    font-size: 26px;
+    font-weight: 900;
+    margin-bottom: 8px;
+    line-height: 1.1;
+}
+
+/* SUBTEXT */
+.join-sub {
+    font-size: 15px;
+    opacity: 0.85;
+}
+
+/* 🔥 BONUS: subtle shine line */
+.cashcup-join-card::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -50%;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(
+            120deg,
+            transparent,
+            rgba(255,255,255,0.4),
+            transparent
+    );
+    transform: skewX(-25deg);
+}
+
+.cashcup-join-card:hover::after {
+    left: 120%;
+    transition: 0.8s;
+}
