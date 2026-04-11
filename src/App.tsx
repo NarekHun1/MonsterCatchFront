@@ -409,30 +409,13 @@ function App() {
     const [showLangMenu, setShowLangMenu] = useState(false);
     const [questsDot, setQuestsDot] = useState(false);
     const [match3Level, setMatch3Level] = useState<number | null>(null);
-    const [showEventAd, setShowEventAd] = useState(false);
     const [incomingInvite, setIncomingInvite] = useState<any | null>(null);
+    const [showEventNotice, setShowEventNotice] = useState(false);
+    const [, setEventNoticeChecked] = useState(false);
+
 
     const t = (key: string) => translations[lang][key] || key;
 
-// ───────────────── EVENT AD CONTROL ─────────────────
-
-    const EVENT_SLUG = 'big-march-2026';
-
-    const eventDoneKey = (slug: string) => `mc_event_done_${slug}`;
-
-    const isEventDone = (slug: string) => {
-        try {
-            return localStorage.getItem(eventDoneKey(slug)) === '1';
-        } catch {
-            return false;
-        }
-    };
-
-    const markEventDone = (slug: string) => {
-        try {
-            localStorage.setItem(eventDoneKey(slug), '1');
-        } catch {}
-    };
     const handleAcceptInvite = async (
         inviteId: number,
         payWith: 'coins' | 'tickets'
@@ -521,6 +504,7 @@ function App() {
 
         return () => clearInterval(i);
     }, [token]);
+
     useEffect(() => {
         const tgLang =
             (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.language_code;
@@ -531,20 +515,44 @@ function App() {
             setLang('ru');
         }
     }, []);
+
     useEffect(() => {
-        if (isBooting) return;
+        if (!token || isBooting) return;
 
-        // ✅ если юзер уже участвовал/играл Big March — НЕ показываем никогда
-        if (isEventDone(EVENT_SLUG)) return;
+        let cancelled = false;
 
-        // дальше твоя логика "раз в день"
-        const today = new Date().toISOString().slice(0, 10);
-        const lastSeen = localStorage.getItem('mc_event_ad_last_seen');
-        if (lastSeen === today) return;
+        const checkEventNotice = async () => {
+            try {
+                const res = await apiFetch('/event-tournament/daily-notice', token, {
+                    method: 'POST',
+                    body: JSON.stringify({ slug: 'monster-april-2026' }),
+                });
 
-        setShowEventAd(true);
-        localStorage.setItem('mc_event_ad_last_seen', today);
-    }, [isBooting]);
+                const json = await res.json().catch(() => ({}));
+
+                if (!res.ok) {
+                    throw new Error(json?.message || 'Failed to check daily event notice');
+                }
+
+                if (!cancelled) {
+                    setShowEventNotice(!!json.showNotice);
+                    setEventNoticeChecked(true);
+                }
+            } catch (e) {
+                console.error('event daily-notice failed', e);
+                if (!cancelled) {
+                    setShowEventNotice(false);
+                    setEventNoticeChecked(true);
+                }
+            }
+        };
+
+        checkEventNotice();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [token, isBooting]);
 
     // 👇 состояние для магазина монет
     const [showCoinShop, setShowCoinShop] = useState(false);
@@ -1324,7 +1332,6 @@ function App() {
                                             setMe((prev) => (prev ? { ...prev, coins } : prev))
                                         }
                                         onStartGame={(tournamentId) => {
-                                            markEventDone('monster-april-2026');
                                             setTournamentGameId(tournamentId);
                                             setTournamentType(null);
                                             setCurrentPage('game');
@@ -1496,49 +1503,49 @@ function App() {
                         onTournaments={() => setCurrentPage('tournament')}
                     />
                 )}
-                {showEventAd && (
-                    <div className="event-ad-overlay" onClick={() => setShowEventAd(false)}>
+                {showEventNotice && (
+                    <div className="event-ad-overlay" onClick={() => setShowEventNotice(false)}>
                         <div className="event-ad-card" onClick={(e) => e.stopPropagation()}>
                             <button
                                 className="event-ad-close"
-                                onClick={() => setShowEventAd(false)}
+                                onClick={() => setShowEventNotice(false)}
                                 aria-label="close"
                             >
                                 ✕
                             </button>
 
-                            <div className="event-ad-badge">🔥 BIG EVENT</div>
+                            <div className="event-ad-badge">🔥 LIVE EVENT</div>
 
                             <div className="event-ad-title">
-                                Играй Big Tournament до <b>1 марта</b>!
+                                Monster April Tournament is live!
                             </div>
 
                             <div className="event-ad-sub">
-                                🏆 Призовой фонд: <b>10 000 coins</b> <br />
-                                🐯 Стань лучшим — забери награду
+                                🏆 Вступай в турнир и поднимайся в топ <br />
+                                🪙 Плати вход монетами и забирай призы
                             </div>
 
                             <div className="event-ad-actions">
                                 <button
                                     className="event-ad-btn event-ad-btn--primary"
                                     onClick={() => {
-                                        setShowEventAd(false);
-                                        setCurrentPage('tournament'); // кидаем в турниры
+                                        setShowEventNotice(false);
+                                        setCurrentPage('tournament');
                                     }}
                                 >
-                                    🎮 Играть
+                                    🎮 Открыть турнир
                                 </button>
 
                                 <button
                                     className="event-ad-btn event-ad-btn--ghost"
-                                    onClick={() => setShowEventAd(false)}
+                                    onClick={() => setShowEventNotice(false)}
                                 >
                                     Позже
                                 </button>
                             </div>
 
                             <div className="event-ad-foot">
-                                *Успей войти до дедлайна
+                                *Показывается только тем, кто ещё не вступил
                             </div>
                         </div>
                     </div>
