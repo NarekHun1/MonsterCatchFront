@@ -1,4 +1,3 @@
-// src/EventTournamentCard.tsx
 import { useEffect, useState } from 'react';
 import { apiFetch } from './api';
 import './EventTournament.css';
@@ -27,7 +26,6 @@ interface EventTournamentData {
     participants: Participant[];
     timeLeftSec: number;
     joinLeftSec: number;
-    fixedPrizes?: number[];
 }
 
 export function EventTournamentCard({
@@ -39,7 +37,7 @@ export function EventTournamentCard({
     onStartGame: (tournamentId: number) => void;
     onCoinsChange?: (coins: number) => void;
 }) {
-    const slug = 'monster-april-2026'; // 🔥 новый турнир
+    const slug = 'monster-april-2026';
 
     const [data, setData] = useState<EventTournamentData | null>(null);
     const [loading, setLoading] = useState(true);
@@ -49,6 +47,7 @@ export function EventTournamentCard({
     const [timeLeft, setTimeLeft] = useState(0);
     const [joinLeft, setJoinLeft] = useState(0);
 
+    /* ───────── LOAD ───────── */
     const load = async (first = false) => {
         if (first) setLoading(true);
         setError('');
@@ -74,6 +73,7 @@ export function EventTournamentCard({
         return () => clearInterval(i);
     }, []);
 
+    /* ───────── TIMERS ───────── */
     useEffect(() => {
         if (!data?.endsAt) return;
 
@@ -101,11 +101,21 @@ export function EventTournamentCard({
     }, [data]);
 
     const formatMs = (ms: number) => {
-        const s = Math.floor(ms / 1000);
-        const m = Math.floor(s / 60);
-        return `${m}:${(s % 60).toString().padStart(2, '0')}`;
+        if (ms <= 0) return '00:00';
+
+        const total = Math.floor(ms / 1000);
+        const d = Math.floor(total / 86400);
+        const h = Math.floor((total % 86400) / 3600);
+        const m = Math.floor((total % 3600) / 60);
+        const s = total % 60;
+
+        if (d > 0) return `${d}d ${h}h`;
+        if (h > 0) return `${h}h ${m}m`;
+
+        return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
     };
 
+    /* ───────── JOIN ───────── */
     const handleJoin = async () => {
         if (!data) return;
 
@@ -128,6 +138,7 @@ export function EventTournamentCard({
         }
     };
 
+    /* ───────── UI ───────── */
     if (loading) return <div className="tournament-card">Loading...</div>;
     if (error) return <div className="tournament-card error">{error}</div>;
     if (!data) return null;
@@ -139,7 +150,7 @@ export function EventTournamentCard({
 
     return (
         <div className="tournament-card">
-            <h3>🔥 MONSTER TOURNAMENT</h3>
+            <h3>{data.title || '🔥 MONSTER TOURNAMENT'}</h3>
 
             <div className="tc-row">
                 <span>Entry</span>
@@ -151,11 +162,25 @@ export function EventTournamentCard({
                 <strong>{data.prizePool} 🪙</strong>
             </div>
 
-            <div className="tc-timer">
-                ⏳ {formatMs(timeLeft)}
+            <div className="tc-status">
+                {data.status === 'ACTIVE' ? (
+                    <>
+                        <span className="tc-badge tc-badge--active">🟢 Active</span>
+                        <div className="tc-timer">
+                            ⏳ {formatMs(timeLeft)}
+                        </div>
+                        <div className="tc-timer">
+                            🕒 Join left: {formatMs(joinLeft)}
+                        </div>
+                    </>
+                ) : data.status === 'PLANNED' ? (
+                    <span className="tc-badge tc-badge--planned">🟡 Planned</span>
+                ) : (
+                    <span className="tc-badge tc-badge--finished">🏁 Finished</span>
+                )}
             </div>
 
-            {/* ACTIONS */}
+            {/* ───────── ACTIONS ───────── */}
             <div className="tc-actions">
                 {data.joined ? (
                     <button
@@ -165,52 +190,65 @@ export function EventTournamentCard({
                         🎮 PLAY
                     </button>
                 ) : canJoin ? (
-                    <button
-                        className="tc-join-btn"
+                    <div
+                        className={`cashcup-join-card coin ${
+                            data.coins < data.entryFee ? 'locked' : ''
+                        }`}
                         onClick={() => {
                             if (data.coins < data.entryFee) {
-                                setHint(`Need ${data.entryFee - data.coins} coins`);
-                                setTimeout(() => setHint(null), 2000);
+                                setHint(`❌ Need ${data.entryFee - data.coins} coins`);
+                                setTimeout(() => setHint(null), 1500);
                                 return;
                             }
                             handleJoin();
                         }}
                     >
-                        🔥 Join for {data.entryFee}
-                    </button>
+                        <div className="join-icon">🪙</div>
+                        <div className="join-title">Join with Coins</div>
+                        <div className="join-sub">
+                            Price: {data.entryFee} · Balance: {data.coins}
+                        </div>
+                    </div>
                 ) : (
-                    <div>Closed</div>
+                    <div className="tc-closed">
+                        🚫 {joinLeft <= 0 ? 'Join closed' : 'Tournament finished'}
+                    </div>
                 )}
 
                 {hint && <div className="tc-hint">{hint}</div>}
             </div>
 
-            {/* LEADERBOARD */}
+            {/* ───────── LEADERBOARD ───────── */}
             <div className="tc-leaderboard">
                 <h4>🏆 TOP PLAYERS</h4>
 
-                {data.participants.map((p, i) => {
-                    const medal =
-                        i === 0 ? '🥇' :
-                            i === 1 ? '🥈' :
-                                i === 2 ? '🥉' :
-                                    `#${i + 1}`;
+                {data.participants.length === 0 ? (
+                    <div className="tc-lb-empty">No players yet</div>
+                ) : (
+                    <div className="tc-lb-list">
+                        {data.participants.map((p, i) => {
+                            const medal =
+                                i === 0 ? '🥇' :
+                                    i === 1 ? '🥈' :
+                                        i === 2 ? '🥉' :
+                                            `#${i + 1}`;
 
-                    return (
-                        <div key={p.userId} className="tc-lb-row">
-                            <div>{medal}</div>
-                            <div>{p.username || 'Player'}</div>
-                            <div>{p.score}</div>
+                            return (
+                                <div key={p.userId} className="tc-lb-row">
+                                    <div className="tc-lb-rank">{medal}</div>
+                                    <div className="tc-lb-name">{p.username || 'Player'}</div>
+                                    <div className="tc-lb-score">{p.score}</div>
 
-                            {/* 🔥 НОВОЕ: ПРИЗ */}
-                            {(p.prize ?? 0) > 0 && (
-                                <div className="tc-prize">
-                                    🪙 {p.prize ?? 0}
+                                    {(p.prize ?? 0) > 0 && (
+                                        <div className="tc-prize">
+                                            🪙 {p.prize ?? 0}
+                                        </div>
+                                    )}
                                 </div>
-                            )}
-                        </div>
-                    );
-                })}
+                            );
+                        })}
+                    </div>
+                )}
             </div>
         </div>
     );
