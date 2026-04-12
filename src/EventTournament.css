@@ -347,3 +347,19 @@
         font-size: 12px;
     }
 }
+.tournament-card::before {
+    pointer-events: none;
+    z-index: 0;
+}
+
+.tournament-card > * {
+    position: relative;
+    z-index: 1;
+}
+
+.cashcup-join-card,
+.tc-play-main,
+.tc-replay-main {
+    position: relative;
+    z-index: 2;
+}
