@@ -45,6 +45,9 @@ type RawTap = {
     spawnedAt: number | null;
 };
 
+const MAX_RAW_TAPS = 320;
+const MISS_SAMPLE_EVERY = 4;
+
 const MONSTERS: MonsterDef[] = [
     { img: commonImg, rarity: 'common', score: 1, weight: 60 },
     { img: rareImg, rarity: 'rare', score: 3, weight: 25 },
@@ -123,8 +126,14 @@ export function Game({
     const gameIdRef = useRef<number | null>(null);
 
     const tapsRef = useRef<RawTap[]>([]);
+    const missCounterRef = useRef(0);
     const gameStartAtRef = useRef<number>(0);
     const monsterSpawnedAtRef = useRef<number>(0);
+
+    const pushTap = useCallback((tap: RawTap) => {
+        if (tapsRef.current.length >= MAX_RAW_TAPS) return;
+        tapsRef.current.push(tap);
+    }, []);
 
     const playCatchSound = async () => {
         try {
@@ -170,11 +179,13 @@ export function Game({
             const localScore = scoreRef.current;
             setFinalScore(localScore);
 
+            const compactTaps = tapsRef.current.slice(0, MAX_RAW_TAPS);
+
             const res = await apiFetch('/game/finish', token, {
                 method: 'POST',
                 body: JSON.stringify({
                     gameId: currentGameId,
-                    rawTaps: tapsRef.current,
+                    rawTaps: compactTaps,
                 }),
             });
 
@@ -295,6 +306,7 @@ export function Game({
             melasCountRef.current = 0;
 
             tapsRef.current = [];
+            missCounterRef.current = 0;
             gameStartAtRef.current = Date.now();
             monsterSpawnedAtRef.current = gameStartAtRef.current;
 
@@ -371,18 +383,23 @@ export function Game({
             const target = e.target as HTMLElement;
             if (target.closest('.game-monster-emoji-wrapper')) return;
 
+            missCounterRef.current += 1;
+
+            if (missCounterRef.current % MISS_SAMPLE_EVERY !== 0) return;
+            if (tapsRef.current.length >= MAX_RAW_TAPS) return;
+
             const at = Math.max(0, Date.now() - gameStartAtRef.current);
 
-            tapsRef.current.push({
+            pushTap({
                 at,
-                x: e.clientX,
-                y: e.clientY,
+                x: Math.round(e.clientX),
+                y: Math.round(e.clientY),
                 hit: false,
                 targetType: null,
                 spawnedAt: null,
             });
         },
-        [status],
+        [status, pushTap],
     );
 
     const handleCatch = useCallback(
@@ -405,10 +422,10 @@ export function Game({
             const spawnedAtAbsolute = monsterSpawnedAtRef.current || now;
             const spawnedAt = Math.max(0, spawnedAtAbsolute - gameStartAtRef.current);
 
-            tapsRef.current.push({
+            pushTap({
                 at,
-                x: currentPos.x,
-                y: currentPos.y,
+                x: Math.round(currentPos.x * 10) / 10,
+                y: Math.round(currentPos.y * 10) / 10,
                 hit: true,
                 targetType: mapMonsterToTargetType(currentMonster.rarity),
                 spawnedAt,
@@ -463,7 +480,7 @@ export function Game({
                 }
             });
         },
-        [status, monster, monsterPos, spawnNextMonster],
+        [status, monster, monsterPos, spawnNextMonster, pushTap],
     );
 
     const handleBack = () => {
@@ -489,6 +506,7 @@ export function Game({
         gameIdRef.current = null;
 
         tapsRef.current = [];
+        missCounterRef.current = 0;
         gameStartAtRef.current = 0;
         monsterSpawnedAtRef.current = 0;
 
