@@ -50,7 +50,8 @@ const MONSTERS: MonsterDef[] = [
     { img: rareImg, rarity: 'rare', score: 3, weight: 25 },
     { img: epicImg, rarity: 'epic', score: 10, weight: 10 },
     { img: legendaryImg, rarity: 'legendary', score: 5, weight: 5 },
-    { img: melasImg, rarity: 'melas', score: 1, weight: 8 },];
+    { img: melasImg, rarity: 'melas', score: 1, weight: 8 },
+];
 
 function pickRandomMonster(): MonsterDef {
     const totalWeight = MONSTERS.reduce((sum, m) => sum + m.weight, 0);
@@ -166,21 +167,13 @@ export function Game({
         setLoading(true);
 
         try {
-            const finalScoreValue = scoreRef.current;
-            const finalClicksValue = tapsRef.current.length; // все тапы, а не только хиты
-            const finalEpicCountValue = epicCountRef.current;
-            const finalMelasCountValue = melasCountRef.current;
-
-            setFinalScore(finalScoreValue);
+            const localScore = scoreRef.current;
+            setFinalScore(localScore);
 
             const res = await apiFetch('/game/finish', token, {
                 method: 'POST',
                 body: JSON.stringify({
                     gameId: currentGameId,
-                    score: finalScoreValue,
-                    clicks: finalClicksValue,
-                    epicCount: finalEpicCountValue,
-                    melasCount: finalMelasCountValue,
                     rawTaps: tapsRef.current,
                 }),
             });
@@ -194,7 +187,7 @@ export function Game({
             const serverScore =
                 typeof (data as any)?.serverScore === 'number'
                     ? (data as any).serverScore
-                    : finalScoreValue;
+                    : localScore;
 
             setFinalScore(serverScore);
             setScore(serverScore);
@@ -504,6 +497,11 @@ export function Game({
         setIsHit(false);
         setFinalScore(null);
         setError('');
+        setScore(0);
+        scoreRef.current = 0;
+        clicksRef.current = 0;
+        epicCountRef.current = 0;
+        melasCountRef.current = 0;
     };
 
     const secondsLeft = Math.ceil(remainingMs / 1000);
