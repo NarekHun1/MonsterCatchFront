@@ -46,6 +46,7 @@ type RawTap = {
 
 const MAX_RAW_TAPS = 320;
 const MISS_SAMPLE_EVERY = 4;
+const MAX_ALLOWED_TOUCHES = 2;
 
 const MONSTERS: MonsterDef[] = [
     { img: commonImg, rarity: 'common', score: 1, weight: 60 },
@@ -103,6 +104,7 @@ export function Game({
     const [, setMelasCount] = useState<number>(0);
     const [error, setError] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
+    const [touchWarning, setTouchWarning] = useState<string>('');
 
     const [monster, setMonster] = useState<MonsterDef>(MONSTERS[0]);
     const [monsterPos, setMonsterPos] = useState<{ x: number; y: number }>({
@@ -117,6 +119,7 @@ export function Game({
     const hitLockRef = useRef(false);
     const gameEndedRef = useRef(false);
     const catchAudioRef = useRef<HTMLAudioElement | null>(null);
+    const touchWarningTimerRef = useRef<number | null>(null);
 
     const scoreRef = useRef(0);
     const clicksRef = useRef(0);
@@ -129,9 +132,7 @@ export function Game({
     const gameStartAtRef = useRef<number>(0);
     const monsterSpawnedAtRef = useRef<number>(0);
 
-    // anti-multitouch refs
-    const activePointerIdRef = useRef<number | null>(null);
-    const multiTouchBlockedRef = useRef(false);
+    const activeTouchPointersRef = useRef<Set<number>>(new Set());
 
     const pushTap = useCallback((tap: RawTap) => {
         if (tapsRef.current.length >= MAX_RAW_TAPS) return;
@@ -162,15 +163,48 @@ export function Game({
         }
     }, []);
 
+    const clearTouchWarningTimer = useCallback(() => {
+        if (touchWarningTimerRef.current !== null) {
+            window.clearTimeout(touchWarningTimerRef.current);
+            touchWarningTimerRef.current = null;
+        }
+    }, []);
+
+    const showTouchWarning = useCallback(
+        (message: string) => {
+            setTouchWarning(message);
+            clearTouchWarningTimer();
+
+            touchWarningTimerRef.current = window.setTimeout(() => {
+                setTouchWarning('');
+                touchWarningTimerRef.current = null;
+            }, 900);
+        },
+        [clearTouchWarningTimer],
+    );
+
+    const clearActiveTouches = useCallback(() => {
+        activeTouchPointersRef.current.clear();
+    }, []);
+
+    const registerTouchPointer = useCallback((e: React.PointerEvent<HTMLElement>) => {
+        if (e.pointerType === 'touch') {
+            activeTouchPointersRef.current.add(e.pointerId);
+        }
+    }, []);
+
+    const releaseTouchPointer = useCallback((pointerId: number) => {
+        activeTouchPointersRef.current.delete(pointerId);
+    }, []);
+
+    const getActiveTouchCount = useCallback(() => {
+        return activeTouchPointersRef.current.size;
+    }, []);
+
     const spawnNextMonster = useCallback(() => {
         setMonster(pickRandomMonster());
         setMonsterPos(randomPosition());
         monsterSpawnedAtRef.current = Date.now();
-    }, []);
-
-    const resetTouchGuards = useCallback(() => {
-        activePointerIdRef.current = null;
-        multiTouchBlockedRef.current = false;
     }, []);
 
     const finishGame = useCallback(async () => {
@@ -180,7 +214,7 @@ export function Game({
         finishSentRef.current = true;
         gameEndedRef.current = true;
         hitLockRef.current = true;
-        resetTouchGuards();
+        clearActiveTouches();
         clearTimer();
         setLoading(true);
 
@@ -263,7 +297,7 @@ export function Game({
         } finally {
             setLoading(false);
         }
-    }, [clearTimer, token, tournamentId, onStarsChange, onStatsChange, resetTouchGuards]);
+    }, [clearActiveTouches, clearTimer, token, tournamentId, onStarsChange, onStatsChange]);
 
     const startLocalTimer = useCallback(
         (durationMs: number) => {
@@ -301,7 +335,10 @@ export function Game({
             finishSentRef.current = false;
             hitLockRef.current = false;
             gameEndedRef.current = false;
-            resetTouchGuards();
+
+            clearActiveTouches();
+            setTouchWarning('');
+            clearTouchWarningTimer();
 
             setGameId(null);
             gameIdRef.current = null;
@@ -357,7 +394,7 @@ export function Game({
         } finally {
             setLoading(false);
         }
-    }, [startLocalTimer, token, spawnNextMonster, resetTouchGuards]);
+    }, [startLocalTimer, token, spawnNextMonster, clearActiveTouches, clearTouchWarningTimer]);
 
     useEffect(() => {
         if (status === 'finished' && gameIdRef.current && !finishSentRef.current) {
@@ -378,6 +415,8 @@ export function Game({
 
         return () => {
             clearTimer();
+            clearTouchWarningTimer();
+            clearActiveTouches();
 
             if (catchAudioRef.current) {
                 try {
@@ -386,7 +425,7 @@ export function Game({
                 catchAudioRef.current = null;
             }
         };
-    }, [clearTimer]);
+    }, [clearTimer, clearTouchWarningTimer, clearActiveTouches]);
 
     const handleArenaMiss = useCallback(
         (e: React.PointerEvent<HTMLDivElement>) => {
@@ -394,19 +433,14 @@ export function Game({
             if (gameEndedRef.current) return;
             if (finishSentRef.current) return;
 
-            const nativeEvent = e.nativeEvent as PointerEvent & {
-                touches?: { length: number };
-                isPrimary?: boolean;
-            };
+            if (e.pointerType === 'touch') {
+                registerTouchPointer(e);
 
-            if (e.pointerType === 'touch' && nativeEvent.isPrimary === false) {
-                multiTouchBlockedRef.current = true;
-                return;
-            }
-
-            if (nativeEvent.touches && nativeEvent.touches.length > 1) {
-                multiTouchBlockedRef.current = true;
-                return;
+                const activeTouches = getActiveTouchCount();
+                if (activeTouches > MAX_ALLOWED_TOUCHES) {
+                    showTouchWarning('Играть можно только 1–2 пальцами');
+                    return;
+                }
             }
 
             const target = e.target as HTMLElement;
@@ -428,7 +462,7 @@ export function Game({
                 spawnedAt: null,
             });
         },
-        [status, pushTap],
+        [status, pushTap, registerTouchPointer, getActiveTouchCount, showTouchWarning],
     );
 
     const handleCatch = useCallback(
@@ -442,34 +476,15 @@ export function Game({
 
             if (e.pointerType !== 'touch') return;
 
-            const nativeEvent = e.nativeEvent as PointerEvent & {
-                touches?: { length: number };
-                isPrimary?: boolean;
-            };
+            registerTouchPointer(e);
 
-            if (nativeEvent.isPrimary === false) {
-                multiTouchBlockedRef.current = true;
+            const activeTouches = getActiveTouchCount();
+
+            if (activeTouches > MAX_ALLOWED_TOUCHES) {
+                showTouchWarning('Играть можно только 1–2 пальцами');
                 return;
             }
 
-            if (nativeEvent.touches && nativeEvent.touches.length > 1) {
-                multiTouchBlockedRef.current = true;
-                return;
-            }
-
-            if (
-                activePointerIdRef.current !== null &&
-                activePointerIdRef.current !== e.pointerId
-            ) {
-                multiTouchBlockedRef.current = true;
-                return;
-            }
-
-            if (multiTouchBlockedRef.current) {
-                return;
-            }
-
-            activePointerIdRef.current = e.pointerId;
             hitLockRef.current = true;
             void playCatchSound();
 
@@ -537,17 +552,19 @@ export function Game({
                 if (!gameEndedRef.current && !finishSentRef.current) {
                     hitLockRef.current = false;
                 }
-                resetTouchGuards();
             });
         },
-        [status, monster, monsterPos, spawnNextMonster, pushTap, resetTouchGuards],
+        [status, monster, monsterPos, spawnNextMonster, pushTap, registerTouchPointer, getActiveTouchCount, showTouchWarning],
     );
 
-    const handlePointerUpOrCancel = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-        if (activePointerIdRef.current === e.pointerId) {
-            resetTouchGuards();
-        }
-    }, [resetTouchGuards]);
+    const handlePointerRelease = useCallback(
+        (e: React.PointerEvent<HTMLDivElement>) => {
+            if (e.pointerType === 'touch') {
+                releaseTouchPointer(e.pointerId);
+            }
+        },
+        [releaseTouchPointer],
+    );
 
     const handleBack = () => {
         if (status === 'running' && gameIdRef.current && !finishSentRef.current) {
@@ -557,7 +574,9 @@ export function Game({
         }
 
         clearTimer();
-        resetTouchGuards();
+        clearActiveTouches();
+        setTouchWarning('');
+        clearTouchWarningTimer();
         onBack();
     };
 
@@ -566,7 +585,10 @@ export function Game({
         hitLockRef.current = false;
         finishSentRef.current = false;
         gameEndedRef.current = false;
-        resetTouchGuards();
+
+        clearActiveTouches();
+        setTouchWarning('');
+        clearTouchWarningTimer();
 
         setPhase('intro');
         setStatus('idle');
@@ -596,6 +618,12 @@ export function Game({
 
     return (
         <div className="game-fullscreen">
+            {touchWarning && (
+                <div className="game-touch-warning">
+                    {touchWarning}
+                </div>
+            )}
+
             <div className="game-topbar">
                 <button
                     className="game-back-btn"
@@ -674,8 +702,9 @@ export function Game({
                 <div
                     className="game-arena game-arena--fullscreen"
                     onPointerDown={handleArenaMiss}
-                    onPointerUp={handlePointerUpOrCancel}
-                    onPointerCancel={handlePointerUpOrCancel}
+                    onPointerUp={handlePointerRelease}
+                    onPointerCancel={handlePointerRelease}
+                    onPointerLeave={handlePointerRelease}
                 >
                     <div
                         className={[
@@ -693,8 +722,9 @@ export function Game({
                             WebkitTapHighlightColor: 'transparent',
                         }}
                         onPointerDown={handleCatch}
-                        onPointerUp={handlePointerUpOrCancel}
-                        onPointerCancel={handlePointerUpOrCancel}
+                        onPointerUp={handlePointerRelease}
+                        onPointerCancel={handlePointerRelease}
+                        onPointerLeave={handlePointerRelease}
                         role="button"
                         tabIndex={0}
                         aria-label="Catch monster"
