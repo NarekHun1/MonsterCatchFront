@@ -1,4 +1,3 @@
-// src/Game.tsx
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import './Game.css';
 import { apiFetch } from './api';
@@ -130,6 +129,10 @@ export function Game({
     const gameStartAtRef = useRef<number>(0);
     const monsterSpawnedAtRef = useRef<number>(0);
 
+    // anti-multitouch refs
+    const activePointerIdRef = useRef<number | null>(null);
+    const multiTouchBlockedRef = useRef(false);
+
     const pushTap = useCallback((tap: RawTap) => {
         if (tapsRef.current.length >= MAX_RAW_TAPS) return;
         tapsRef.current.push(tap);
@@ -165,6 +168,11 @@ export function Game({
         monsterSpawnedAtRef.current = Date.now();
     }, []);
 
+    const resetTouchGuards = useCallback(() => {
+        activePointerIdRef.current = null;
+        multiTouchBlockedRef.current = false;
+    }, []);
+
     const finishGame = useCallback(async () => {
         const currentGameId = gameIdRef.current;
         if (!currentGameId || finishSentRef.current) return;
@@ -172,6 +180,7 @@ export function Game({
         finishSentRef.current = true;
         gameEndedRef.current = true;
         hitLockRef.current = true;
+        resetTouchGuards();
         clearTimer();
         setLoading(true);
 
@@ -254,7 +263,7 @@ export function Game({
         } finally {
             setLoading(false);
         }
-    }, [clearTimer, token, tournamentId, onStarsChange, onStatsChange]);
+    }, [clearTimer, token, tournamentId, onStarsChange, onStatsChange, resetTouchGuards]);
 
     const startLocalTimer = useCallback(
         (durationMs: number) => {
@@ -292,6 +301,7 @@ export function Game({
             finishSentRef.current = false;
             hitLockRef.current = false;
             gameEndedRef.current = false;
+            resetTouchGuards();
 
             setGameId(null);
             gameIdRef.current = null;
@@ -347,7 +357,7 @@ export function Game({
         } finally {
             setLoading(false);
         }
-    }, [startLocalTimer, token, spawnNextMonster]);
+    }, [startLocalTimer, token, spawnNextMonster, resetTouchGuards]);
 
     useEffect(() => {
         if (status === 'finished' && gameIdRef.current && !finishSentRef.current) {
@@ -384,6 +394,21 @@ export function Game({
             if (gameEndedRef.current) return;
             if (finishSentRef.current) return;
 
+            const nativeEvent = e.nativeEvent as PointerEvent & {
+                touches?: { length: number };
+                isPrimary?: boolean;
+            };
+
+            if (e.pointerType === 'touch' && nativeEvent.isPrimary === false) {
+                multiTouchBlockedRef.current = true;
+                return;
+            }
+
+            if (nativeEvent.touches && nativeEvent.touches.length > 1) {
+                multiTouchBlockedRef.current = true;
+                return;
+            }
+
             const target = e.target as HTMLElement;
             if (target.closest('.game-monster-emoji-wrapper')) return;
 
@@ -415,6 +440,36 @@ export function Game({
             if (finishSentRef.current) return;
             if (hitLockRef.current) return;
 
+            if (e.pointerType !== 'touch') return;
+
+            const nativeEvent = e.nativeEvent as PointerEvent & {
+                touches?: { length: number };
+                isPrimary?: boolean;
+            };
+
+            if (nativeEvent.isPrimary === false) {
+                multiTouchBlockedRef.current = true;
+                return;
+            }
+
+            if (nativeEvent.touches && nativeEvent.touches.length > 1) {
+                multiTouchBlockedRef.current = true;
+                return;
+            }
+
+            if (
+                activePointerIdRef.current !== null &&
+                activePointerIdRef.current !== e.pointerId
+            ) {
+                multiTouchBlockedRef.current = true;
+                return;
+            }
+
+            if (multiTouchBlockedRef.current) {
+                return;
+            }
+
+            activePointerIdRef.current = e.pointerId;
             hitLockRef.current = true;
             void playCatchSound();
 
@@ -482,10 +537,17 @@ export function Game({
                 if (!gameEndedRef.current && !finishSentRef.current) {
                     hitLockRef.current = false;
                 }
+                resetTouchGuards();
             });
         },
-        [status, monster, monsterPos, spawnNextMonster, pushTap],
+        [status, monster, monsterPos, spawnNextMonster, pushTap, resetTouchGuards],
     );
+
+    const handlePointerUpOrCancel = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+        if (activePointerIdRef.current === e.pointerId) {
+            resetTouchGuards();
+        }
+    }, [resetTouchGuards]);
 
     const handleBack = () => {
         if (status === 'running' && gameIdRef.current && !finishSentRef.current) {
@@ -495,6 +557,7 @@ export function Game({
         }
 
         clearTimer();
+        resetTouchGuards();
         onBack();
     };
 
@@ -503,6 +566,7 @@ export function Game({
         hitLockRef.current = false;
         finishSentRef.current = false;
         gameEndedRef.current = false;
+        resetTouchGuards();
 
         setPhase('intro');
         setStatus('idle');
@@ -610,6 +674,8 @@ export function Game({
                 <div
                     className="game-arena game-arena--fullscreen"
                     onPointerDown={handleArenaMiss}
+                    onPointerUp={handlePointerUpOrCancel}
+                    onPointerCancel={handlePointerUpOrCancel}
                 >
                     <div
                         className={[
@@ -627,6 +693,8 @@ export function Game({
                             WebkitTapHighlightColor: 'transparent',
                         }}
                         onPointerDown={handleCatch}
+                        onPointerUp={handlePointerUpOrCancel}
+                        onPointerCancel={handlePointerUpOrCancel}
                         role="button"
                         tabIndex={0}
                         aria-label="Catch monster"
