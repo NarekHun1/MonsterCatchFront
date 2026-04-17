@@ -120,7 +120,7 @@ export function Game({
     const catchAudioRef = useRef<HTMLAudioElement | null>(null);
 
     const scoreRef = useRef(0);
-    const clicksRef = useRef(0); // только хиты, для UI
+    const clicksRef = useRef(0);
     const epicCountRef = useRef(0);
     const melasCountRef = useRef(0);
     const gameIdRef = useRef<number | null>(null);
@@ -185,6 +185,10 @@ export function Game({
                 method: 'POST',
                 body: JSON.stringify({
                     gameId: currentGameId,
+                    score: scoreRef.current,
+                    clicks: clicksRef.current,
+                    epicCount: epicCountRef.current,
+                    melasCount: melasCountRef.current,
                     rawTaps: compactTaps,
                 }),
             });
