@@ -59,8 +59,7 @@ export function EventTournamentCard({
     onCoinsChange?: (coins: number) => void;
     onOpenCoinsShop?: () => void;
 }) {
-    const slug = 'monster-april-2026';
-
+    const slug = import.meta.env.VITE_EVENT_SLUG || 'monster-may-2026';
     const [data, setData] = useState<EventTournamentData | null>(null);
     const [loading, setLoading] = useState(true);
     const [joining, setJoining] = useState(false);
