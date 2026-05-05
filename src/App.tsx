@@ -525,7 +525,7 @@ function App() {
             try {
                 const res = await apiFetch('/event-tournament/daily-notice', token, {
                     method: 'POST',
-                    body: JSON.stringify({ slug: 'monster-april-2026' }),
+                    body: JSON.stringify({ slug: 'monster-may-2026' }),
                 });
 
                 const json = await res.json().catch(() => ({}));
@@ -1517,7 +1517,7 @@ function App() {
                             <div className="event-ad-badge">🔥 LIVE EVENT</div>
 
                             <div className="event-ad-title">
-                                Monster April Tournament is live!
+                                Monster May Tournament is live!
                             </div>
 
                             <div className="event-ad-sub">
